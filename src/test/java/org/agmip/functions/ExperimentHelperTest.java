@@ -239,13 +239,13 @@ public class ExperimentHelperTest {
         AcePathfinderUtil.insertValue(data, "fen_tot", "110");
         AcePathfinderUtil.insertValue(data, "pdate", "19990415");
         ExperimentHelper.getFertDistribution(num, fecd, feacd, fedep, offsets, ptps, data);
-        //Map mgnData = getObjectOr((HashMap) getObjectOr(data, "experiments", new ArrayList()).get(0), "management", new HashMap());
-        //ArrayList<Map> events = (ArrayList<Map>) getObjectOr(data, "events", new ArrayList());
-        //acctual_1 = events.get(1);
-        //acctual_2 = events.get(2);
+        Map mgnData = (HashMap) getObjectOr(data, "management", new HashMap());
+        ArrayList<Map> events = (ArrayList<Map>) getObjectOr(mgnData, "events", new ArrayList());
+        acctual_1 = events.get(1);
+        acctual_2 = events.get(2);
         //}
-        //assertEquals("getRootDistribution: fert app 1", expected_1, acctual_1);
-        //assertEquals("getRootDistribution: fert app 2", expected_2, acctual_2);
+//        assertEquals("getRootDistribution: fert app 1", expected_1, acctual_1);
+//        assertEquals("getRootDistribution: fert app 2", expected_2, acctual_2);
         log.info("getFertDistribution Output: {}", data.toString());
     }
 
@@ -298,24 +298,24 @@ public class ExperimentHelperTest {
         assertEquals("getRootDistribution: om app 1", expected_1, acctual_1);
         log.info("getOMDistribution output: {}", data.toString());
     }
-    
+
     @Test
     public void testGetOMDistribution_NoOMData() throws IOException, Exception {
-        
+
         String offset = "-7";
         String omcd = "RE003";
         String omc2n = "8.3";
         String omdep = "5";
         String ominp = "50";
         String dmr = "2.5";
-        
+
         HashMap<String, Object> data = new HashMap<String, Object>();
         AcePathfinderUtil.insertValue(data, "pdate", "19990415");
         ExperimentHelper.getOMDistribution(offset, omcd, omc2n, omdep, ominp, dmr, data);
-        
+
         Map mgnData = (HashMap) getObjectOr(data, "management", new HashMap());
         ArrayList<Map> events = getObjectOr(mgnData, "events", new ArrayList());
-        
+
         assertEquals("getRootDistribution: om no data", 1, events.size());
         log.info("getOMDistribution output: {}", data.toString());
     }
@@ -347,9 +347,6 @@ public class ExperimentHelperTest {
 // //            f.delete();
 //         }
 
-//         for (int i = 0; i < expected.length; i++) {
-//             assertEquals("getRootDistribution: normal case " + i, expected[i], (String) acctual.get(i).get("slsc"));
-//         }
         //}
         HashMap<String, Object> data = new HashMap<String, Object>();
         AcePathfinderUtil.insertValue(data, "icbl", "5");
@@ -379,5 +376,11 @@ public class ExperimentHelperTest {
 
         ExperimentHelper.getStableCDistribution(som3_0, pp, rd, data);
         log.info("getStableCDistribution() output: {}", data.toString());
+
+        Map icData = (HashMap) getObjectOr(data, "initial_conditions", new HashMap());
+        acctual = getObjectOr(icData, "soilLayer", new ArrayList());
+        for (int i = 0; i < expected.length; i++) {
+            assertEquals("getRootDistribution: normal case " + i, expected[i], (String) acctual.get(i).get("slsc"));
+        }
     }
 }
