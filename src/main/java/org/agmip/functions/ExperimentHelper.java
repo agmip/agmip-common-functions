@@ -1,9 +1,7 @@
 package org.agmip.functions;
 
-
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
@@ -439,30 +437,30 @@ public class ExperimentHelper {
         //        LOG.error("NO EXPERIMENT DATA.");
         //       return;
         //    } else {
-                Map mgnData = getObjectOr(data, "management", new HashMap());
-                eventData = getObjectOr(mgnData, "events", new ArrayList());
+        Map mgnData = getObjectOr(data, "management", new HashMap());
+        eventData = getObjectOr(mgnData, "events", new ArrayList());
         //    }
 
-            // Check FEN_TOT is avalaible
-            try {
-                fen_tot = Double.parseDouble(getValueOr(data, "fen_tot", "")); // TODO will be replace by generic getting method
-            } catch (Exception e) {
-                LOG.error("FEN_TOT IS INVALID");
-                return;
-            }
+        // Check FEN_TOT is avalaible
+        try {
+            fen_tot = Double.parseDouble(getValueOr(data, "fen_tot", "")); // TODO will be replace by generic getting method
+        } catch (Exception e) {
+            LOG.error("FEN_TOT IS INVALID");
+            return;
+        }
 
-            // Check planting date is avalaible
-            events = new Event(eventData, "planting");
-            if (events.isEventExist()) {
-                pdate = getValueOr(events.getCurrentEvent(), "date", "");
-                if (convertFromAgmipDateString(pdate) == null) {
-                    LOG.error("PLANTING DATE IS MISSING");
-                    return;
-                }
-            } else {
-                LOG.error("PLANTING EVENT IS MISSING");
+        // Check planting date is avalaible
+        events = new Event(eventData, "planting");
+        if (events.isEventExist()) {
+            pdate = getValueOr(events.getCurrentEvent(), "date", "");
+            if (convertFromAgmipDateString(pdate) == null) {
+                LOG.error("PLANTING DATE IS MISSING");
                 return;
             }
+        } else {
+            LOG.error("PLANTING EVENT IS MISSING");
+            return;
+        }
         //}
 
         // Check input days and ptps
@@ -485,11 +483,16 @@ public class ExperimentHelper {
         events.setEventType("fertilizer");
         for (int i = 0; i < iNum; i++) {
             // Create event map
-            Map event = events.addEvent(fdates[i], true);
-            event.put("fecd", fecd);
-            event.put("feacd", feacd);
-            event.put("fedep", fedep);
-            event.put("feamn", String.format("%.0f", fen_tot * dPtps[i] / 100));
+//            Map event = events.addEvent(fdates[i], true);
+//            event.put("fecd", fecd);
+//            event.put("feacd", feacd);
+//            event.put("fedep", fedep);
+//            event.put("feamn", String.format("%.0f", fen_tot * dPtps[i] / 100));
+            events.updateEvent("date", fdates[i], false);
+            events.updateEvent("fecd", fecd, false);
+            events.updateEvent("feacd", feacd, false);
+            events.updateEvent("fedep", fedep, false);
+            events.updateEvent("feamn", String.format("%.0f", fen_tot * dPtps[i] / 100), true);
         }
     }
 
@@ -525,18 +528,18 @@ public class ExperimentHelper {
         //         LOG.error("NO EXPERIMENT DATA.");
         //         return;
         //     } else {
-                Map mgnData = getObjectOr(expData, "management", new HashMap());
-                eventData = getObjectOr(mgnData, "events", new ArrayList());
+        Map mgnData = getObjectOr(expData, "management", new HashMap());
+        eventData = getObjectOr(mgnData, "events", new ArrayList());
 
         //    }
-            // Get the omamt from the first? OM event
-            Event omEvent = new Event(eventData, "organic_matter");
-            omamt = (String) omEvent.getCurrentEvent().get("omamt");
-            if (omamt == null || omamt.equals("")) {
-                LOG.error("OMAMT IS NOT AVAILABLE");
-                return;
-            }
-            //omamt = getValueOr(expData, "omamt", ""); // TODO will be replace by generic getting method
+        // Get the omamt from the first? OM event
+        Event omEvent = new Event(eventData, "organic_matter");
+        omamt = (String) omEvent.getCurrentEvent().get("omamt");
+        if (omamt == null || omamt.equals("")) {
+            LOG.error("OMAMT IS NOT AVAILABLE");
+            return;
+        }
+        //omamt = getValueOr(expData, "omamt", ""); // TODO will be replace by generic getting method
 
         //}
 
@@ -563,7 +566,7 @@ public class ExperimentHelper {
             LOG.error("INVALID VALUES FOR DMR and OMC2N");
             return;
         }
-        
+
         BigDecimal omnpct = start.divide(decDmr, 2, RoundingMode.HALF_UP).divide(decOMC2N, 2, RoundingMode.HALF_UP);
         // Update organic material event
         events.setEventType("organic_matter");
@@ -646,16 +649,16 @@ public class ExperimentHelper {
         //         LOG.error("NO EXPERIMENT DATA.");
         //         return;
         //     } else {
-                Map icData = getObjectOr(data, "initial_conditions", new HashMap());
-                icLayers = getObjectOr(icData, "soilLayer", new ArrayList());
-                if (icLayers.isEmpty()) {
-                    LOG.error("NO INITIAL CONDITION DATA.");
-                    return;
-                } else if (icLayers.size() != soilLayers.size()) {
-                    LOG.error("THE LAYER DATA IN THE INITIAL CONDITION SECTION IS NOT MATCHED WITH SOIL SECTION");
-                    return;
-                }
-            //}
+        Map icData = getObjectOr(data, "initial_conditions", new HashMap());
+        icLayers = getObjectOr(icData, "soilLayer", new ArrayList());
+        if (icLayers.isEmpty()) {
+            LOG.error("NO INITIAL CONDITION DATA.");
+            return;
+        } else if (icLayers.size() != soilLayers.size()) {
+            LOG.error("THE LAYER DATA IN THE INITIAL CONDITION SECTION IS NOT MATCHED WITH SOIL SECTION");
+            return;
+        }
+        //}
         //}
 
         double last = 0;
