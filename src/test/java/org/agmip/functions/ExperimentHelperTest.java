@@ -29,7 +29,6 @@ import org.slf4j.LoggerFactory;
 public class ExperimentHelperTest {
 
     private static final Logger log = LoggerFactory.getLogger(ExperimentHelperTest.class);
-
     URL resource;
     URL resource2;
 
@@ -57,7 +56,7 @@ public class ExperimentHelperTest {
 
         if ((line = br.readLine()) != null) {
             HashMap<String, Object> data = JSONAdapter.fromJSON(line);
-            Map<String, Object> expData = getRawPackageContents(data, "experiments").get(0);        
+            Map<String, Object> expData = getRawPackageContents(data, "experiments").get(0);
             // Map<String, Object> expData = (Map)((ArrayList) data.get("experiments")).get(0);
             expData.put("exp_dur", "2");
             ExperimentHelper.getAutoPlantingDate(startDate, endDate, accRainAmt, dayNum, data);
@@ -258,16 +257,18 @@ public class ExperimentHelperTest {
         String omc2n = "8.3";
         String omdep = "5";
         String ominp = "50";
+        String dmr = "2.5";
         // planting data is 19990415
         // fen_tot is 110
         Map expected_1 = new HashMap();
-        expected_1.put("event", "organic-materials");
+        expected_1.put("event", "organic_matter");
         expected_1.put("date", "19990408");
         expected_1.put("omcd", "RE003");
         expected_1.put("omamt", "1000");
         expected_1.put("omc2n", "8.3");
         expected_1.put("omdep", "5");
         expected_1.put("ominp", "50");
+        expected_1.put("omn%", "4.82");
         Map acctual_1 = null;
 
         // BufferedReader br = new BufferedReader(
@@ -277,24 +278,45 @@ public class ExperimentHelperTest {
         // if ((line = br.readLine()) != null) {
         //     HashMap<String, ArrayList<Map>> data = new LinkedHashMap<String, ArrayList<Map>>();
         //     Map<String, Object> expData = JSONAdapter.fromJSON(line);
-            // data.put("experiments", new ArrayList());
-            // data.put("weathers", new ArrayList());
-            // data.get("experiments").add(expData);
-            // data.get("weathers").add((Map) expData.get("weather"));
-            // expData.put("omamt", "1000");
-            // Map omEvent = new LinkedHashMap();
-            // omEvent.put("event", "organic-materials");
-            // omEvent.put("date", "19990414");
-            // Map mgnData = getObjectOr((HashMap) getObjectOr(data, "experiments", new ArrayList()).get(0), "management", new HashMap());
-            // ArrayList<Map> events = getObjectOr(mgnData, "events", new ArrayList());
-            // events.add(0, omEvent);
+        // data.put("experiments", new ArrayList());
+        // data.put("weathers", new ArrayList());
+        // data.get("experiments").add(expData);
+        // data.get("weathers").add((Map) expData.get("weather"));
+        // expData.put("omamt", "1000");
+        // Map omEvent = new LinkedHashMap();
+        // omEvent.put("event", "organic-materials");
+        // omEvent.put("date", "19990414");
         HashMap<String, Object> data = new HashMap<String, Object>();
         AcePathfinderUtil.insertValue(data, "pdate", "19990415");
         AcePathfinderUtil.insertValue(data, "omamt", "1000");
-        ExperimentHelper.getOMDistribution(offset, omcd, omc2n, omdep, ominp, "2.5", data);
-            //acctual_1 = events.get(0);
+        ExperimentHelper.getOMDistribution(offset, omcd, omc2n, omdep, ominp, dmr, data);
+
+        Map mgnData = (HashMap) getObjectOr(data, "management", new HashMap());
+        ArrayList<Map> events = getObjectOr(mgnData, "events", new ArrayList());
+        acctual_1 = events.get(1);
         //}
-        //assertEquals("getRootDistribution: om app 1", expected_1, acctual_1);
+        assertEquals("getRootDistribution: om app 1", expected_1, acctual_1);
+        log.info("getOMDistribution output: {}", data.toString());
+    }
+    
+    @Test
+    public void testGetOMDistribution_NoOMData() throws IOException, Exception {
+        
+        String offset = "-7";
+        String omcd = "RE003";
+        String omc2n = "8.3";
+        String omdep = "5";
+        String ominp = "50";
+        String dmr = "2.5";
+        
+        HashMap<String, Object> data = new HashMap<String, Object>();
+        AcePathfinderUtil.insertValue(data, "pdate", "19990415");
+        ExperimentHelper.getOMDistribution(offset, omcd, omc2n, omdep, ominp, dmr, data);
+        
+        Map mgnData = (HashMap) getObjectOr(data, "management", new HashMap());
+        ArrayList<Map> events = getObjectOr(mgnData, "events", new ArrayList());
+        
+        assertEquals("getRootDistribution: om no data", 1, events.size());
         log.info("getOMDistribution output: {}", data.toString());
     }
 
@@ -317,7 +339,7 @@ public class ExperimentHelperTest {
 //             HashMap<String, Object> icData = (HashMap<String, Object>) getObjectOr(exp, "initial_conditions", new HashMap());
 //             ExperimentHelper.getStableCDistribution(som3_0, pp, rd, data);
 //             acctual = (ArrayList<HashMap<String, String>>) getObjectOr(icData, "soilLayer", new ArrayList());
-            
+
 //             File f = new File("RootDistJson.txt");
 //             BufferedOutputStream bo = new BufferedOutputStream(new FileOutputStream(f));
 //             bo.write(JSONAdapter.toJSON(data).getBytes());
@@ -328,7 +350,7 @@ public class ExperimentHelperTest {
 //         for (int i = 0; i < expected.length; i++) {
 //             assertEquals("getRootDistribution: normal case " + i, expected[i], (String) acctual.get(i).get("slsc"));
 //         }
-    //}
+        //}
         HashMap<String, Object> data = new HashMap<String, Object>();
         AcePathfinderUtil.insertValue(data, "icbl", "5");
         AcePathfinderUtil.insertValue(data, "icbl", "15");
