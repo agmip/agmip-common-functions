@@ -71,7 +71,7 @@ public class SoilHelperTest {
         AcePathfinderUtil.insertValue(data, "sllb", "150");
         AcePathfinderUtil.insertValue(data, "sllb", "180");
 
-        SoilHelper.getRootDistribution("slref", m, pp, rd, data);
+        SoilHelper.getRootDistribution("slrgf", m, pp, rd, data);
         log.info("getRootDistribution() output: {}", data.toString());
     }
 }
