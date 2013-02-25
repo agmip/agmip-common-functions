@@ -23,7 +23,7 @@ public class SoilHelper {
      * @param sllbs The array of soil_layer_depth (cm)
      * @param pp depth of top of curve (pivot point) (cm)
      */
-    public static void getRootDistribution(String m, String pp, String rd, HashMap data) {
+    public static void getRootDistribution(String var, String m, String pp, String rd, HashMap data) {
 
         double[] dSllbs;
         double mid;
@@ -57,14 +57,14 @@ public class SoilHelper {
         }
 
         // First layer
-        soilLayers.get(0).put("slrgf", getGrowthFactor(dSllbs[0] / 2, dPp, dK, dM, 3));
+        soilLayers.get(0).put(var, getGrowthFactor(dSllbs[0] / 2, dPp, dK, dM, 3));
 //        insertValue(data, "slrgf", getGrowthFactor(dSllbs[0] / 2, dPp, dK, dM, 3));
 
         // Other layers
         for (int i = 1; i < dSllbs.length; i++) {
             mid = (dSllbs[i] + dSllbs[i - 1]) / 2;
             String slrgf = getGrowthFactor(mid, dPp, dK, dM, 3);
-            soilLayers.get(i).put("slrgf", slrgf);
+            soilLayers.get(i).put(var, slrgf);
 //            insertValue(data, "slrgf", slrgf);
 //            LOG.debug("Layer " + (i + 1) + " : sllb= " + dSllbs[i] + ", mid=" + mid + ", factor=" + slrgf);
         }
