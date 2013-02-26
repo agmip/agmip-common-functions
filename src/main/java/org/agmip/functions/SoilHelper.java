@@ -20,11 +20,8 @@ public class SoilHelper {
     /**
      * Calculate root growth factor (0-1) for each soil layer
      *
-     * @param var The variable name that will be used for storing the result
-     * @prarm m Maximum value in the top PP cm of soil (units depend on variable)
+     * @param sllbs The array of soil_layer_depth (cm)
      * @param pp depth of top of curve (pivot point) (cm)
-     * @param rd maximum rooting depth (cm), or depth at which the value is 2% of the maximum value
-     * @param data The data map
      */
     public static void getRootDistribution(String var, String m, String pp, String rd, HashMap data) {
 
@@ -61,14 +58,14 @@ public class SoilHelper {
 
         // First layer
         soilLayers.get(0).put(var, getGrowthFactor(dSllbs[0] / 2, dPp, dK, dM, 3));
-//        insertValue(data, var, getGrowthFactor(dSllbs[0] / 2, dPp, dK, dM, 3));
+//        insertValue(data, "slrgf", getGrowthFactor(dSllbs[0] / 2, dPp, dK, dM, 3));
 
         // Other layers
         for (int i = 1; i < dSllbs.length; i++) {
             mid = (dSllbs[i] + dSllbs[i - 1]) / 2;
             String slrgf = getGrowthFactor(mid, dPp, dK, dM, 3);
             soilLayers.get(i).put(var, slrgf);
-//            insertValue(data, var, slrgf);
+//            insertValue(data, "slrgf", slrgf);
 //            LOG.debug("Layer " + (i + 1) + " : sllb= " + dSllbs[i] + ", mid=" + mid + ", factor=" + slrgf);
         }
 

@@ -225,10 +225,10 @@ public class ExperimentHelperTest {
         AcePathfinderUtil.insertValue(data, "fen_tot", "110");
         AcePathfinderUtil.insertValue(data, "pdate", "19990415");
         ExperimentHelper.getFertDistribution(num, fecd, feacd, fedep, offsets, ptps, data);
-        Map mgnData = (HashMap) getObjectOr(data, "management", new HashMap());
-        ArrayList<Map> events = (ArrayList<Map>) getObjectOr(mgnData, "events", new ArrayList());
-        acctual_1 = events.get(1);
-        acctual_2 = events.get(2);
+        //Map mgnData = getObjectOr((HashMap) getObjectOr(data, "experiments", new ArrayList()).get(0), "management", new HashMap());
+        //ArrayList<Map> events = (ArrayList<Map>) getObjectOr(data, "events", new ArrayList());
+        //acctual_1 = events.get(1);
+        //acctual_2 = events.get(2);
         //}
 //        assertEquals("getRootDistribution: fert app 1", expected_1, acctual_1);
 //        assertEquals("getRootDistribution: fert app 2", expected_2, acctual_2);
