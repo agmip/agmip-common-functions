@@ -3,8 +3,10 @@ package org.agmip.functions;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import static org.agmip.common.Functions.*;
+import org.agmip.common.Functions.CompareMode;
+import org.agmip.util.MapUtil;
 import static org.agmip.util.MapUtil.*;
-import static org.agmip.ace.util.AcePathfinderUtil.insertValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,55 +22,83 @@ public class SoilHelper {
     /**
      * Calculate root growth factor (0-1) for each soil layer
      *
-     * @param sllbs The array of soil_layer_depth (cm)
+     * @param data The data map
+     * @param var The variable name that will be used for storing the result
+     * @param m Maximum value in the top PP cm of soil (units depend on
+     * variable)
      * @param pp depth of top of curve (pivot point) (cm)
+     * @param rd maximum rooting depth (cm), or depth at which the value is 2%
+     * of the maximum value
      */
-    public static void getRootDistribution(String var, String m, String pp, String rd, HashMap data) {
+    public static HashMap<String, ArrayList<String>> getRootDistribution(HashMap data, String var, String m, String pp, String rd) {
 
-        double[] dSllbs;
-        double mid;
-        double dPp;
-        double dRd;
-        double dM;
-        double dK;
-//        ArrayList<HashMap<String, Object>> soilLayers = traverseAndGetSiblings(data, "sllb");
-        ArrayList<HashMap<String, Object>> soilLayers = getSoilLayer(data);
-        // ArrayList<HashMap<String, String>> soilLayers = MapUtil.getBucket(data, "soils").getDataList();
+        String[] sllbs;
+        String k;
+//        double[] dSllbs;
+//        double mid;
+//        double dPp;
+//        double dRd;
+//        double dM;
+//        double dK;
+        HashMap<String, ArrayList<String>> results = new HashMap<String, ArrayList<String>>();
+        ArrayList<String> result = new ArrayList<String>();
+        ArrayList<HashMap<String, String>> soilLayers = MapUtil.getBucket(data, "soils").getDataList();
 
         if (soilLayers == null) {
-            return;
+            return results;
         } else if (soilLayers.isEmpty()) {
             LOG.error("----  SOIL LAYER DATA IS EMPTY");
-            return;
+            return results;
         } else {
             try {
-                dPp = Double.parseDouble(pp);
-                dRd = Double.parseDouble(rd);
-                dM = Double.parseDouble(m);
-                dSllbs = new double[soilLayers.size()];
-                dK = Math.log(0.02) / (dRd - dPp);
+//                dPp = Double.parseDouble(pp);
+//                dRd = Double.parseDouble(rd);
+//                dM = Double.parseDouble(m);
+//                dSllbs = new double[soilLayers.size()];
+                sllbs = new String[soilLayers.size()];
+//                dK = Math.log(0.02) / (dRd - dPp);
+                k = divide(Math.log(0.02) + "", substract(rd, pp));
                 for (int i = 0; i < soilLayers.size(); i++) {
-                    dSllbs[i] = Double.parseDouble(getObjectOr(soilLayers.get(i), "sllb", "").toString());
+                    sllbs[i] = soilLayers.get(i).get("sllb");
+//                    dSllbs[i] = Double.parseDouble(getObjectOr(soilLayers.get(i), "sllb", "").toString());
                 }
             } catch (NumberFormatException e) {
                 LOG.error("INVALID INPUT NUMBER [" + e.getMessage() + "]");
-                return;
+                return results;
             }
         }
 
         // First layer
-        soilLayers.get(0).put(var, getGrowthFactor(dSllbs[0] / 2, dPp, dK, dM, 3));
-//        insertValue(data, "slrgf", getGrowthFactor(dSllbs[0] / 2, dPp, dK, dM, 3));
+//        soilLayers.get(0).put(var, getGrowthFactor(dSllbs[0] / 2, dPp, dK, dM, 3));
+        result.add(getGrowthFactor(divide(sllbs[0], "2"), pp, k, m));
 
         // Other layers
-        for (int i = 1; i < dSllbs.length; i++) {
-            mid = (dSllbs[i] + dSllbs[i - 1]) / 2;
-            String slrgf = getGrowthFactor(mid, dPp, dK, dM, 3);
-            soilLayers.get(i).put(var, slrgf);
-//            insertValue(data, "slrgf", slrgf);
-//            LOG.debug("Layer " + (i + 1) + " : sllb= " + dSllbs[i] + ", mid=" + mid + ", factor=" + slrgf);
+        for (int i = 1; i < sllbs.length; i++) {
+//            mid = (dSllbs[i] + sllbs[i - 1]) / 2;
+//            String slrgf = getGrowthFactor(mid, dPp, dK, dM, 3);
+            result.add(getGrowthFactor(average(sllbs[i], sllbs[i - 1]), pp, k, m));
         }
 
+        results.put(var, result);
+        return results;
+    }
+
+    /**
+     * soil factors which decline exponentially between PP and RD (units depend
+     * on variable, same units as M (Maximum value, will use default value 1)
+     *
+     * @param mid The mid point value between two layers
+     * @param pp depth of top soil, or pivot point of curve (cm)
+     * @param k exponential decay rate
+     * @param m Maximum value in the top PP cm of soil (units depend on
+     * @return The growth factor (0-m)
+     */
+    protected static String getGrowthFactor(String mid, String pp, String k, String m) {
+        if (compare(mid, pp, CompareMode.NOTGREATER)) {
+            return m;
+        } else {
+            return multiply(m, exp(multiply(k, substract(mid, pp))));
+        }
     }
 
     /**
