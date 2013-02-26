@@ -5,11 +5,13 @@ import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import org.agmip.common.Event;
 import static org.agmip.common.Functions.*;
 import static org.agmip.functions.SoilHelper.*;
 import static org.agmip.util.MapUtil.*;
+import org.agmip.ace.util.AcePathfinderUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,13 +36,12 @@ public class ExperimentHelper {
      * @param days Number of days of accumulation
      * @param wthData The HashMap of experiment (including weather data)
      *
-     * @return The calculated first planting date, if not valid based on the
-     * input data, will return ""
+     * @return An {@code ArrayList} of {@code pdate} for each year in the
+     * weather data.
      */
-    public static void getAutoPlantingDate(String eDate, String lDate, String rain, String days, Map data) {
+    public static HashMap<String, ArrayList<String>> getAutoPlantingDate(String eDate, String lDate, String rain, String days, Map data) {
 
         Map wthData;
-        Map expData;
         ArrayList<Map> dailyData;
         ArrayList<Map> eventData;
         Event event;
@@ -53,76 +54,83 @@ public class ExperimentHelper {
         int expDur;
         int startYear = 0;
         Window[] windows;
+        ArrayList<String> pdates = new ArrayList<String>();
+        HashMap<String, ArrayList<String>> results = new HashMap<String, ArrayList<String>>();
+
+
 
         // Validation for input parameters
         // Weather data check and try to get daily data
         if (data.isEmpty()) {
             LOG.error("NO ANY DATA.");
-            return;
+            return new HashMap<String, ArrayList<String>>();
         } else {
             // Case for multiple data json structure
             if (data.containsKey("weathers")) {
                 ArrayList<Map> wths = getObjectOr(data, "weathers", new ArrayList());
                 if (wths.isEmpty()) {
                     LOG.error("NO WEATHER DATA.");
-                    return;
+                    return new HashMap<String, ArrayList<String>>();
                 } else {
                     wthData = wths.get(0);
                     if (wthData.isEmpty()) {
                         LOG.error("NO WEATHER DATA.");
-                        return;
+                        return new HashMap<String, ArrayList<String>>();
                     } else {
                         dailyData = getObjectOr(wthData, "dailyWeather", new ArrayList());
                     }
                 }
             } else {
-                return;
+                HashMap<String, Object> weather = (HashMap<String, Object>) getObjectOr(data, "weather", new HashMap<String, Object>());
+                if (weather.isEmpty()) {
+                    LOG.error("NO WEATHER DATA.");
+                    return new HashMap<String, ArrayList<String>>();
+                }
+                dailyData = (ArrayList<Map>) getObjectOr(weather, "dailyWeather", new ArrayList());
             }
 
             if (dailyData.isEmpty()) {
                 LOG.error("EMPTY DAILY WEATHER DATA.");
-                return;
+                return new HashMap<String, ArrayList<String>>();
             }
         }
 
         // Check experiment data
         // Case for multiple data json structure
-        if (data.containsKey("experiments")) {
-            ArrayList<Map> exps = getObjectOr(data, "experiments", new ArrayList());
-            if (exps.isEmpty()) {
-                LOG.error("NO EXPERIMENT DATA.");
-                return;
-            } else {
-                expData = exps.get(0);
-                if (expData.isEmpty()) {
-                    LOG.error("NO EXPERIMENT DATA.");
-                    return;
-                } else {
-                    Map mgnData = getObjectOr(expData, "management", new HashMap());
-                    eventData = getObjectOr(mgnData, "events", new ArrayList());
-                }
+        Map mgnData = getObjectOr(data, "management", new HashMap());
+        eventData = getObjectOr(mgnData, "events", new ArrayList());
+        
+        // Remove all planting events, for now, as a default. This is because this generates new replaced planting events.
+        // NOTE: This is the "safest" way to remove items during iteration.
+        Iterator<Map> iter = eventData.iterator();
+        while( iter.hasNext()) {
+            if (getValueOr(iter.next(), "event", "").equals("planting")) {
+                iter.remove();
+            }
+        }
 
-                // Check EXP_DUR is avalaible
-                try {
-                    expDur = Integer.parseInt(getValueOr(expData, "exp_dur", "1"));
-                } catch (Exception e) {
-                    expDur = 1;
-                }
+        // Check EXP_DUR is avalaible
+        try {
+            expDur = Integer.parseInt(getValueOr(data, "exp_dur", "1"));
+        } catch (Exception e) {
+            expDur = 1;
+        }
+
+        LOG.debug("EXP_DUR FOUND: {}", expDur);
 
                 // The starting year for multiple year runs may be set with SC_YEAR.
-                if (expDur > 1) {
-                    try {
-                        startYear = Integer.parseInt(getValueOr(expData, "sc_year", "").substring(0, 4));
-                    } catch (Exception e) {
-                        startYear = 0;
-                    }
-                }
-                windows = new Window[expDur];
+        if (expDur > 1) {
+            try {
+                startYear = Integer.parseInt(getValueOr(data, "sc_year", "").substring(0, 4));
+            } catch (Exception e) {
+                startYear = 0;
             }
-        } else {
-            LOG.error("NO EXPERIMENT DATA.");
-            return;
         }
+
+        LOG.debug("START YEAR: {}", startYear);
+        windows = new Window[expDur];
+
+        
 
         // Check if there is eventData existing
         if (eventData.isEmpty()) {
@@ -169,113 +177,127 @@ public class ExperimentHelper {
                 } // If multiple year duration, then report error and end function
                 else {
                     LOG.error("THE START YEAR IS OUT OF DATA RANGE (SC_YEAR:[" + startYear + "]");
-                    return;
+                        return new HashMap<String, ArrayList<String>>();
+                    }
                 }
             }
-        }
 
-        // Check input dates
-        if (!isValidDate(eDate, eDateCal, "-")) {
-            LOG.error("INVALID EARLIST DATE:[" + eDate + "]");
-            return;
-        }
-        if (!isValidDate(lDate, lDateCal, "-")) {
-            LOG.error("INVALID LATEST DATE:[" + lDate + "]");
-            return;
-        }
-        if (eDateCal.after(lDateCal)) {
-            lDateCal.set(Calendar.YEAR, lDateCal.get(Calendar.YEAR) + 1);
-        }
-        duration = (int) ((lDateCal.getTimeInMillis() - eDateCal.getTimeInMillis()) / 86400000);
-
-        // Check Number of days of accumulation
-        try {
-            intDays = Integer.parseInt(days);
-        } catch (Exception e) {
-            LOG.error("INVALID NUMBER FOR NUMBER OF DAYS OF ACCUMULATION");
-            return;
-        }
-        if (intDays <= 0) {
-            LOG.error("NON-POSITIVE NUMBER FOR NUMBER OF DAYS OF ACCUMULATION");
-            return;
-        }
-
-        // Check Threshold rainfall amount
-        try {
-            accRainAmtTotal = Double.parseDouble(rain);
-        } catch (Exception e) {
-            LOG.error("INVALID NUMBER FOR THRESHOLD RAINFALL AMOUNT");
-            return;
-        }
-        if (accRainAmtTotal <= 0) {
-            LOG.error("NON-POSITIVE NUMBER FOR THRESHOLD RAINFALL AMOUNT");
-            return;
-        }
-
-        // Find the first record which is the ealiest date for the window in each year
-        int end;
-        int start = getDailyRecIndex(dailyData, eDate, startYearIndex, 0);
-        for (int i = 0; i < windows.length; i++) {
-            end = getDailyRecIndex(dailyData, lDate, start, duration);
-            windows[i] = new Window(start, end);
-            if (i + 1 < windows.length) {
-                start = getDailyRecIndex(dailyData, eDate, end, 365 - duration);
+            // Check input dates
+            if (!isValidDate(eDate, eDateCal, "-")) {
+                LOG.error("INVALID EARLIST DATE:[" + eDate + "]");
+                return new HashMap<String, ArrayList<String>>();
             }
-        }
+            if (!isValidDate(lDate, lDateCal, "-")) {
+                LOG.error("INVALID LATEST DATE:[" + lDate + "]");
+                return new HashMap<String, ArrayList<String>>();
+            }
+            if (eDateCal.after(lDateCal)) {
+                lDateCal.set(Calendar.YEAR, lDateCal.get(Calendar.YEAR) + 1);
+            }
+            duration = (int) ((lDateCal.getTimeInMillis() - eDateCal.getTimeInMillis()) / 86400000);
 
-        if (windows[0].start == dailyData.size()) {
-            LOG.error("NO VALID DAILY DATA FOR SEARCH WINDOW");
-            return;
-        }
+            // Check Number of days of accumulation
+            try {
+                intDays = Integer.parseInt(days);
+            } catch (Exception e) {
+                LOG.error("INVALID NUMBER FOR NUMBER OF DAYS OF ACCUMULATION");
+                return new HashMap<String, ArrayList<String>>();
+            }
+            if (intDays <= 0) {
+                LOG.error("NON-POSITIVE NUMBER FOR NUMBER OF DAYS OF ACCUMULATION");
+                return new HashMap<String, ArrayList<String>>();
+            }
 
-        // Loop each window to try to find appropriate planting date
-        for (int i = 0; i < windows.length; i++) {
+            // Check Threshold rainfall amount
+            try {
+                accRainAmtTotal = Double.parseDouble(rain);
+            } catch (Exception e) {
+                LOG.error("INVALID NUMBER FOR THRESHOLD RAINFALL AMOUNT");
+                return new HashMap<String, ArrayList<String>>();
+            }
+            if (accRainAmtTotal <= 0) {
+                LOG.error("NON-POSITIVE NUMBER FOR THRESHOLD RAINFALL AMOUNT");
+                return new HashMap<String, ArrayList<String>>();
+            }
+
+            // Find the first record which is the ealiest date for the window in each year
+            int end;
+            int start = getDailyRecIndex(dailyData, eDate, startYearIndex, 0);
+            for (int i = 0; i < windows.length; i++) {
+                end = getDailyRecIndex(dailyData, lDate, start, duration);
+                windows[i] = new Window(start, end);
+                if (i + 1 < windows.length) {
+                    start = getDailyRecIndex(dailyData, eDate, end, 365 - duration);
+                }
+            }
+
+            if (windows[0].start == dailyData.size()) {
+                LOG.error("NO VALID DAILY DATA FOR SEARCH WINDOW");
+                return new HashMap<String, ArrayList<String>>();
+            }
+
+            // Loop each window to try to find appropriate planting date
+            for (int i = 0; i < windows.length; i++) {
 
             // Check first n days
-            int last = Math.min(windows[i].start + intDays, windows[i].end);
-            accRainAmt = 0;
-            for (int j = windows[i].start; j < last; j++) {
+                int last = Math.min(windows[i].start + intDays, windows[i].end);
+                accRainAmt = 0;
+                for (int j = windows[i].start; j < last; j++) {
 
-                try {
-                    accRainAmt += Double.parseDouble(getValueOr(dailyData.get(j), "rain", "0"));
-                } catch (Exception e) {
+                    try {
+                        accRainAmt += Double.parseDouble(getValueOr(dailyData.get(j), "rain", "0"));
+                    } catch (Exception e) {
+                        continue;
+                    }
+                    if (accRainAmt >= accRainAmtTotal) {
+                        LOG.debug("1: "+getValueOr(dailyData.get(j), "w_date", "") + " : " + accRainAmt + ", " + (accRainAmt >= accRainAmtTotal));
+                    //event.updateEvent("date", getValueOr(dailyData.get(j), "w_date", ""));
+                        //AcePathfinderUtil.insertValue((HashMap)data, "pdate", getValueOr(dailyData.get(j), "w_date", ""));
+                        pdates.add(getValueOr(dailyData.get(j), "w_date", ""));
+                        break;
+                    }
+                }
+
+                if (accRainAmt >= accRainAmtTotal) {
                     continue;
                 }
-//                LOG.debug(getValueOr(dailyData.get(j), "w_date", "") + " : " + accRainAmt + ", " + (accRainAmt >= accRainAmtTotal));
-                if (accRainAmt >= accRainAmtTotal) {
-                    event.updateEvent("date", getValueOr(dailyData.get(j), "w_date", ""));
-                    break;
-                }
-            }
-
-            if (accRainAmt >= accRainAmtTotal) {
-                continue;
-            }
 
             // If the window size is smaller than n
-            if (last > windows[i].end) {
-                LOG.info("NO APPROPRIATE DATE WAS FOUND FOR NO." + (i + 1) + " PLANTING EVENT");
+                if (last > windows[i].end) {
+                    LOG.info("NO APPROPRIATE DATE WAS FOUND FOR NO." + (i + 1) + " PLANTING EVENT");
                 // TODO remove one planting event
-                event.removeEvent();
-            }
+                    event.removeEvent();
+                }
 
             // Check following days
-            for (int j = last; j < windows[i].end; j++) {
+                int outIndex = last;
+                for (int j = last; j < windows[i].end; j++) {
 
-                try {
-                    accRainAmt -= Double.parseDouble(getValueOr(dailyData.get(j - intDays), "rain", "0"));
-                    accRainAmt += Double.parseDouble(getValueOr(dailyData.get(j), "rain", "0"));
-                } catch (Exception e) {
-                    continue;
+                    try {
+                        accRainAmt -= Double.parseDouble(getValueOr(dailyData.get(j - intDays), "rain", "0"));
+                        accRainAmt += Double.parseDouble(getValueOr(dailyData.get(j), "rain", "0"));
+                    } catch (Exception e) {
+                        continue;
+                    }
+                    if (accRainAmt >= accRainAmtTotal) {
+                        LOG.debug("2:"+getValueOr(dailyData.get(j), "w_date", "") + " : " + accRainAmt + ", " + (accRainAmt >= accRainAmtTotal));
+                    //event.updateEvent("date", getValueOr(dailyData.get(j), "w_date", ""));
+                        //AcePathfinderUtil.insertValue((HashMap)data, "pdate", getValueOr(dailyData.get(j), "w_date", ""));
+                        pdates.add(getValueOr(dailyData.get(j), "w_date", ""));
+                        break;
+                    }
+                    outIndex++;
                 }
-//                LOG.debug(getValueOr(dailyData.get(j), "w_date", "") + " : " + accRainAmt + ", " + (accRainAmt >= accRainAmtTotal));
-                if (accRainAmt >= accRainAmtTotal) {
-                    event.updateEvent("date", getValueOr(dailyData.get(j), "w_date", ""));
-                    break;
+
+                if (accRainAmt < accRainAmtTotal) {
+                    String lastDay = getValueOr(dailyData.get(windows[i].end-1), "w_date", "");
+                    LOG.error("Could not find an appropriate day to plant, using {}", lastDay);
+                    pdates.add(lastDay);
                 }
             }
+            results.put("pdate", pdates);
+            return results;
         }
-    }
 
     /**
      * Store a start index and end index of daily data array for a window
@@ -410,7 +432,7 @@ public class ExperimentHelper {
         double fen_tot;
         String[] fdates;
         double[] dPtps;
-        Event events;
+        //Event events;
         String pdate;
 
         try {
@@ -441,60 +463,65 @@ public class ExperimentHelper {
         eventData = getObjectOr(mgnData, "events", new ArrayList());
         //    }
 
-        // Check FEN_TOT is avalaible
+            // Check FEN_TOT is avalaible
         try {
-            fen_tot = Double.parseDouble(getValueOr(data, "fen_tot", "")); // TODO will be replace by generic getting method
-        } catch (Exception e) {
-            LOG.error("FEN_TOT IS INVALID");
-            return;
-        }
-
-        // Check planting date is avalaible
-        events = new Event(eventData, "planting");
-        if (events.isEventExist()) {
-            pdate = getValueOr(events.getCurrentEvent(), "date", "");
-            if (convertFromAgmipDateString(pdate) == null) {
-                LOG.error("PLANTING DATE IS MISSING");
+                fen_tot = Double.parseDouble(getValueOr(data, "fen_tot", "")); // TODO will be replace by generic getting method
+            } catch (Exception e) {
+                LOG.error("FEN_TOT IS INVALID");
                 return;
             }
-        } else {
-            LOG.error("PLANTING EVENT IS MISSING");
-            return;
-        }
+
+            // Check planting date is avalaible
+            // events = new Event(eventData, "planting");
+            // if (events.isEventExist()) {
+            //     pdate = getValueOr(events.getCurrentEvent(), "date", "");
+            //     if (convertFromAgmipDateString(pdate) == null) {
+            //         LOG.error("PLANTING DATE IS MISSING");
+            //         return;
+            //     }
+            // } else {
+            //     LOG.error("PLANTING EVENT IS MISSING");
+            //     return;
+            // }
+            //HashMap<String, Object> dest = new HashMap<String, Object>();
+            ArrayList<String> output = new ArrayList<String>();
+            for(Map events : eventData) {
+                if (getValueOr(events, "event", "").equals("planting")) {
+                    pdate = getValueOr(events, "date", "");
         //}
 
         // Check input days and ptps
-        try {
-            fdates = new String[iNum];
-            dPtps = new double[iNum];
-            for (int i = 0; i < iNum; i++) {
-                fdates[i] = dateOffset(pdate, offsets[i]);
-                if (fdates[i] == null) {
-                    LOG.error("INVALID OFFSET NUMBER OF DAYS [" + offsets[i] + "]");
-                    return;
-                }
-                dPtps[i] = Double.parseDouble(ptps[i]);
-            }
-        } catch (Exception e) {
-            LOG.error("PAIR DATA IS IN VALID [" + e.getMessage() + "]");
-            return;
-        }
+                    try {
+                        fdates = new String[iNum];
+                        dPtps = new double[iNum];
+                        for (int i = 0; i < iNum; i++) {
+                            fdates[i] = dateOffset(pdate, offsets[i]);
+                            if (fdates[i] == null) {
+                                LOG.error("INVALID OFFSET NUMBER OF DAYS [" + offsets[i] + "]");
+                                return;
+                            }
+                            dPtps[i] = Double.parseDouble(ptps[i]);
+                        }
+                    } catch (Exception e) {
+                        LOG.error("PAIR DATA IS IN VALID [" + e.getMessage() + "]");
+                        return;
+                    }
 
-        events.setEventType("fertilizer");
-        for (int i = 0; i < iNum; i++) {
-            // Create event map
-//            Map event = events.addEvent(fdates[i], true);
-//            event.put("fecd", fecd);
-//            event.put("feacd", feacd);
-//            event.put("fedep", fedep);
-//            event.put("feamn", String.format("%.0f", fen_tot * dPtps[i] / 100));
-            events.updateEvent("date", fdates[i], false);
-            events.updateEvent("fecd", fecd, false);
-            events.updateEvent("feacd", feacd, false);
-            events.updateEvent("fedep", fedep, false);
-            events.updateEvent("feamn", String.format("%.0f", fen_tot * dPtps[i] / 100), true);
+                    //events.setEventType("fertilizer");
+                    for (int i = 0; i < iNum; i++) {
+                        output.add(String.format("%s|%.0f", fdates[i], (fen_tot * dPtps[i] / 100)));
+                    }
+                }
+            }
+            for (String addNew : output) {
+                String[] tmp = addNew.split("[|]");
+                AcePathfinderUtil.insertValue(data, "fedate", tmp[0]);
+                AcePathfinderUtil.insertValue(data, "fecd", fecd);
+                AcePathfinderUtil.insertValue(data, "feacd", feacd);
+                AcePathfinderUtil.insertValue(data, "fedep", fedep);
+                AcePathfinderUtil.insertValue(data, "feamn", tmp[1]);
+            }
         }
-    }
 
     /**
      * Organic matter applications include manure, crop residues, etc. As a
@@ -507,6 +534,7 @@ public class ExperimentHelper {
      * @param omc2n C:N ratio for applied organic matter
      * @param omdep depth at which organic matter is incorporated (cm)
      * @param ominp percentage incorporation of organic matter (%)
+     * @param dmr 
      * @param data The experiment data holder
      */
     public static void getOMDistribution(String offset, String omcd, String omc2n, String omdep, String ominp, String dmr, HashMap expData) {
@@ -532,14 +560,14 @@ public class ExperimentHelper {
         eventData = getObjectOr(mgnData, "events", new ArrayList());
 
         //    }
-        // Get the omamt from the first? OM event
+            // Get the omamt from the first? OM event
         Event omEvent = new Event(eventData, "organic_matter");
         omamt = (String) omEvent.getCurrentEvent().get("omamt");
         if (omamt == null || omamt.equals("")) {
             LOG.error("OMAMT IS NOT AVAILABLE");
             return;
         }
-        //omamt = getValueOr(expData, "omamt", ""); // TODO will be replace by generic getting method
+            //omamt = getValueOr(expData, "omamt", ""); // TODO will be replace by generic getting method
 
         //}
 
@@ -571,13 +599,13 @@ public class ExperimentHelper {
         // Update organic material event
         events.setEventType("organic_matter");
         if (events.isEventExist()) {
-            events.updateEvent("date", odate, false);
-            events.updateEvent("omcd", omcd, false);
+            events.updateEvent("date",  odate, false);
+            events.updateEvent("omcd",  omcd,  false);
             events.updateEvent("omamt", omamt, false);
             events.updateEvent("omc2n", omc2n, false);
             events.updateEvent("omdep", omdep, false);
             events.updateEvent("ominp", ominp, false);
-            events.updateEvent("omn%", omnpct.toString(), true);
+            events.updateEvent("omn%",  omnpct.toString(), true);
         }
     }
 
@@ -607,6 +635,7 @@ public class ExperimentHelper {
         double[] dSlocs;
         double mid;
 
+        LOG.debug("Checkpoint 1");
         try {
             dSom3_0 = Double.parseDouble(som3_0);
             dPp = Double.parseDouble(pp);
@@ -638,6 +667,7 @@ public class ExperimentHelper {
             }
         }
 
+        LOG.debug("Checkpoint 2");
         // Check if initial condition layer data is available
         // ArrayList<Map> exps = getObjectOr(data, "experiments", new ArrayList());
         // if (exps.isEmpty()) {
@@ -649,25 +679,26 @@ public class ExperimentHelper {
         //         LOG.error("NO EXPERIMENT DATA.");
         //         return;
         //     } else {
-        Map icData = getObjectOr(data, "initial_conditions", new HashMap());
-        icLayers = getObjectOr(icData, "soilLayer", new ArrayList());
-        if (icLayers.isEmpty()) {
-            LOG.error("NO INITIAL CONDITION DATA.");
-            return;
-        } else if (icLayers.size() != soilLayers.size()) {
-            LOG.error("THE LAYER DATA IN THE INITIAL CONDITION SECTION IS NOT MATCHED WITH SOIL SECTION");
-            return;
-        }
-        //}
-        //}
+        // Map icData = getObjectOr(data, "soil", new HashMap());
+        // icLayers = getObjectOr(icData, "soilLayer", new ArrayList());
+        // if (icLayers.isEmpty()) {
+        //     LOG.error("NO SOIL DATA.");
+        //     return;
+        // } else if (icLayers.size() != soilLayers.size()) {
+        //     LOG.error("THE LAYER DATA IN THE INITIAL CONDITION SECTION IS NOT MATCHED WITH SOIL SECTION");
+        //     return;
+        // }
+        //     //}
+        // //}
 
+        LOG.debug("Checkpoint 3");
         double last = 0;
-        for (int i = 0; i < icLayers.size(); i++) {
+        for (int i = 0; i < soilLayers.size(); i++) {
             mid = (dSllbs[i] + last) / 2;
             last = dSllbs[i];
             dF = getGrowthFactor(mid, dPp, dK, dSom2_0);
             dSom3_fac = 1 - Math.max(0.02, dF) / 0.95;
-            icLayers.get(i).put("slsc", String.format("%.2f", dSlocs[i] * dSom3_fac));
+            soilLayers.get(i).put("slsc", String.format("%.2f", dSlocs[i] * dSom3_fac));
 //            LOG.debug((String)icLayers.get(i).get("icbl") + ", " + (String)icLayers.get(i).get("slsc"));
         }
     }

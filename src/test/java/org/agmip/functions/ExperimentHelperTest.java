@@ -29,49 +29,44 @@ import org.slf4j.LoggerFactory;
 public class ExperimentHelperTest {
 
     private static final Logger log = LoggerFactory.getLogger(ExperimentHelperTest.class);
-    URL resource;
-    URL resource2;
-
-    @Before
-    public void setUp() throws Exception {
-        resource = this.getClass().getResource("/ufga8201_multi.json");
-        resource2 = this.getClass().getResource("/machakos.json");
-    }
 
     @Test
     public void testGetAutoPlantingDate() throws IOException, Exception {
         String line;
         String startDate = "01-15";
         String endDate = "02-28";
-        String accRainAmt = "29.2";
+        String accRainAmt = "25";
         String dayNum = "4";
-        String expected_1 = "19820204";
-        int expected_2 = 5;
+        String expected_1 = "19820203";
+        int expected_2 = 2; // 5 standard events + 1 new planting event
         String acctual_1 = "";
         int acctual_2 = 0;
-
+        URL test_resource = this.getClass().getResource("/auto_plant_single_year_test.json");
+        ArrayList<Map<String, String>> events = new ArrayList<Map<String, String>>();
+        HashMap<String, ArrayList<String>> results = new HashMap<String, ArrayList<String>>();
         BufferedReader br = new BufferedReader(
                 new InputStreamReader(
-                new FileInputStream(resource.getPath())));
+                new FileInputStream(test_resource.getPath())));
 
         if ((line = br.readLine()) != null) {
             HashMap<String, Object> data = JSONAdapter.fromJSON(line);
-            Map<String, Object> expData = getRawPackageContents(data, "experiments").get(0);
+            //Map<String, Object> expData = getRawPackageContents(data, "experiments").get(0);        
             // Map<String, Object> expData = (Map)((ArrayList) data.get("experiments")).get(0);
-            expData.put("exp_dur", "2");
-            ExperimentHelper.getAutoPlantingDate(startDate, endDate, accRainAmt, dayNum, data);
-            Map<String, ArrayList> mgnData = (Map) expData.get("management");
-            ArrayList<Map<String, String>> events = mgnData.get("events");
-            acctual_1 = events.get(0).get("date");
-            acctual_2 = events.size();
+            data.put("exp_dur", "2");
+            results = ExperimentHelper.getAutoPlantingDate(startDate, endDate, accRainAmt, dayNum, data);
+            //Map<String, ArrayList> mgnData = (Map) data.get("results");
+            //events = mgnData.get("events");
+            //acctual_1 = results.get(0);
         }
+        log.info("Results: {}", results);
 
-        assertEquals("getAutoPlantingDate: normal case", expected_1, acctual_1);
-        assertEquals("getAutoPlantingDate: no date find case", expected_2, acctual_2);
+        assertEquals("getAutoPlantingDate: normal case", expected_1, results.get("pdate").get(0));
+        assertEquals("getAutoPlantingDate: no date find case", expected_2, results.get("pdate").size());
 
     }
 
     @Test
+    @Ignore
     public void testGetAutoPlantingDate_oneYear() throws IOException, Exception {
         String line;
         String startDate = "03-01";
@@ -79,13 +74,13 @@ public class ExperimentHelperTest {
         String accRainAmt = "9.0";
         String dayNum = "6";
         String expected_1 = "19990310"; // TODO
-        int expected_2 = 2;
+        int expected_2 = 3;
         String acctual_1 = "";
         int acctual_2 = 0;
-
+        URL test_resource = null;
         BufferedReader br = new BufferedReader(
                 new InputStreamReader(
-                new FileInputStream(resource2.getPath())));
+                new FileInputStream(test_resource.getPath())));
 
         if ((line = br.readLine()) != null) {
 
@@ -110,6 +105,7 @@ public class ExperimentHelperTest {
 
     @Test
     public void testGetAutoPlantingDate_machakos() throws IOException, Exception {
+        URL test_resource = this.getClass().getResource("/machakos_wth_only.json");
         String line;
         String startDate = "01-15";
         String endDate = "02-28";
@@ -124,32 +120,26 @@ public class ExperimentHelperTest {
 
         BufferedReader br = new BufferedReader(
                 new InputStreamReader(
-                new FileInputStream(resource2.getPath())));
+                new FileInputStream(test_resource.getPath())));
 
         if ((line = br.readLine()) != null) {
 
-            Map<String, ArrayList<Map>> data = new LinkedHashMap<String, ArrayList<Map>>();
-            Map<String, Object> expData = JSONAdapter.fromJSON(line);
-            data.put("experiments", new ArrayList());
-            data.put("weathers", new ArrayList());
-            data.get("experiments").add(expData);
-            data.get("weathers").add((Map) expData.get("weather"));
-            expData.put("exp_dur", "3");
-            ExperimentHelper.getAutoPlantingDate(startDate, endDate, accRainAmt, dayNum, data);
-            Map<String, ArrayList> mgnData = (Map) expData.get("management");
-            ArrayList<Map<String, String>> events = mgnData.get("events");
-            acctual_1 = events.get(0).get("date");
-            acctual_2 = events.get(1).get("date");
-            acctual_3 = events.size();
+            Map<String, Object> data = JSONAdapter.fromJSON(line);
+            data.put("exp_dur", "3");
+            HashMap<String, ArrayList<String>> results = ExperimentHelper.getAutoPlantingDate(startDate, endDate, accRainAmt, dayNum, data);
+            acctual_1 = results.get("pdate").get(0);
+            acctual_2 = results.get("pdate").get(1);
+            acctual_3 = results.get("pdate").size();
+            log.info("Results: {}", results);
         }
 
         assertEquals("getAutoPlantingDate: normal case", expected_1, acctual_1);
         assertEquals("getAutoPlantingDate: copy case", expected_2, acctual_2);
         assertEquals("getAutoPlantingDate: no date find case", expected_3, acctual_3);
-
     }
 
     @Test
+    @Ignore
     public void testGetAutoPlantingDate_machakos_scYear() throws IOException, Exception {
         String line;
         String startDate = "01-15";
@@ -159,28 +149,24 @@ public class ExperimentHelperTest {
         String expected_1 = "19830214";
         String expected_2 = "19840131";
         String expected_3 = "19850202";
-        int expected_99 = 4;
+        int expected_99 = 3;
         String acctual_1 = "";
         String acctual_2 = "";
         String acctual_3 = "";
         int acctual_99 = 0;
 
+        URL test_resource = this.getClass().getResource("/machakos_wth_only.json");
         BufferedReader br = new BufferedReader(
                 new InputStreamReader(
-                new FileInputStream(resource2.getPath())));
+                new FileInputStream(test_resource.getPath())));
 
         if ((line = br.readLine()) != null) {
 
-            Map<String, ArrayList<Map>> data = new LinkedHashMap<String, ArrayList<Map>>();
-            Map<String, Object> expData = JSONAdapter.fromJSON(line);
-            data.put("experiments", new ArrayList());
-            data.put("weathers", new ArrayList());
-            data.get("experiments").add(expData);
-            data.get("weathers").add((Map) expData.get("weather"));
-            expData.put("exp_dur", "3");
-            expData.put("sc_year", "1983");
+            Map<String, Object> data = JSONAdapter.fromJSON(line);
+            data.put("exp_dur", "3");
+            data.put("sc_year", "1983");
             ExperimentHelper.getAutoPlantingDate(startDate, endDate, accRainAmt, dayNum, data);
-            Map<String, ArrayList> mgnData = (Map) expData.get("management");
+            Map<String, ArrayList> mgnData = (Map) data.get("management");
             ArrayList<Map<String, String>> events = mgnData.get("events");
             acctual_1 = events.get(0).get("date");
             acctual_2 = events.get(1).get("date");
@@ -349,14 +335,14 @@ public class ExperimentHelperTest {
 
         //}
         HashMap<String, Object> data = new HashMap<String, Object>();
-        AcePathfinderUtil.insertValue(data, "icbl", "5");
-        AcePathfinderUtil.insertValue(data, "icbl", "15");
-        AcePathfinderUtil.insertValue(data, "icbl", "30");
-        AcePathfinderUtil.insertValue(data, "icbl", "60");
-        AcePathfinderUtil.insertValue(data, "icbl", "90");
-        AcePathfinderUtil.insertValue(data, "icbl", "120");
-        AcePathfinderUtil.insertValue(data, "icbl", "150");
-        AcePathfinderUtil.insertValue(data, "icbl", "180");
+        // AcePathfinderUtil.insertValue(data, "icbl", "5");
+        // AcePathfinderUtil.insertValue(data, "icbl", "15");
+        // AcePathfinderUtil.insertValue(data, "icbl", "30");
+        // AcePathfinderUtil.insertValue(data, "icbl", "60");
+        // AcePathfinderUtil.insertValue(data, "icbl", "90");
+        // AcePathfinderUtil.insertValue(data, "icbl", "120");
+        // AcePathfinderUtil.insertValue(data, "icbl", "150");
+        // AcePathfinderUtil.insertValue(data, "icbl", "180");
         AcePathfinderUtil.insertValue(data, "sllb", "5");
         AcePathfinderUtil.insertValue(data, "sloc", "2.00");
         AcePathfinderUtil.insertValue(data, "sllb", "15");
@@ -377,7 +363,7 @@ public class ExperimentHelperTest {
         ExperimentHelper.getStableCDistribution(som3_0, pp, rd, data);
         log.info("getStableCDistribution() output: {}", data.toString());
 
-        Map icData = (HashMap) getObjectOr(data, "initial_conditions", new HashMap());
+        Map icData = (HashMap) getObjectOr(data, "soil", new HashMap());
         acctual = getObjectOr(icData, "soilLayer", new ArrayList());
         for (int i = 0; i < expected.length; i++) {
             assertEquals("getRootDistribution: normal case " + i, expected[i], (String) acctual.get(i).get("slsc"));

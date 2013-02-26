@@ -7,26 +7,30 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.GregorianCalendar;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class Functions {
+    private static final Logger log = LoggerFactory.getLogger(Functions.class);
     private static final SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyyMMdd");
-    
+
     /**
      * Cannot instantiate this class.
      */
     private Functions() {}
-    
+
     /**
      * Converts a numeric string to a {@code BigInteger}.
      *
      * This function first converts to a {@code BigDecimal} to make sure the base
-     * number being used is accurate. By default, this method uses the {@code ROUND_HALF_UP} 
-     * rounding method from BigDecimal. If the string cannot be converted, this method 
+     * number being used is accurate. By default, this method uses the {@code ROUND_HALF_UP}
+     * rounding method from BigDecimal. If the string cannot be converted, this method
      * returns {@code null}
      *
      * @param numeric A numeric string (with or without decimals).
      *
      * @return {@code BigInteger} representation of the string or {@code null}.
-     * 
+     *
      * @see BigDecimal
      */
     public static BigInteger numericStringToBigInteger(String numeric) {
@@ -38,7 +42,7 @@ public class Functions {
      *
      * This function first converts to a {@code BigDecimal} to make sure the base
      * number being used is accurate. If {@code round} is set to <strong>true</strong>
-     * this method uses the {@code ROUND_HALF_UP} rounding method from {@code BigDecimal}. 
+     * this method uses the {@code ROUND_HALF_UP} rounding method from {@code BigDecimal}.
      * Otherwise the decimal part is dropped. If the string cannot be converted, this method
      * returns {@code null}
      *
@@ -57,7 +61,7 @@ public class Functions {
         } catch (Exception ex) {
             return null;
         }
-        
+
         if (round) {
             decimal = decimal.setScale(0, BigDecimal.ROUND_HALF_UP);
         }
@@ -94,7 +98,24 @@ public class Functions {
             return null;
         }
     }
-    
+
+    /**
+     * Convert from AgMIP standard date string (YYMMDD) to a custom date string
+     *
+     * @param agmipDate AgMIP standard date string
+     * @param format Destination format
+     *
+     * @return a formatted date string or {@code null}
+     */
+    public static String formatAgmipDateString(String agmipDate, String format) {
+        try {
+            SimpleDateFormat fmt = new SimpleDateFormat(format);
+            Date d = dateFormatter.parse(agmipDate);
+            return fmt.format(d);
+        } catch (ParseException ex) {
+            return null;
+        }
+    }
     /**
      * Offset an AgMIP standard date string (YYYYMMDD) by a set number of days.
      *
@@ -124,7 +145,7 @@ public class Functions {
 
     /**
      * Offset a numeric string by another numeric string.
-     * 
+     *
      * Any numeric string recognized by {@code BigDecimal} is supported.
      *
      * @param initial A valid number string
@@ -149,9 +170,9 @@ public class Functions {
 
     /**
      * Multiply two numbers together
-     * 
+     *
      * Any numeric string recognized by {@code BigDecimal} is supported.
-     * 
+     *
      * @param f1 A valid number string
      * @param f2 A valid number string
      *
