@@ -29,6 +29,9 @@ public class SoilHelper {
      * @param pp depth of top of curve (pivot point) (cm)
      * @param rd maximum rooting depth (cm), or depth at which the value is 2%
      * of the maximum value
+     *
+     * @return An {@code ArrayList} of {@code root distribution} for each layer
+     * of given soil
      */
     public static HashMap<String, ArrayList<String>> getRootDistribution(HashMap data, String var, String m, String pp, String rd) {
 
@@ -70,13 +73,13 @@ public class SoilHelper {
 
         // First layer
 //        soilLayers.get(0).put(var, getGrowthFactor(dSllbs[0] / 2, dPp, dK, dM, 3));
-        result.add(getGrowthFactor(divide(sllbs[0], "2"), pp, k, m));
+        result.add(round(getGrowthFactor(divide(sllbs[0], "2"), pp, k, m), 3));
 
         // Other layers
         for (int i = 1; i < sllbs.length; i++) {
 //            mid = (dSllbs[i] + sllbs[i - 1]) / 2;
 //            String slrgf = getGrowthFactor(mid, dPp, dK, dM, 3);
-            result.add(getGrowthFactor(average(sllbs[i], sllbs[i - 1]), pp, k, m));
+            result.add(round(getGrowthFactor(average(sllbs[i], sllbs[i - 1]), pp, k, m), 3));
         }
 
         results.put(var, result);

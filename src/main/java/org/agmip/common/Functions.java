@@ -351,7 +351,7 @@ public class Functions {
      *
      * Any numeric string recognized by {@code BigDecimal} is supported.
      *
-     * @param exponent one or more valid number strings
+     * @param exponent A valid number string
      *
      * @return the value <i>e</i><sup>{@code value}</sup>, where <i>e</i> is the
      * base of the natural logarithms.
@@ -363,6 +363,106 @@ public class Functions {
         try {
             bd = new BigDecimal(exponent);
             return Math.exp(bd.doubleValue()) + "";
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    /**
+     * Returns the natural logarithm (base <i>e</i>) of a {@code double} value.
+     *
+     * Any numeric string recognized by {@code BigDecimal} is supported.
+     *
+     * @param val A valid number string
+     *
+     * @return the value ln&nbsp;{@code a}, the natural logarithm of {@code a}.
+     *
+     * @see BigDecimal
+     */
+    public static String log(String val) {
+        BigDecimal bd;
+        try {
+            bd = new BigDecimal(val);
+            return Math.log(bd.doubleValue()) + "";
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    /**
+     * Returns the minimum number from a group of input value.
+     *
+     * Any numeric string recognized by {@code BigDecimal} is supported.
+     *
+     * @param values One of more valid number strings
+     *
+     * @return the minimum number.
+     *
+     * @see BigDecimal
+     */
+    public static String min(String... values) {
+        BigDecimal bd;
+        BigDecimal bd2;
+        try {
+            bd = new BigDecimal(values[0]);
+            for (int i = 1; i < values.length; i++) {
+                bd2 = new BigDecimal(values[i]);
+                if (bd.compareTo(bd2) > 0) {
+                    bd = bd2;
+                }
+            }
+            return bd.toString();
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    /**
+     * Returns the maximum number from a group of input value.
+     *
+     * Any numeric string recognized by {@code BigDecimal} is supported.
+     *
+     * @param values One of more valid number strings
+     *
+     * @return the maximum number.
+     *
+     * @see BigDecimal
+     */
+    public static String max(String... values) {
+        BigDecimal bd;
+        BigDecimal bd2;
+        try {
+            bd = new BigDecimal(values[0]);
+            for (int i = 1; i < values.length; i++) {
+                bd2 = new BigDecimal(values[i]);
+                if (bd.compareTo(bd2) < 0) {
+                    bd = bd2;
+                }
+            }
+            return bd.toString();
+        } catch (Exception e) {
+            return null;
+        }
+    }
+    
+    /**
+     * Returns the closest {@code decimal} to the argument, with given scale, using HALF_UP mode
+     *
+     * Any numeric string recognized by {@code BigDecimal} is supported.
+     *
+     * @param value A valid number string
+     *
+     * @return the rounded number.
+     *
+     * @see BigDecimal
+     */
+    public static String round(String value, int scale) {
+        Math.round(234);
+        BigDecimal bd;
+        try {
+            bd = new BigDecimal(value);
+            bd = bd.setScale(scale, RoundingMode.HALF_UP);
+            return bd.toString();
         } catch (Exception e) {
             return null;
         }

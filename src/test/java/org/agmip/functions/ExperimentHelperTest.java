@@ -53,7 +53,7 @@ public class ExperimentHelperTest {
             //Map<String, Object> expData = getRawPackageContents(data, "experiments").get(0);        
             // Map<String, Object> expData = (Map)((ArrayList) data.get("experiments")).get(0);
             data.put("exp_dur", "2");
-            results = ExperimentHelper.getAutoPlantingDate(startDate, endDate, accRainAmt, dayNum, data);
+            results = ExperimentHelper.getAutoPlantingDate(data, startDate, endDate, accRainAmt, dayNum);
             //Map<String, ArrayList> mgnData = (Map) data.get("results");
             //events = mgnData.get("events");
             //acctual_1 = results.get(0);
@@ -91,7 +91,7 @@ public class ExperimentHelperTest {
             data.get("experiments").add(expData);
             data.get("weathers").add((Map) expData.get("weather"));
             expData.put("sc_year", "1982");
-            ExperimentHelper.getAutoPlantingDate(startDate, endDate, accRainAmt, dayNum, data);
+            ExperimentHelper.getAutoPlantingDate(data, startDate, endDate, accRainAmt, dayNum);
             Map<String, ArrayList> mgnData = (Map) expData.get("management");
             ArrayList<Map<String, String>> events = mgnData.get("events");
             acctual_1 = events.get(0).get("date");
@@ -126,7 +126,7 @@ public class ExperimentHelperTest {
 
             Map<String, Object> data = JSONAdapter.fromJSON(line);
             data.put("exp_dur", "3");
-            HashMap<String, ArrayList<String>> results = ExperimentHelper.getAutoPlantingDate(startDate, endDate, accRainAmt, dayNum, data);
+            HashMap<String, ArrayList<String>> results = ExperimentHelper.getAutoPlantingDate(data, startDate, endDate, accRainAmt, dayNum);
             acctual_1 = results.get("pdate").get(0);
             acctual_2 = results.get("pdate").get(1);
             acctual_3 = results.get("pdate").size();
@@ -165,7 +165,7 @@ public class ExperimentHelperTest {
             Map<String, Object> data = JSONAdapter.fromJSON(line);
             data.put("exp_dur", "3");
             data.put("sc_year", "1983");
-            ExperimentHelper.getAutoPlantingDate(startDate, endDate, accRainAmt, dayNum, data);
+            ExperimentHelper.getAutoPlantingDate(data, startDate, endDate, accRainAmt, dayNum);
             Map<String, ArrayList> mgnData = (Map) data.get("management");
             ArrayList<Map<String, String>> events = mgnData.get("events");
             acctual_1 = events.get(0).get("date");
@@ -224,7 +224,7 @@ public class ExperimentHelperTest {
         //     data.get("weathers").add((Map) expData.get("weather"));
         AcePathfinderUtil.insertValue(data, "fen_tot", "110");
         AcePathfinderUtil.insertValue(data, "pdate", "19990415");
-        ExperimentHelper.getFertDistribution(num, fecd, feacd, fedep, offsets, ptps, data);
+        ExperimentHelper.getFertDistribution(data, num, fecd, feacd, fedep, offsets, ptps);
         //Map mgnData = getObjectOr((HashMap) getObjectOr(data, "experiments", new ArrayList()).get(0), "management", new HashMap());
         //ArrayList<Map> events = (ArrayList<Map>) getObjectOr(data, "events", new ArrayList());
         //acctual_1 = events.get(1);
@@ -275,7 +275,7 @@ public class ExperimentHelperTest {
         HashMap<String, Object> data = new HashMap<String, Object>();
         AcePathfinderUtil.insertValue(data, "pdate", "19990415");
         AcePathfinderUtil.insertValue(data, "omamt", "1000");
-        ExperimentHelper.getOMDistribution(offset, omcd, omc2n, omdep, ominp, dmr, data);
+        ExperimentHelper.getOMDistribution(data, offset, omcd, omc2n, omdep, ominp, dmr);
 
         Map mgnData = (HashMap) getObjectOr(data, "management", new HashMap());
         ArrayList<Map> events = getObjectOr(mgnData, "events", new ArrayList());
@@ -297,7 +297,7 @@ public class ExperimentHelperTest {
 
         HashMap<String, Object> data = new HashMap<String, Object>();
         AcePathfinderUtil.insertValue(data, "pdate", "19990415");
-        ExperimentHelper.getOMDistribution(offset, omcd, omc2n, omdep, ominp, dmr, data);
+        ExperimentHelper.getOMDistribution(data, offset, omcd, omc2n, omdep, ominp, dmr);
 
         Map mgnData = (HashMap) getObjectOr(data, "management", new HashMap());
         ArrayList<Map> events = getObjectOr(mgnData, "events", new ArrayList());
@@ -313,7 +313,7 @@ public class ExperimentHelperTest {
         String pp = "20";
         String rd = "60";
         String[] expected = {"1.10", "0.55", "0.65", "0.48", "0.10", "0.10", "0.04", "0.23"};
-        ArrayList<HashMap<String, String>> acctual = null;
+        ArrayList<String> acctual = null;
 
 //         BufferedReader br = new BufferedReader(
 //                 new InputStreamReader(
@@ -360,13 +360,14 @@ public class ExperimentHelperTest {
         AcePathfinderUtil.insertValue(data, "sllb", "180");
         AcePathfinderUtil.insertValue(data, "sloc", "0.24");
 
-        ExperimentHelper.getStableCDistribution(som3_0, pp, rd, data);
-        log.info("getStableCDistribution() output: {}", data.toString());
+        HashMap<String, ArrayList<String>> result = ExperimentHelper.getStableCDistribution(data, som3_0, pp, rd);
+        log.info("getStableCDistribution() output: {}", result.toString());
 
-        Map icData = (HashMap) getObjectOr(data, "soil", new HashMap());
-        acctual = getObjectOr(icData, "soilLayer", new ArrayList());
+//        Map icData = (HashMap) getObjectOr(data, "soil", new HashMap());
+//        acctual = getObjectOr(icData, "soilLayer", new ArrayList());
+        acctual = getObjectOr(result, "slsc", new ArrayList());
         for (int i = 0; i < expected.length; i++) {
-            assertEquals("getRootDistribution: normal case " + i, expected[i], (String) acctual.get(i).get("slsc"));
+            assertEquals("getRootDistribution: normal case " + i, expected[i], (String) acctual.get(i));
         }
     }
 }
