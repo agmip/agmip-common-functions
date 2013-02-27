@@ -221,7 +221,7 @@ public class Functions {
         try {
             sum = new BigDecimal(addends[0]);
             for (int i = 1; i < addends.length; i++) {
-                sum.add(new BigDecimal(addends[i]));
+                sum = sum.add(new BigDecimal(addends[i]));
             }
             return sum.toString();
         } catch (Exception e) {
@@ -251,7 +251,7 @@ public class Functions {
         try {
             difference = new BigDecimal(minuend);
             for (int i = 0; i < subtrahends.length; i++) {
-                difference.subtract(new BigDecimal(subtrahends[i]));
+                difference = difference.subtract(new BigDecimal(subtrahends[i]));
             }
             return difference.toString();
         } catch (Exception e) {
@@ -280,7 +280,7 @@ public class Functions {
         try {
             prodcut = new BigDecimal(factors[0]);
             for (int i = 1; i < factors.length; i++) {
-                prodcut.multiply(new BigDecimal(factors[i]));
+                prodcut = prodcut.multiply(new BigDecimal(factors[i]));
             }
             return prodcut.toString();
         } catch (Exception e) {
