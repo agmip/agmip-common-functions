@@ -1,5 +1,8 @@
 package org.agmip.common;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.io.Writer;
 import java.math.BigInteger;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -305,8 +308,12 @@ public class Functions {
         try {
             BigDecimal bdDividend = new BigDecimal(dividend);
             BigDecimal bdDivisor = new BigDecimal(divisor);
-            int scale = Math.max(bdDividend.scale(), bdDivisor.scale()) + 1;
-            return divide(dividend, divisor, scale);
+            try {
+                return bdDividend.divide(bdDivisor).toString();
+            } catch  (ArithmeticException ae) {
+                int scale = Math.max(bdDividend.scale(), bdDivisor.scale()) + 1;
+                return divide(dividend, divisor, scale);
+            }
         } catch (Exception ex) {
             return null;
         }
@@ -332,22 +339,7 @@ public class Functions {
         try {
             bdDividend = new BigDecimal(dividend);
             bdDivisor = new BigDecimal(divisor);
-            if (bdDivisor.doubleValue() == 0) {
-                log.warn("Try to let a number be devided by 0");
-                return null;
-            }
-        } catch (Exception ex) {
-            return null;
-        }
-
-        try {
-            return bdDividend.divide(bdDivisor).toString();
-        } catch (ArithmeticException ae) {
-            try {
-                return bdDividend.divide(bdDivisor, scale, RoundingMode.HALF_UP).toString();
-            } catch (Exception e) {
-                return null;
-            }
+            return bdDividend.divide(bdDivisor, scale, RoundingMode.HALF_UP).toString();
         } catch (Exception e) {
             return null;
         }
@@ -535,7 +527,7 @@ public class Functions {
      */
     public enum CompareMode {
 
-        LESS, NOTLESS, GREATER, NOTGREATER, EQUALL
+        LESS, NOTLESS, GREATER, NOTGREATER, EQUAL
     }
 
     /**
@@ -570,7 +562,7 @@ public class Functions {
                     return ret > 0;
                 case NOTGREATER:
                     return ret <= 0;
-                case EQUALL:
+                case EQUAL:
                     return ret == 0;
                 default:
                     return false;
@@ -578,5 +570,19 @@ public class Functions {
         } catch (Exception e) {
             return false;
         }
+    }
+    
+    /**
+     * Gathering the messages from a {@code Throwable} instance and its back trace
+     * 
+     * @param aThrowable
+     * 
+     * @return The trace messages
+     */
+    public static String getStackTrace(Throwable aThrowable) {
+        final Writer result = new StringWriter();
+        final PrintWriter printWriter = new PrintWriter(result);
+        aThrowable.printStackTrace(printWriter);
+        return result.toString();
     }
 }
