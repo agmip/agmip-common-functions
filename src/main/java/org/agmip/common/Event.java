@@ -13,7 +13,7 @@ public class Event {
 
     private int next = -1;
     private HashMap template;
-    private ArrayList<HashMap> events;
+    private ArrayList<HashMap<String, String>> events;
     private String eventType;
 
     /**
@@ -23,7 +23,7 @@ public class Event {
      * @param eventType The name of event type
      * @eventType The type of events which will be handled
      */
-    public Event(ArrayList<HashMap> events, String eventType) {
+    public Event(ArrayList<HashMap<String, String>> events, String eventType) {
         this.events = events;
         this.eventType = eventType;
         getNextEventIndex();

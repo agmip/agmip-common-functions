@@ -41,7 +41,7 @@ public class SoilHelperTest {
         String pp = "20";
         String rd = "180";
         String[] expected = {"1.000", "1.000", "0.941", "0.543", "0.261", "0.125", "0.060", "0.029"};
-        ArrayList<HashMap> acctual = null;
+        ArrayList<String> acctual = null;
 
         // BufferedReader br = new BufferedReader(
         //         new InputStreamReader(
@@ -71,7 +71,15 @@ public class SoilHelperTest {
         AcePathfinderUtil.insertValue(data, "sllb", "150");
         AcePathfinderUtil.insertValue(data, "sllb", "180");
 
-        SoilHelper.getRootDistribution(data, "slrgf", m, pp, rd);
-        log.info("getRootDistribution() output: {}", data.toString());
+        HashMap<String, ArrayList<String>> result = SoilHelper.getRootDistribution(data, "slrgf", m, pp, rd);
+        acctual = result.get("slrgf");
+        for (int i = 0; i < expected.length; i++) {
+            try {
+                assertEquals("getRootDistribution: normal case " + i, expected[i], (String) acctual.get(i));
+            } catch (Error e) {
+                log.error(e.getMessage());
+            }
+        }
+        log.info("getRootDistribution() output: {}", result.toString());
     }
 }

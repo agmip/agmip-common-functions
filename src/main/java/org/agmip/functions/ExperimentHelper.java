@@ -44,7 +44,7 @@ public class ExperimentHelper {
 
         Map wthData;
         ArrayList<Map> dailyData;
-        ArrayList<HashMap> eventData;
+        ArrayList<HashMap<String, String>> eventData;
         Event event;
         Calendar eDateCal = Calendar.getInstance();
         Calendar lDateCal = Calendar.getInstance();
@@ -103,7 +103,7 @@ public class ExperimentHelper {
 
         // Remove all planting events, for now, as a default. This is because this generates new replaced planting events.
         // NOTE: This is the "safest" way to remove items during iteration.
-        Iterator<HashMap> iter = eventData.iterator();
+        Iterator<HashMap<String, String>> iter = eventData.iterator();
         while (iter.hasNext()) {
             if (getValueOr(iter.next(), "event", "").equals("planting")) {
                 iter.remove();
@@ -548,10 +548,10 @@ public class ExperimentHelper {
      * updated {@code Organic matter event} will be included and sorted inside
      * the {@code ArrayList}
      */
-    public static ArrayList<HashMap> getOMDistribution(HashMap expData, String offset, String omcd, String omc2n, String omdep, String ominp, String dmr) {
+    public static ArrayList<HashMap<String, String>> getOMDistribution(HashMap expData, String offset, String omcd, String omc2n, String omdep, String ominp, String dmr) {
 
         String omamt;
-        ArrayList<HashMap> eventData;
+        ArrayList<HashMap<String, String>> eventData;
         Event events;
         String pdate;
         String odate;
@@ -570,7 +570,12 @@ public class ExperimentHelper {
 //        Map mgnData = getObjectOr(expData, "management", new HashMap());
 //        eventData = getObjectOr(mgnData, "events", new ArrayList());
         eventData = new ArrayList();
-        eventData.addAll(MapUtil.getBucket(expData, "management").getDataList());
+        ArrayList<HashMap<String, String>> originalEvents = MapUtil.getBucket(expData, "management").getDataList();
+        for (int i = 0; i < originalEvents.size(); i++) {
+            HashMap tmp = new HashMap();
+            tmp.putAll(originalEvents.get(i));
+            eventData.add(tmp);
+        }
 
         //    }
         // Get the omamt from the first? OM event
@@ -597,18 +602,23 @@ public class ExperimentHelper {
             return eventData;
         }
 
-        BigDecimal decDmr;
-        BigDecimal decOMC2N;
-        BigDecimal start = new BigDecimal("100.0");
-        try {
-            decDmr = new BigDecimal(dmr);
-            decOMC2N = new BigDecimal(omc2n);
-        } catch (Exception ex) {
+//        BigDecimal decDmr;
+//        BigDecimal decOMC2N;
+//        BigDecimal start = new BigDecimal("100.0");
+//        try {
+//            decDmr = new BigDecimal(dmr);
+//            decOMC2N = new BigDecimal(omc2n);
+//        } catch (Exception ex) {
+//            LOG.error("INVALID VALUES FOR DMR and OMC2N");
+//            return eventData;
+//        }
+//
+//        BigDecimal omnpct = start.divide(decDmr, 2, RoundingMode.HALF_UP).divide(decOMC2N, 2, RoundingMode.HALF_UP);
+        String omnpct = divide(divide("100.0", dmr, 3), omc2n, 2);
+        if (omnpct == null) {
             LOG.error("INVALID VALUES FOR DMR and OMC2N");
             return eventData;
         }
-
-        BigDecimal omnpct = start.divide(decDmr, 2, RoundingMode.HALF_UP).divide(decOMC2N, 2, RoundingMode.HALF_UP);
         // Update organic material event
         events.setEventType("organic_matter");
         if (events.isEventExist()) {
@@ -618,7 +628,7 @@ public class ExperimentHelper {
             events.updateEvent("omc2n", omc2n, false);
             events.updateEvent("omdep", omdep, false);
             events.updateEvent("ominp", ominp, false);
-            events.updateEvent("omn%", omnpct.toString(), true);
+            events.updateEvent("omn%", omnpct, true);
         }
         return eventData;
     }
@@ -659,6 +669,7 @@ public class ExperimentHelper {
         String[] slocs;
 //        double mid;
         String mid;
+        int finalScale = 2;
 
         LOG.debug("Checkpoint 1");
         try {
@@ -666,7 +677,7 @@ public class ExperimentHelper {
 //            dPp = Double.parseDouble(pp);
 //            dRd = Double.parseDouble(rd);
 //            dK = Math.log(0.02) / (dRd - dPp);
-            k = log(divide("0.02", substract(rd, pp)));
+            k = divide(log("0.02") + "", substract(rd, pp), finalScale + 1);
 //            dSom2_0 = 0.95 * (1 - dSom3_0);
             som2_0 = multiply("0.95", substract("1", som3_0));
         } catch (Exception e) {
@@ -727,15 +738,15 @@ public class ExperimentHelper {
         String last = "0";
         for (int i = 0; i < soilLayers.size(); i++) {
 //            mid = (dSllbs[i] + last) / 2;
-            mid = divide(sum(sllbs[i], last), "2");
+            mid = average(sllbs[i], last);
 //            last = dSllbs[i];
             last = sllbs[i];
 //            dF = getGrowthFactor(mid, dPp, dK, dSom2_0);
             f = getGrowthFactor(mid, pp, k, som2_0);
 //            dSom3_fac = 1 - Math.max(0.02, dF) / 0.95;
-            som3_fac = substract("1", divide(max("0.02", f), "0.95"));
+            som3_fac = substract("1", divide(max("0.02", f), "0.95", finalScale + 1));
 //            soilLayers.get(i).put("slsc", String.format("%.2f", dSlocs[i] * dSom3_fac));
-            slscArr.add(round(multiply(slocs[i], som3_fac), 2));
+            slscArr.add(round(multiply(slocs[i], som3_fac), finalScale));
 //            LOG.debug((String)icLayers.get(i).get("icbl") + ", " + (String)icLayers.get(i).get("slsc"));
         }
         results.put("slsc", slscArr);

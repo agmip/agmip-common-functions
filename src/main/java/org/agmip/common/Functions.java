@@ -289,8 +289,8 @@ public class Functions {
     }
 
     /**
-     * Get the result of dividend divided by divisor The scale will depends on
-     * the scale of dividend when the result is indivisible
+     * Get the result of dividend divided by divisor. When the result is
+     * indivisible, the scale will depends on the scale of dividend and divisor.
      *
      * Any numeric string recognized by {@code BigDecimal} is supported.
      *
@@ -302,6 +302,30 @@ public class Functions {
      * @see BigDecimal
      */
     public static String divide(String dividend, String divisor) {
+        try {
+            BigDecimal bdDividend = new BigDecimal(dividend);
+            BigDecimal bdDivisor = new BigDecimal(divisor);
+            int scale = Math.max(bdDividend.scale(), bdDivisor.scale()) + 1;
+            return divide(dividend, divisor, scale);
+        } catch (Exception ex) {
+            return null;
+        }
+    }
+
+    /**
+     * Get the result of dividend divided by divisor with given scale.
+     *
+     * Any numeric string recognized by {@code BigDecimal} is supported.
+     *
+     * @param dividend A valid number string
+     * @param divisor A valid number strings
+     * @param scale scale of the {@code BigDecimal} quotient to be returned.
+     *
+     * @return <code>dividend / divisor</code>
+     *
+     * @see BigDecimal
+     */
+    public static String divide(String dividend, String divisor, int scale) {
         BigDecimal bdDividend;
         BigDecimal bdDivisor;
 
@@ -320,7 +344,7 @@ public class Functions {
             return bdDividend.divide(bdDivisor).toString();
         } catch (ArithmeticException ae) {
             try {
-                return bdDividend.divide(bdDivisor, bdDividend.scale(), RoundingMode.HALF_UP).toString();
+                return bdDividend.divide(bdDivisor, scale, RoundingMode.HALF_UP).toString();
             } catch (Exception e) {
                 return null;
             }
@@ -330,8 +354,8 @@ public class Functions {
     }
 
     /**
-     * Get the average of all input numbers The scale will depends on the scale
-     * of input number when the result is indivisible
+     * Get the average of all input numbers. When the result is indivisible, the
+     * scale will depends on the scale of all input numbers
      *
      * Any numeric string recognized by {@code BigDecimal} is supported.
      *
@@ -342,7 +366,29 @@ public class Functions {
      * @see BigDecimal
      */
     public static String average(String... values) {
-        return divide(sum(values), values.length + "");
+        if (values != null) {
+            return divide(sum(values), values.length + "");
+        }
+        return null;
+    }
+
+    /**
+     * Get the average of all input numbers with given scale.
+     *
+     * Any numeric string recognized by {@code BigDecimal} is supported.
+     *
+     * @scale scale of the {@code BigDecimal} quotient to be returned.
+     * @param values one or more valid number strings
+     *
+     * @return <code>(values[0] + values[1] + ...) / values.length</code>
+     *
+     * @see BigDecimal
+     */
+    public static String average(int scale, String... values) {
+        if (values != null) {
+            return divide(sum(values), values.length + "", scale);
+        }
+        return null;
     }
 
     /**
@@ -403,14 +449,22 @@ public class Functions {
     public static String min(String... values) {
         BigDecimal bd;
         BigDecimal bd2;
+//        int scale;
         try {
             bd = new BigDecimal(values[0]);
+//            scale = bd.scale();
             for (int i = 1; i < values.length; i++) {
                 bd2 = new BigDecimal(values[i]);
                 if (bd.compareTo(bd2) > 0) {
                     bd = bd2;
                 }
+//                if (scale < bd2.scale()) {
+//                    scale = bd2.scale();
+//                }
             }
+//            if (scale != bd.scale()) {
+//                bd = bd.setScale(scale);
+//            }
             return bd.toString();
         } catch (Exception e) {
             return null;
@@ -431,22 +485,31 @@ public class Functions {
     public static String max(String... values) {
         BigDecimal bd;
         BigDecimal bd2;
+//        int scale;
         try {
             bd = new BigDecimal(values[0]);
+//            scale = bd.scale();
             for (int i = 1; i < values.length; i++) {
                 bd2 = new BigDecimal(values[i]);
                 if (bd.compareTo(bd2) < 0) {
                     bd = bd2;
                 }
+//                if (scale < bd2.scale()) {
+//                    scale = bd2.scale();
+//                }
             }
+//            if (scale != bd.scale()) {
+//                bd = bd.setScale(scale);
+//            }
             return bd.toString();
         } catch (Exception e) {
             return null;
         }
     }
-    
+
     /**
-     * Returns the closest {@code decimal} to the argument, with given scale, using HALF_UP mode
+     * Returns the closest {@code decimal} to the argument, with given scale,
+     * using HALF_UP mode
      *
      * Any numeric string recognized by {@code BigDecimal} is supported.
      *
@@ -457,7 +520,6 @@ public class Functions {
      * @see BigDecimal
      */
     public static String round(String value, int scale) {
-        Math.round(234);
         BigDecimal bd;
         try {
             bd = new BigDecimal(value);
