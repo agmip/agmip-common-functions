@@ -1,7 +1,6 @@
 package org.agmip.functions;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
@@ -511,8 +510,8 @@ public class ExperimentHelper {
 
                 //events.setEventType("fertilizer");
                 for (int i = 0; i < iNum; i++) {
-                    double feamn = new BigDecimal(product(fen_tot, ptps[i], "0.01")).doubleValue();
-                    output.add(String.format("%s|%.0f", fdates[i], feamn));
+                    String feamn = round(product(fen_tot, ptps[i], "0.01"), 0);
+                    output.add(String.format("%s|%s", fdates[i], feamn));
                 }
             }
         }
@@ -602,18 +601,6 @@ public class ExperimentHelper {
             return eventData;
         }
 
-//        BigDecimal decDmr;
-//        BigDecimal decOMC2N;
-//        BigDecimal start = new BigDecimal("100.0");
-//        try {
-//            decDmr = new BigDecimal(dmr);
-//            decOMC2N = new BigDecimal(omc2n);
-//        } catch (Exception ex) {
-//            LOG.error("INVALID VALUES FOR DMR and OMC2N");
-//            return eventData;
-//        }
-//
-//        BigDecimal omnpct = start.divide(decDmr, 2, RoundingMode.HALF_UP).divide(decOMC2N, 2, RoundingMode.HALF_UP);
         String omnpct = divide(divide("100.0", dmr, 3), omc2n, 2);
         if (omnpct == null) {
             LOG.error("INVALID VALUES FOR DMR and OMC2N");
@@ -652,19 +639,10 @@ public class ExperimentHelper {
         HashMap<String, ArrayList<String>> results = new HashMap<String, ArrayList<String>>();
         ArrayList<String> slscArr = new ArrayList();
         ArrayList<HashMap> soilLayers;
-//        double dSom3_0;
-//        double dPp;
-//        double dRd;
-//        double dK;
         String k;
-//        double dSom2_0;
         String som2_0;
-//        double dF;
         String f;
-//        double dSom3_fac;
         String som3_fac;
-//        double[] dSllbs;
-//        double[] dSlocs;
         String[] sllbs;
         String[] slocs;
 //        double mid;
@@ -673,12 +651,7 @@ public class ExperimentHelper {
 
         LOG.debug("Checkpoint 1");
         try {
-//            dSom3_0 = Double.parseDouble(som3_0);
-//            dPp = Double.parseDouble(pp);
-//            dRd = Double.parseDouble(rd);
-//            dK = Math.log(0.02) / (dRd - dPp);
             k = divide(log("0.02") + "", substract(rd, pp), finalScale + 1);
-//            dSom2_0 = 0.95 * (1 - dSom3_0);
             som2_0 = multiply("0.95", substract("1", som3_0));
         } catch (Exception e) {
             LOG.error("INVALID INPUT FOR NUMBERIC VALUE");
@@ -693,13 +666,9 @@ public class ExperimentHelper {
             return results;
         } else {
             try {
-//                dSllbs = new double[soilLayers.size()];
-//                dSlocs = new double[soilLayers.size()];
                 sllbs = new String[soilLayers.size()];
                 slocs = new String[soilLayers.size()];
                 for (int i = 0; i < soilLayers.size(); i++) {
-//                    dSllbs[i] = Double.parseDouble(getObjectOr(soilLayers.get(i), "sllb", "").toString());
-//                    dSlocs[i] = Double.parseDouble(getObjectOr(soilLayers.get(i), "sloc", "").toString());
                     sllbs[i] = getObjectOr(soilLayers.get(i), "sllb", "");
                     slocs[i] = getObjectOr(soilLayers.get(i), "sloc", "");
                 }
@@ -734,18 +703,12 @@ public class ExperimentHelper {
         // //}
 
         LOG.debug("Checkpoint 3");
-//        double last = 0;
         String last = "0";
         for (int i = 0; i < soilLayers.size(); i++) {
-//            mid = (dSllbs[i] + last) / 2;
             mid = average(sllbs[i], last);
-//            last = dSllbs[i];
             last = sllbs[i];
-//            dF = getGrowthFactor(mid, dPp, dK, dSom2_0);
             f = getGrowthFactor(mid, pp, k, som2_0);
-//            dSom3_fac = 1 - Math.max(0.02, dF) / 0.95;
             som3_fac = substract("1", divide(max("0.02", f), "0.95", finalScale + 1));
-//            soilLayers.get(i).put("slsc", String.format("%.2f", dSlocs[i] * dSom3_fac));
             slscArr.add(round(multiply(slocs[i], som3_fac), finalScale));
 //            LOG.debug((String)icLayers.get(i).get("icbl") + ", " + (String)icLayers.get(i).get("slsc"));
         }
