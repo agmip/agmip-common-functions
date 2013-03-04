@@ -19,6 +19,15 @@ public class WeatherHelper {
 
     private static final Logger LOG = LoggerFactory.getLogger(WeatherHelper.class);
 
+    /**
+     * Calculate the AMP (annual amplitude of mean monthly temperature oC) and
+     * TAV (Annual average ambient temperature oC)
+     *
+     * @param wthData The data map
+     *
+     * @return An {@code HashMap} contains {@code TAV} and {@code TAMP}, the key
+     * is their ICASA variable name
+     */
     public static HashMap<String, String> getTavAndAmp(HashMap wthData) {
 
         HashMap<String, String> results = new HashMap<String, String>();
@@ -72,7 +81,7 @@ public class WeatherHelper {
         for (Iterator<Integer> it = tyear.keySet().iterator(); it.hasNext();) {
             int year = it.next();
             tmonth = tyear.get(year);
-            String[] tavgs = tmonth.getAllTavg();
+            String[] tavgs = tmonth.getAllAvg();
             // TAV
             for (int month = 0; month < tavgs.length; month++) {
                 tavAllYears.add(month, tavgs[month]);
@@ -84,7 +93,7 @@ public class WeatherHelper {
             }
 
         }
-        tav = average(tavAllYears.getAllTavg());
+        tav = average(tavAllYears.getAllAvg());
         tamp = average(tampAllYears.toArray(new String[0]));
 
         if (tav != null) {
@@ -96,36 +105,39 @@ public class WeatherHelper {
         return results;
     }
 
+    /**
+     * Calculate the monthly average for each month
+     */
     private static class MonthlyAvg {
 
         private int[] days = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-        private String[] tavg = new String[12];
+        private String[] avg = new String[12];
 
-        public void add(int month, String tavg) {
-            if (tavg == null) {
+        public void add(int month, String val) {
+            if (val == null) {
                 return;
             }
-            if (this.tavg[month] == null) {
-                this.tavg[month] = tavg;
+            if (this.avg[month] == null) {
+                this.avg[month] = val;
                 days[month] = 1;
             } else {
-                this.tavg[month] = sum(this.tavg[month], tavg);
+                this.avg[month] = sum(this.avg[month], val);
                 days[month]++;
             }
         }
 
-        public String getTavg(int month) {
+        public String getAvg(int month) {
             if (days[month] <= 0) {
                 return null;
             } else {
-                return divide(tavg[month], days[month] + "");
+                return divide(avg[month], days[month] + "");
             }
         }
 
-        public String[] getAllTavg() {
+        public String[] getAllAvg() {
             String[] ret = new String[days.length];
             for (int i = 0; i < days.length; i++) {
-                ret[i] = getTavg(i);
+                ret[i] = getAvg(i);
             }
             return ret;
         }
