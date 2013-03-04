@@ -93,8 +93,8 @@ public class WeatherHelper {
             }
 
         }
-        tav = average(tavAllYears.getAllAvg());
-        tamp = average(tampAllYears.toArray(new String[0]));
+        tav = average(2, tavAllYears.getAllAvg());
+        tamp = average(2, tampAllYears.toArray(new String[0]));
 
         if (tav != null) {
             results.put("tav", tav);
