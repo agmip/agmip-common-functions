@@ -441,22 +441,21 @@ public class Functions {
     public static String min(String... values) {
         BigDecimal bd;
         BigDecimal bd2;
-//        int scale;
         try {
-            bd = new BigDecimal(values[0]);
-//            scale = bd.scale();
-            for (int i = 1; i < values.length; i++) {
+            int start = 0;
+            while (values[start] == null) {
+                start++;
+            }
+            bd = new BigDecimal(values[start]);
+            for (int i = start + 1; i < values.length; i++) {
+                if (values[i] == null) {
+                    continue;
+                }
                 bd2 = new BigDecimal(values[i]);
                 if (bd.compareTo(bd2) > 0) {
                     bd = bd2;
                 }
-//                if (scale < bd2.scale()) {
-//                    scale = bd2.scale();
-//                }
             }
-//            if (scale != bd.scale()) {
-//                bd = bd.setScale(scale);
-//            }
             return bd.toString();
         } catch (Exception e) {
             return null;
@@ -477,22 +476,21 @@ public class Functions {
     public static String max(String... values) {
         BigDecimal bd;
         BigDecimal bd2;
-//        int scale;
         try {
-            bd = new BigDecimal(values[0]);
-//            scale = bd.scale();
-            for (int i = 1; i < values.length; i++) {
+            int start = 0;
+            while (values[start] == null) {
+                start++;
+            }
+            bd = new BigDecimal(values[start]);
+            for (int i = start + 1; i < values.length; i++) {
+                if (values[i] == null) {
+                    continue;
+                }
                 bd2 = new BigDecimal(values[i]);
                 if (bd.compareTo(bd2) < 0) {
                     bd = bd2;
                 }
-//                if (scale < bd2.scale()) {
-//                    scale = bd2.scale();
-//                }
             }
-//            if (scale != bd.scale()) {
-//                bd = bd.setScale(scale);
-//            }
             return bd.toString();
         } catch (Exception e) {
             return null;
