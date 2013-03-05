@@ -370,7 +370,7 @@ public class Functions {
      *
      * Any numeric string recognized by {@code BigDecimal} is supported.
      *
-     * @scale scale of the {@code BigDecimal} quotient to be returned.
+     * @param scale of the {@code BigDecimal} quotient to be returned.
      * @param values one or more valid number strings
      *
      * @return <code>(values[0] + values[1] + ...) / values.length</code>

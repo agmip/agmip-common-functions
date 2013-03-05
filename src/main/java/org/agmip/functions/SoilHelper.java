@@ -155,7 +155,7 @@ public class SoilHelper {
      * Get soil layer data array from data holder.
      *
      * @param data The experiment data holder
-     * @return
+     * @return The soil layer data array
      */
     protected static ArrayList getSoilLayer(HashMap data) {
         if (data.containsKey("soil")) {

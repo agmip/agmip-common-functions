@@ -147,7 +147,7 @@ public class WeatherHelper {
      * Get weather daily data array from data holder.
      *
      * @param data The experiment data holder
-     * @return
+     * @return The weather daily data array
      */
     protected static ArrayList getDailyData(HashMap data) {
         if (data.containsKey("weather")) {
