@@ -8,6 +8,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.GregorianCalendar;
 
@@ -310,7 +311,7 @@ public class Functions {
             BigDecimal bdDivisor = new BigDecimal(divisor);
             try {
                 return bdDividend.divide(bdDivisor).toString();
-            } catch  (ArithmeticException ae) {
+            } catch (ArithmeticException ae) {
                 int scale = Math.max(bdDividend.scale(), bdDivisor.scale()) + 1;
                 return divide(dividend, divisor, scale);
             }
@@ -569,12 +570,13 @@ public class Functions {
             return false;
         }
     }
-    
+
     /**
-     * Gathering the messages from a {@code Throwable} instance and its back trace
-     * 
+     * Gathering the messages from a {@code Throwable} instance and its back
+     * trace
+     *
      * @param aThrowable
-     * 
+     *
      * @return The trace messages
      */
     public static String getStackTrace(Throwable aThrowable) {
@@ -582,5 +584,28 @@ public class Functions {
         final PrintWriter printWriter = new PrintWriter(result);
         aThrowable.printStackTrace(printWriter);
         return result.toString();
+    }
+
+    /**
+     * Remove the null value in the input String array
+     *
+     * @param in The input String values
+     * @return The input String without null value
+     */
+    public static String[] removeNull(String[] in) {
+        if (in == null) {
+            return new String[0];
+        }
+        ArrayList<String> arr = new ArrayList();
+        for (int i = 0; i < in.length; i++) {
+            if (in[i] != null) {
+                arr.add(in[i]);
+            }
+        }
+        if (in.length == arr.size()) {
+            return in;
+        } else {
+            return arr.toArray(new String[0]);
+        }
     }
 }
