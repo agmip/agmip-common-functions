@@ -1,19 +1,10 @@
 package org.agmip.functions;
 
-import java.io.BufferedOutputStream;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
+
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.URL;
-import java.util.ArrayList;
 import java.util.HashMap;
-import org.agmip.util.JSONAdapter;
-import static org.agmip.util.MapUtil.*;
-import static org.junit.Assert.*;
 import org.agmip.ace.util.AcePathfinderUtil;
+import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -1138,8 +1129,92 @@ public class WeatherHelperTest {
         AcePathfinderUtil.insertValue(data, "tmax", "27.9");
         AcePathfinderUtil.insertValue(data, "tmin", "11.4");
 
-        acctual = WeatherHelper.getTavAndAmp((HashMap) data.get("weather"));
-        assertEquals("getRootDistribution: normal case ", expected, acctual);
+        acctual = WeatherHelper.getTavAndAmp(data);
+        assertEquals("getRootDistribution: one year data case failed", expected, acctual);
+        log.info("getRootDistribution() output: {}", acctual.toString());
+    }
+
+    @Test
+    public void testGetTavAndAmpMultiYearLite() throws IOException, Exception {
+
+        HashMap<String, String> expected = new HashMap();
+        expected.put("tav", "20.29");
+        expected.put("tamp", "5.58");
+        HashMap<String, String> acctual;
+
+        HashMap<String, Object> data = new HashMap<String, Object>();
+        AcePathfinderUtil.insertValue(data, "w_date", "19890101");
+        AcePathfinderUtil.insertValue(data, "tmax", "26.3");
+        AcePathfinderUtil.insertValue(data, "tmin", "16.2");
+        AcePathfinderUtil.insertValue(data, "w_date", "19890102");
+        AcePathfinderUtil.insertValue(data, "tmax", "25");
+        AcePathfinderUtil.insertValue(data, "tmin", "15.1");
+        AcePathfinderUtil.insertValue(data, "w_date", "19890103");
+        AcePathfinderUtil.insertValue(data, "tmax", "25.1");
+        AcePathfinderUtil.insertValue(data, "tmin", "15.4");
+        AcePathfinderUtil.insertValue(data, "w_date", "19890201");
+        AcePathfinderUtil.insertValue(data, "tmax", "27.9");
+        AcePathfinderUtil.insertValue(data, "tmin", "17.4");
+        AcePathfinderUtil.insertValue(data, "w_date", "19890202");
+        AcePathfinderUtil.insertValue(data, "tmax", "27.9");
+        AcePathfinderUtil.insertValue(data, "tmin", "17.4");
+        AcePathfinderUtil.insertValue(data, "w_date", "19890203");
+        AcePathfinderUtil.insertValue(data, "tmax", "28.1");
+        AcePathfinderUtil.insertValue(data, "tmin", "13.8");
+        AcePathfinderUtil.insertValue(data, "w_date", "19890303");
+        AcePathfinderUtil.insertValue(data, "tmax", "27.5");
+        AcePathfinderUtil.insertValue(data, "tmin", "13");
+        AcePathfinderUtil.insertValue(data, "w_date", "19890304");
+        AcePathfinderUtil.insertValue(data, "tmax", "31");
+        AcePathfinderUtil.insertValue(data, "tmin", "16.9");
+        AcePathfinderUtil.insertValue(data, "w_date", "19890305");
+        AcePathfinderUtil.insertValue(data, "tmax", "32.3");
+        AcePathfinderUtil.insertValue(data, "tmin", "16.5");
+        AcePathfinderUtil.insertValue(data, "w_date", "19900101");
+        AcePathfinderUtil.insertValue(data, "tmax", "20.4");
+        AcePathfinderUtil.insertValue(data, "tmin", "5.2");
+        AcePathfinderUtil.insertValue(data, "w_date", "19900102");
+        AcePathfinderUtil.insertValue(data, "tmax", "20.1");
+        AcePathfinderUtil.insertValue(data, "tmin", "3.2");
+        AcePathfinderUtil.insertValue(data, "w_date", "19900103");
+        AcePathfinderUtil.insertValue(data, "tmax", "25");
+        AcePathfinderUtil.insertValue(data, "tmin", "8.1");
+        AcePathfinderUtil.insertValue(data, "w_date", "19900201");
+        AcePathfinderUtil.insertValue(data, "tmax", "29.6");
+        AcePathfinderUtil.insertValue(data, "tmin", "13.6");
+        AcePathfinderUtil.insertValue(data, "w_date", "19900202");
+        AcePathfinderUtil.insertValue(data, "tmax", "29.2");
+        AcePathfinderUtil.insertValue(data, "tmin", "17.7");
+        AcePathfinderUtil.insertValue(data, "w_date", "19900203");
+        AcePathfinderUtil.insertValue(data, "tmax", "30.4");
+        AcePathfinderUtil.insertValue(data, "tmin", "15.6");
+        AcePathfinderUtil.insertValue(data, "w_date", "19900204");
+        AcePathfinderUtil.insertValue(data, "tmax", "28.3");
+        AcePathfinderUtil.insertValue(data, "tmin", "16.2");
+        AcePathfinderUtil.insertValue(data, "w_date", "19900205");
+        AcePathfinderUtil.insertValue(data, "tmax", "19.4");
+        AcePathfinderUtil.insertValue(data, "tmin", "6.9");
+        AcePathfinderUtil.insertValue(data, "w_date", "19900301");
+        AcePathfinderUtil.insertValue(data, "tmax", "26.2");
+        AcePathfinderUtil.insertValue(data, "tmin", "8.8");
+        AcePathfinderUtil.insertValue(data, "w_date", "19900302");
+        AcePathfinderUtil.insertValue(data, "tmax", "26.2");
+        AcePathfinderUtil.insertValue(data, "tmin", "11.7");
+        AcePathfinderUtil.insertValue(data, "w_date", "19900303");
+        AcePathfinderUtil.insertValue(data, "tmax", "21.5");
+        AcePathfinderUtil.insertValue(data, "tmin", "10.8");
+        AcePathfinderUtil.insertValue(data, "w_date", "19901229");
+        AcePathfinderUtil.insertValue(data, "tmax", "29.3");
+        AcePathfinderUtil.insertValue(data, "tmin", "16.1");
+        AcePathfinderUtil.insertValue(data, "w_date", "19901230");
+        AcePathfinderUtil.insertValue(data, "tmax", "30.1");
+        AcePathfinderUtil.insertValue(data, "tmin", "17.4");
+        AcePathfinderUtil.insertValue(data, "w_date", "19901231");
+        AcePathfinderUtil.insertValue(data, "tmax", "25");
+        AcePathfinderUtil.insertValue(data, "tmin", "16.9");
+
+        acctual = WeatherHelper.getTavAndAmp(data);
+        assertEquals("getRootDistribution: one year data case failed", expected, acctual);
         log.info("getRootDistribution() output: {}", acctual.toString());
     }
 }

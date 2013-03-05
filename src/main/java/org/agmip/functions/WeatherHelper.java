@@ -5,6 +5,7 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Iterator;
 import static org.agmip.common.Functions.*;
+import org.agmip.util.MapUtil;
 import static org.agmip.util.MapUtil.*;
 import org.agmip.util.MapUtil.BucketEntry;
 import org.slf4j.Logger;
@@ -37,8 +38,13 @@ public class WeatherHelper {
         ArrayList<String> tampAllYears;
         String tav;
         String tamp;
+        ArrayList<HashMap<String, String>> dailyArr;
 
-        ArrayList<HashMap<String, String>> dailyArr = new BucketEntry(wthData).getDataList();
+        if (wthData.containsKey("weather")) {
+            dailyArr = MapUtil.getBucket(wthData, "weather").getDataList();
+        } else {
+            dailyArr = new BucketEntry(wthData).getDataList();
+        }
 
         // Load daily data
         for (int i = 0; i < dailyArr.size(); i++) {
@@ -93,7 +99,7 @@ public class WeatherHelper {
             }
 
         }
-        tav = average(2, tavAllYears.getAllAvg());
+        tav = average(2, removeNull(tavAllYears.getAllAvg()));
         tamp = average(2, tampAllYears.toArray(new String[0]));
 
         if (tav != null) {
