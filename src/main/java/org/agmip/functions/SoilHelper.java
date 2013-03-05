@@ -72,6 +72,68 @@ public class SoilHelper {
     }
 
     /**
+     * Given a total inorganic N amount for the soil profile, this function
+     * distributes the N over the soil layers assuming a constant concentration
+     * of NO3 (90%) and NH4 (10%)
+     *
+     * @param data The data set
+     * @param icin Total soil N over the profile (kg[N]/ha)
+     * @return Three {@code ArrayList} Corresponded to
+     * {@code ICN_TOT, ICNO3 ICNH4} for each layer of given soil
+     */
+    public static HashMap<String, ArrayList<String>> getIcnDistribution(HashMap data, String icin) {
+        HashMap<String, ArrayList<String>> results = new HashMap<String, ArrayList<String>>();
+        ArrayList<HashMap<String, String>> soilLayers;
+        soilLayers = getSoilLayer(data);
+
+        icin = sum(icin);
+        if (icin == null) {
+            LOG.error("Input variable ICIN come with invalid  value icin={}", icin);
+            return results;
+        }
+
+        String lastSllb = "0";
+        String[] productSBXTH = new String[soilLayers.size()];
+        for (int i = 0; i < soilLayers.size(); i++) {
+            HashMap<String, String> soilLayer = soilLayers.get(i);
+            String sllb = getValueOr(soilLayer, "sllb", "");
+            String slbdm = getValueOr(soilLayer, "slbdm", "");
+            String thick = substract(sllb, lastSllb);
+            productSBXTH[i] = product(slbdm, thick);
+            if (productSBXTH[i] == null) {
+                LOG.error("Invalid SLLB and/or SLBDM in the soil layer data with value sllb={}, slbdm={}", sllb, slbdm);
+                return results;
+            }
+            lastSllb = sllb;
+        }
+
+        String totalSBXTH = sum(productSBXTH);
+        if (compare(totalSBXTH, "0", CompareMode.EQUAL)) {
+            LOG.error("Total SLBDM * thick is 0");
+            return results;
+        }
+        String nppm = divide(product(icin, "10"), totalSBXTH);
+        String icnh4 = product("0.1", nppm);
+        String icno3 = product("0.9", nppm);
+
+        ArrayList<String> icnTotArr = new ArrayList();
+        ArrayList<String> icnh4Arr = new ArrayList();
+        ArrayList<String> icno3Arr = new ArrayList();
+
+        for (int i = 0; i < productSBXTH.length; i++) {
+            String icn_tot = divide(product(productSBXTH[i], icin), totalSBXTH);
+            icnTotArr.add(round(icn_tot, 2));
+            icnh4Arr.add(round(icnh4, 2));
+            icno3Arr.add(round(icno3, 2));
+        }
+
+        results.put("icn_tot", icnTotArr);
+        results.put("icnh4", icnh4Arr);
+        results.put("icno3", icno3Arr);
+        return results;
+    }
+
+    /**
      * soil factors which decline exponentially between PP and RD (units depend
      * on variable, same units as M (Maximum value, will use default value 1)
      *
@@ -90,19 +152,16 @@ public class SoilHelper {
     }
 
     /**
-     * Get soil layer data array from data holder. Only get the first soil site.
+     * Get soil layer data array from data holder.
      *
      * @param data The experiment data holder
      * @return
      */
-    protected static ArrayList getSoilLayer(Map data) {
-        HashMap soils = (HashMap) getObjectOr(data, "soil", new HashMap());
-
-        if (soils.isEmpty()) {
-            LOG.error("SOIL DATA IS EMPTY");
-            return null;
+    protected static ArrayList getSoilLayer(HashMap data) {
+        if (data.containsKey("soil")) {
+            return MapUtil.getBucket(data, "soil").getDataList();
         } else {
-            return getObjectOr(soils, "soilLayer", new ArrayList());
+            return new BucketEntry(data).getDataList();
         }
     }
 }
