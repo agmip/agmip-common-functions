@@ -24,12 +24,12 @@ public class WeatherHelper {
      * Calculate the AMP (annual amplitude of mean monthly temperature oC) and
      * TAV (Annual average ambient temperature oC)
      *
-     * @param wthData The data map
+     * @param data The data map
      *
      * @return An {@code HashMap} contains {@code TAV} and {@code TAMP}, the key
      * is their ICASA variable name
      */
-    public static HashMap<String, String> getTavAndAmp(HashMap wthData) {
+    public static HashMap<String, String> getTavAndAmp(HashMap data) {
 
         HashMap<String, String> results = new HashMap<String, String>();
         HashMap<Integer, MonthlyAvg> tyear = new HashMap<Integer, MonthlyAvg>();
@@ -38,13 +38,7 @@ public class WeatherHelper {
         ArrayList<String> tampAllYears;
         String tav;
         String tamp;
-        ArrayList<HashMap<String, String>> dailyArr;
-
-        if (wthData.containsKey("weather")) {
-            dailyArr = MapUtil.getBucket(wthData, "weather").getDataList();
-        } else {
-            dailyArr = new BucketEntry(wthData).getDataList();
-        }
+        ArrayList<HashMap<String, String>> dailyArr = getDailyData(data);
 
         // Load daily data
         for (int i = 0; i < dailyArr.size(); i++) {
@@ -146,6 +140,20 @@ public class WeatherHelper {
                 ret[i] = getAvg(i);
             }
             return ret;
+        }
+    }
+
+    /**
+     * Get weather daily data array from data holder.
+     *
+     * @param data The experiment data holder
+     * @return
+     */
+    protected static ArrayList getDailyData(HashMap data) {
+        if (data.containsKey("weather")) {
+            return MapUtil.getBucket(data, "weather").getDataList();
+        } else {
+            return new BucketEntry(data).getDataList();
         }
     }
 }
