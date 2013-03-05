@@ -1,16 +1,9 @@
 package org.agmip.functions;
 
-import java.io.BufferedOutputStream;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
-import org.agmip.util.JSONAdapter;
 import static org.agmip.util.MapUtil.*;
 import static org.junit.Assert.*;
 import org.agmip.ace.util.AcePathfinderUtil;
@@ -36,31 +29,12 @@ public class SoilHelperTest {
 
     @Test
     public void testGetRootDistribution() throws IOException, Exception {
-        String line;
         String m = "1";
         String pp = "20";
         String rd = "180";
         String[] expected = {"1.000", "1.000", "0.941", "0.543", "0.261", "0.125", "0.060", "0.029"};
         ArrayList<String> acctual = null;
 
-        // BufferedReader br = new BufferedReader(
-        //         new InputStreamReader(
-        //         new FileInputStream(resource.getPath())));
-
-        // if ((line = br.readLine()) != null) {
-        //     HashMap data = JSONAdapter.fromJSON(line);
-        //     SoilHelper.getRootDistribution(m, pp, rd, data);
-        //     acctual = getObjectOr((HashMap) getObjectOr(data, "soils", new ArrayList()).get(0), "soilLayer", new ArrayList());
-//            File f = new File("RootDistJson.txt");
-//            BufferedOutputStream bo = new BufferedOutputStream(new FileOutputStream(f));
-//            bo.write(JSONAdapter.toJSON(data).getBytes());
-//            bo.close();
-//            f.delete();
-        // }
-
-        // for (int i = 0; i < expected.length; i++) {
-            // assertEquals("getRootDistribution: normal case", expected[i], (String) acctual.get(i).get("slrgf"));
-        // }
         HashMap<String, Object> data = new HashMap<String, Object>();
         AcePathfinderUtil.insertValue(data, "sllb", "5");
         AcePathfinderUtil.insertValue(data, "sllb", "15");
@@ -80,6 +54,65 @@ public class SoilHelperTest {
                 log.error(e.getMessage());
             }
         }
+        log.info("getRootDistribution() output: {}", result.toString());
+    }
+
+    @Test
+    public void testGetIcnDistribution() throws IOException, Exception {
+        String icin = "25";
+        String[] expIcnTot = {"1.91", "1.93", "4.02", "4.09", "4.35", "4.35", "4.35"};
+        String expIcnh4 = "0.11";
+        String expIcno3 = "1.00";
+        ArrayList<String> acctual = null;
+
+        HashMap<String, Object> data = new HashMap<String, Object>();
+        AcePathfinderUtil.insertValue(data, "sllb", "15");
+        AcePathfinderUtil.insertValue(data, "slbdm", "1.15");
+        AcePathfinderUtil.insertValue(data, "sllb", "30");
+        AcePathfinderUtil.insertValue(data, "slbdm", "1.16");
+        AcePathfinderUtil.insertValue(data, "sllb", "60");
+        AcePathfinderUtil.insertValue(data, "slbdm", "1.21");
+        AcePathfinderUtil.insertValue(data, "sllb", "90");
+        AcePathfinderUtil.insertValue(data, "slbdm", "1.23");
+        AcePathfinderUtil.insertValue(data, "sllb", "120");
+        AcePathfinderUtil.insertValue(data, "slbdm", "1.31");
+        AcePathfinderUtil.insertValue(data, "sllb", "150");
+        AcePathfinderUtil.insertValue(data, "slbdm", "1.31");
+        AcePathfinderUtil.insertValue(data, "sllb", "180");
+        AcePathfinderUtil.insertValue(data, "slbdm", "1.31");
+
+        HashMap<String, ArrayList<String>> result = SoilHelper.getIcnDistribution(data, icin);
+        
+        acctual = result.get("icn_tot");
+        for (int i = 0; i < expIcnTot.length; i++) {
+            try {
+                assertEquals("getRootDistribution: icn_tot " + i, expIcnTot[i], (String) acctual.get(i));
+            } catch (Error e) {
+                log.error(e.getMessage());
+            }
+        }
+        assertEquals("getRootDistribution: icn_tot ", expIcnTot.length, acctual.size());
+        
+        acctual = result.get("icnh4");
+        for (int i = 0; i < expIcnTot.length; i++) {
+            try {
+                assertEquals("getRootDistribution: icnh4 " + i, expIcnh4, (String) acctual.get(i));
+            } catch (Error e) {
+                log.error(e.getMessage());
+            }
+        }
+        assertEquals("getRootDistribution: icnh4 ", expIcnTot.length, acctual.size());
+        
+        acctual = result.get("icno3");
+        for (int i = 0; i < expIcnTot.length; i++) {
+            try {
+                assertEquals("getRootDistribution: icno3 " + i, expIcno3, (String) acctual.get(i));
+            } catch (Error e) {
+                log.error(e.getMessage());
+            }
+        }
+        assertEquals("getRootDistribution: icno3 ", expIcnTot.length, acctual.size());
+        
         log.info("getRootDistribution() output: {}", result.toString());
     }
 }

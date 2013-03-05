@@ -16,7 +16,7 @@ public class FunctionsTest {
         int test = 1234;
         assertEquals("Numeric conversion failed", test, numericStringToBigInteger("1234.56", false).intValue());
     }
-    
+
     @Test
     public void numericStringRoundedTest() {
         int test = 1235;
@@ -25,7 +25,7 @@ public class FunctionsTest {
 
     @Test
     public void toDateTest() {
-        Date test = new Date(2012-1900, 0, 1);
+        Date test = new Date(2012 - 1900, 0, 1);
         Date d = convertFromAgmipDateString("20120101");
         assertEquals("Dates not the same", test, d);
     }
@@ -33,7 +33,7 @@ public class FunctionsTest {
     @Test
     public void toStringTest() {
         String test = "20120101";
-        String d = convertToAgmipDateString(new Date(2012-1900, 0, 1));
+        String d = convertToAgmipDateString(new Date(2012 - 1900, 0, 1));
         assertEquals("Dates not the same", test, d);
     }
 
@@ -47,7 +47,7 @@ public class FunctionsTest {
     public void dateOffsetTest() {
         String test = "20120219";
         String initial = "20120212";
-        String offset="7";
+        String offset = "7";
 
         assertEquals("Date offset incorrect", test, dateOffset(initial, offset));
     }
@@ -94,60 +94,60 @@ public class FunctionsTest {
         assertNull("Offset invalid offset", dateOffset("20120101", "1.0"));
     }
 
-    @Test 
+    @Test
     public void failDateOffsetBadNumericOffset2Test() {
         assertNull("Offset invalid offset", dateOffset("20120101", "1.2"));
     }
-    
+
     @Test
     public void numericOffsetTest() {
         String test = "12.34";
         String initial = "11.22";
-        String offset  = "1.12";
-        
+        String offset = "1.12";
+
         assertEquals("Numeric offset incorrect", test, numericOffset(initial, offset));
     }
-    
+
     @Test
     public void integerOffsetTest() {
         String test = "12";
         String initial = "11";
         String offset = "1";
-        
+
         assertEquals("Numeric offset incorrect", test, numericOffset(initial, offset));
     }
-    
+
     @Test
     public void mixedNumericOffsetTest() {
         String test = "12.34";
         String initial = "11";
         String offset = "1.34";
-        
+
         assertEquals("Numeric offset incorrect", test, numericOffset(initial, offset));
     }
-    
+
     @Test
     public void failedNumericOffsetBadInitialTest() {
         assertNull("Offset invalid initial", numericOffset("abc", "12.34"));
     }
-    
+
     @Test
     public void failedNumericOffsetBadOffsetTest() {
         assertNull("Offset invalid offset", numericOffset("12.34", "abc"));
     }
-    
+
     @Test
     public void numericNegativeOffsetTest() {
         String test = "12.34";
         String initial = "23.45";
         String offset = "-11.11";
-        
+
         assertEquals("Numeric offset incorrect", test, numericOffset(initial, offset));
     }
 
     @Test
     public void multiplySimple() {
-        String test="12.34";
+        String test = "12.34";
         String f1 = "1234";
         String f2 = ".01";
 
@@ -164,7 +164,7 @@ public class FunctionsTest {
 
     @Test
     public void sumSingle() {
-        String test="1234";
+        String test = "1234";
         String f1 = "1234";
 
         assertEquals("Sum incorrect", test, sum(f1));
@@ -172,7 +172,7 @@ public class FunctionsTest {
 
     @Test
     public void sumMultiple() {
-        String test="1234.01";
+        String test = "1234.01";
         String f1 = "1234";
         String f2 = ".01";
 
@@ -189,7 +189,7 @@ public class FunctionsTest {
 
     @Test
     public void substractNull() {
-        String test="1234";
+        String test = "1234";
         String f1 = "1234";
 
         assertEquals("Substract incorrect", test, substract(f1));
@@ -197,7 +197,7 @@ public class FunctionsTest {
 
     @Test
     public void substractSingle() {
-        String test="1012";
+        String test = "1012";
         String f1 = "1234";
         String f2 = "222";
 
@@ -206,7 +206,7 @@ public class FunctionsTest {
 
     @Test
     public void substractMultiple() {
-        String test="499.77";
+        String test = "499.77";
         String f1 = "1234";
         String f2 = "234";
         String f3 = "500.23";
@@ -221,10 +221,10 @@ public class FunctionsTest {
 
         assertNull("This shouldn't work", substract(f1, f2));
     }
-    
+
     @Test
     public void productSingle() {
-        String test="1234";
+        String test = "1234";
         String f1 = "1234";
 
         assertEquals("Product incorrect", test, product(f1));
@@ -232,7 +232,7 @@ public class FunctionsTest {
 
     @Test
     public void productMultiple() {
-        String test="12.34";
+        String test = "12.34";
         String f1 = "1234";
         String f2 = ".01";
 
@@ -246,20 +246,20 @@ public class FunctionsTest {
 
         assertNull("This shouldn't work", product(f1, f2));
     }
-    
+
     @Test
     public void divideSimpleDivisible() {
-        String test="2.55";
-        String f1 ="10.2";
+        String test = "2.55";
+        String f1 = "10.2";
         String f2 = "4";
 
         assertEquals("Divide incorrect", test, divide(f1, f2));
     }
-    
+
     @Test
     public void divideSimpleIndivisible() {
-        String test="10.2352";
-        String f1 ="23.541";
+        String test = "10.2352";
+        String f1 = "23.541";
         String f2 = "2.3";
 
         assertEquals("Divide incorrect", test, divide(f1, f2));
@@ -267,8 +267,8 @@ public class FunctionsTest {
 
     @Test
     public void divideWithScaleDivisible() {
-        String test="2.6";
-        String f1 ="10.2";
+        String test = "2.6";
+        String f1 = "10.2";
         String f2 = "4";
         int scale = 1;
 
@@ -277,8 +277,8 @@ public class FunctionsTest {
 
     @Test
     public void divideWithScaleIndivisible() {
-        String test="10.2";
-        String f1 ="23.541";
+        String test = "10.2";
+        String f1 = "23.541";
         String f2 = "2.3";
         int scale = 1;
 
@@ -292,20 +292,20 @@ public class FunctionsTest {
 
         assertNull("This shouldn't work", divide(f1, f2));
     }
-    
+
     @Test
     public void averageSimpleDivisible() {
-        String test="7.1";
-        String f1 ="10.2";
+        String test = "7.1";
+        String f1 = "10.2";
         String f2 = "4";
 
         assertEquals("Average incorrect", test, average(f1, f2));
     }
-    
+
     @Test
     public void averageSimpleIndivisible() {
-        String test="9.38553";
-        String f1 ="23.541";
+        String test = "9.38553";
+        String f1 = "23.541";
         String f2 = "2.3";
         String f3 = "2.3156";
 
@@ -314,8 +314,8 @@ public class FunctionsTest {
 
     @Test
     public void averageWithScaleDivisible() {
-        String test="7.10";
-        String f1 ="10.2";
+        String test = "7.10";
+        String f1 = "10.2";
         String f2 = "4";
         int scale = 2;
 
@@ -324,8 +324,8 @@ public class FunctionsTest {
 
     @Test
     public void averageWithScaleIndivisible() {
-        String test="9.39";
-        String f1 ="23.541";
+        String test = "9.39";
+        String f1 = "23.541";
         String f2 = "2.3";
         String f3 = "2.3156";
         int scale = 2;
@@ -343,8 +343,8 @@ public class FunctionsTest {
 
     @Test
     public void logWithScaleIndivisible() {
-        String test=Math.log(12) + "";
-        String f1 ="12";
+        String test = Math.log(12) + "";
+        String f1 = "12";
 
         assertEquals("Log incorrect", test, log(f1));
     }
@@ -358,8 +358,8 @@ public class FunctionsTest {
 
     @Test
     public void expWithScaleIndivisible() {
-        String test=Math.exp(12) + "";
-        String f1 ="12";
+        String test = Math.exp(12) + "";
+        String f1 = "12";
 
         assertEquals("Exp incorrect", test, exp(f1));
     }
@@ -373,7 +373,7 @@ public class FunctionsTest {
 
     @Test
     public void minSingle() {
-        String test="1234";
+        String test = "1234";
         String f1 = "1234";
 
         assertEquals("Min incorrect", test, min(f1));
@@ -381,7 +381,7 @@ public class FunctionsTest {
 
     @Test
     public void minMultiple() {
-        String test="0.01";
+        String test = "0.01";
         String f1 = "1234";
         String f2 = ".01";
         String f3 = "3.01";
@@ -399,7 +399,7 @@ public class FunctionsTest {
 
     @Test
     public void maxSingle() {
-        String test="1234";
+        String test = "1234";
         String f1 = "1234";
 
         assertEquals("Max incorrect", test, max(f1));
@@ -407,7 +407,7 @@ public class FunctionsTest {
 
     @Test
     public void maxMultiple() {
-        String test="1234";
+        String test = "1234";
         String f1 = "1234";
         String f2 = ".01";
         String f3 = "3.01";
@@ -425,7 +425,7 @@ public class FunctionsTest {
 
     @Test
     public void roundUp() {
-        String test="0.13";
+        String test = "0.13";
         String f1 = "0.1251";
         int scale = 2;
 
@@ -434,7 +434,7 @@ public class FunctionsTest {
 
     @Test
     public void roundDown() {
-        String test="0.12";
+        String test = "0.12";
         String f1 = "0.1249";
         int scale = 2;
 
@@ -511,5 +511,41 @@ public class FunctionsTest {
         CompareMode mode = CompareMode.LESS;
 
         assertFalse("This shouldn't work", compare(f1, f2, mode));
+    }
+
+    @Test
+    public void removeNullNoNull() {
+        String[] test = {"1234", "123"};
+        String[] in = {"1234", "123"};
+
+        in = removeNull(in);
+        for (int i = 0; i < test.length; i++) {
+            assertEquals("Should change anything", test[i], in[i]);
+        }
+        assertEquals("Should change anything", test.length, in.length);
+    }
+
+    @Test
+    public void removeNullHasNull() {
+        String[] test = {"1234", "123"};
+        String[] in = {"1234", null, "123"};
+
+        in = removeNull(in);
+        for (int i = 0; i < test.length; i++) {
+            assertEquals("Should change anything", test[i], in[i]);
+        }
+        assertEquals("Should remove the null element", test.length, in.length);
+    }
+
+    @Test
+    public void removeNullNullArray() {
+        String[] test = {};
+        String[] in = null;
+
+        in = removeNull(in);
+        for (int i = 0; i < test.length; i++) {
+            assertEquals("Should change anything", test[i], in[i]);
+        }
+        assertEquals("Should return a empty array", test.length, in.length);
     }
 }

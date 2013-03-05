@@ -20,8 +20,7 @@ public class Event {
      * Constructor
      *
      * @param events The event data array
-     * @param eventType The name of event type
-     * @eventType The type of events which will be handled
+     * @param eventType The type of events which will be handled
      */
     public Event(ArrayList<HashMap<String, String>> events, String eventType) {
         this.events = events;
@@ -82,7 +81,6 @@ public class Event {
      * @param key The variable's key for a event
      * @param value The input value for the key
      * @param toNext The flag for if move the pointer to the next event
-     * @toNext True for got to next event
      */
     public void updateEvent(String key, String value, boolean toNext) {
         updateEvent(key, value, true, toNext);
@@ -96,8 +94,6 @@ public class Event {
      * @param value The input value for the key
      * @param useTemp The flag for if using the template to build new event
      * @param toNext The flag for if move the pointer to the next event
-     * @useTemp True for use template to create new event
-     * @toNext True for got to next event
      */
     public void updateEvent(String key, String value, boolean useTemp, boolean toNext) {
         if (isEventExist()) {
@@ -154,7 +150,7 @@ public class Event {
     /**
      * Check if the selected event is existed in the array
      *
-     * @return
+     * @return True for exist
      */
     public boolean isEventExist() {
         return next >= 0 && next < events.size();
@@ -163,7 +159,7 @@ public class Event {
     /**
      * Get the current pointed event, if not available will return empty map
      *
-     * @return
+     * @return current pointed event
      */
     public HashMap getCurrentEvent() {
         if (isEventExist()) {

@@ -8,6 +8,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.GregorianCalendar;
 
@@ -310,7 +311,7 @@ public class Functions {
             BigDecimal bdDivisor = new BigDecimal(divisor);
             try {
                 return bdDividend.divide(bdDivisor).toString();
-            } catch  (ArithmeticException ae) {
+            } catch (ArithmeticException ae) {
                 int scale = Math.max(bdDividend.scale(), bdDivisor.scale()) + 1;
                 return divide(dividend, divisor, scale);
             }
@@ -369,7 +370,7 @@ public class Functions {
      *
      * Any numeric string recognized by {@code BigDecimal} is supported.
      *
-     * @scale scale of the {@code BigDecimal} quotient to be returned.
+     * @param scale of the {@code BigDecimal} quotient to be returned.
      * @param values one or more valid number strings
      *
      * @return <code>(values[0] + values[1] + ...) / values.length</code>
@@ -441,22 +442,21 @@ public class Functions {
     public static String min(String... values) {
         BigDecimal bd;
         BigDecimal bd2;
-//        int scale;
         try {
-            bd = new BigDecimal(values[0]);
-//            scale = bd.scale();
-            for (int i = 1; i < values.length; i++) {
+            int start = 0;
+            while (values[start] == null) {
+                start++;
+            }
+            bd = new BigDecimal(values[start]);
+            for (int i = start + 1; i < values.length; i++) {
+                if (values[i] == null) {
+                    continue;
+                }
                 bd2 = new BigDecimal(values[i]);
                 if (bd.compareTo(bd2) > 0) {
                     bd = bd2;
                 }
-//                if (scale < bd2.scale()) {
-//                    scale = bd2.scale();
-//                }
             }
-//            if (scale != bd.scale()) {
-//                bd = bd.setScale(scale);
-//            }
             return bd.toString();
         } catch (Exception e) {
             return null;
@@ -477,22 +477,21 @@ public class Functions {
     public static String max(String... values) {
         BigDecimal bd;
         BigDecimal bd2;
-//        int scale;
         try {
-            bd = new BigDecimal(values[0]);
-//            scale = bd.scale();
-            for (int i = 1; i < values.length; i++) {
+            int start = 0;
+            while (values[start] == null) {
+                start++;
+            }
+            bd = new BigDecimal(values[start]);
+            for (int i = start + 1; i < values.length; i++) {
+                if (values[i] == null) {
+                    continue;
+                }
                 bd2 = new BigDecimal(values[i]);
                 if (bd.compareTo(bd2) < 0) {
                     bd = bd2;
                 }
-//                if (scale < bd2.scale()) {
-//                    scale = bd2.scale();
-//                }
             }
-//            if (scale != bd.scale()) {
-//                bd = bd.setScale(scale);
-//            }
             return bd.toString();
         } catch (Exception e) {
             return null;
@@ -571,12 +570,13 @@ public class Functions {
             return false;
         }
     }
-    
+
     /**
-     * Gathering the messages from a {@code Throwable} instance and its back trace
-     * 
+     * Gathering the messages from a {@code Throwable} instance and its back
+     * trace
+     *
      * @param aThrowable
-     * 
+     *
      * @return The trace messages
      */
     public static String getStackTrace(Throwable aThrowable) {
@@ -584,5 +584,28 @@ public class Functions {
         final PrintWriter printWriter = new PrintWriter(result);
         aThrowable.printStackTrace(printWriter);
         return result.toString();
+    }
+
+    /**
+     * Remove the null value in the input String array
+     *
+     * @param in The input String values
+     * @return The input String without null value
+     */
+    public static String[] removeNull(String[] in) {
+        if (in == null) {
+            return new String[0];
+        }
+        ArrayList<String> arr = new ArrayList();
+        for (int i = 0; i < in.length; i++) {
+            if (in[i] != null) {
+                arr.add(in[i]);
+            }
+        }
+        if (in.length == arr.size()) {
+            return in;
+        } else {
+            return arr.toArray(new String[0]);
+        }
     }
 }
