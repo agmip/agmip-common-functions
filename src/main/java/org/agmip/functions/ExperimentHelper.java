@@ -102,12 +102,12 @@ public class ExperimentHelper {
 
         // Remove all planting events, for now, as a default. This is because this generates new replaced planting events.
         // NOTE: This is the "safest" way to remove items during iteration.
-        Iterator<HashMap<String, String>> iter = eventData.iterator();
-        while (iter.hasNext()) {
-            if (getValueOr(iter.next(), "event", "").equals("planting")) {
-                iter.remove();
-            }
-        }
+//        Iterator<HashMap<String, String>> iter = eventData.iterator();
+//        while (iter.hasNext()) {
+//            if (getValueOr(iter.next(), "event", "").equals("planting")) {
+//                iter.remove();
+//            }
+//        }
 
         // Check EXP_DUR is avalaible
         try {
@@ -266,7 +266,7 @@ public class ExperimentHelper {
             if (last > windows[i].end) {
                 LOG.info("NO APPROPRIATE DATE WAS FOUND FOR NO." + (i + 1) + " PLANTING EVENT");
                 // TODO remove one planting event
-                event.removeEvent();
+//                event.removeEvent();
             }
 
             // Check following days
