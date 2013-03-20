@@ -30,7 +30,7 @@ public class WeatherHelper {
      *
      * @param data The data map
      *
-     * @return An {@code HashMap} contains {@code TAV} and {@code TAMP}, the key
+     * @return A {@code HashMap} contains {@code TAV} and {@code TAMP}, the key
      * is their ICASA variable name
      */
     public static HashMap<String, String> getTavAndAmp(HashMap data) {
@@ -175,6 +175,14 @@ public class WeatherHelper {
         }
     }
 
+    /**
+     * Calculate the reference evapotranspiration (ETo) by means of the
+     * FAO-Penman Monteith equation.
+     *
+     * @param data The data map
+     *
+     * @return An {@code ArrayList} of {@code ETo} for daily weather record.
+     */
     public static HashMap<String, ArrayList<String>> getEto(HashMap data) {
         HashMap<String, ArrayList<String>> results = new HashMap<String, ArrayList<String>>();
         HashMap wthData = getWthData(data);
@@ -336,9 +344,16 @@ public class WeatherHelper {
         return results;
     }
 
+    /**
+     * Based on the location of weather station, return the adjustment
+     * coefficient used for Solar radiation calculation. The default value is
+     * 0.16 for interior locations and 0.19 for coastal locations
+     *
+     * @param data The data map
+     * @return adjustment coefficient [°C-0.5]
+     */
     private static String getKrsValue(HashMap data) {
-        // default value of adjustment coefficient is 0.16 for interior locations and 0.19 for coastal locations.
-        // TODO waiting for response
+        // TODO waiting for GIS system imported
         return "0.16";  // or "0.19";
     }
 }
