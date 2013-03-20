@@ -1,5 +1,6 @@
 package org.agmip.functions;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -7,6 +8,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import static org.agmip.common.Functions.*;
 import org.agmip.common.Functions.CompareMode;
+import org.agmip.util.JSONAdapter;
 import org.agmip.util.MapUtil;
 import static org.agmip.util.MapUtil.*;
 import org.agmip.util.MapUtil.BucketEntry;
@@ -193,13 +195,29 @@ public class WeatherHelper {
         String wst_lat = getValueOr(wthData, "wst_lat", "");
         String phi = divide(product(wst_lat, Math.PI + ""), "180");
 
+        // Get other potentially necessary meta data from Ace data set
+        String psyvnt = getValueOr(wthData, "psyvnt", "").trim();
+        String aPsy = "";
+        if (psyvnt.equals("Forced")) {
+            aPsy = "0.000662";
+        } else if (psyvnt.equals("Natural")) {
+            aPsy = "0.00800";
+        }
+        String rPsy = multiply(aPsy, P);
+        String amth = getValueOr(wthData, "amth", "0.25");
+        String bmth = getValueOr(wthData, "bmth", "0.50");
+
+        // Calculate daily ETO
         ArrayList<String> etoArr = new ArrayList<String>();
         for (int i = 0; i < dailyArr.size(); i++) {
             HashMap<String, String> dailyData = dailyArr.get(i);
+
+            // Get daily TMAX and TMIN
             String tMin = getValueOr(dailyData, "tmin", "").trim();
             String tMax = getValueOr(dailyData, "tmax", "").trim();
             if (tMin.equals("") || tMax.equals("")) {
                 etoArr.add(null);
+                continue;
             }
 
             // Step 3. Mean air temperature (Tmean) [°C]
@@ -217,7 +235,6 @@ public class WeatherHelper {
             String ea;
             String alt1;
             String alt2;
-            String alt3;
             // Method 1 IF VPRSD is available in the ACE data base
             if (!(alt1 = getValueOr(dailyData, "vprsd", "").trim()).equals("")) {
                 // ea = VPRSD
@@ -237,16 +254,9 @@ public class WeatherHelper {
             } // Method 4 IF TDRY, TWET and PSYVNT are available in the ACE data base
             else if (!(alt1 = getValueOr(dailyData, "tdry", "").trim()).equals("")
                     && !(alt2 = getValueOr(dailyData, "twet", "").trim()).equals("")
-                    && !(alt3 = getValueOr(dailyData, "psyvnt", "").trim()).equals("")) {
+                    && rPsy != null) {
                 // derive ea from the psychrometric data
                 String e_tWet = multiply("0.6108", exp(divide(multiply("17.27", alt2), sum(alt2, "237.3"))));
-                String aPsy = "";
-                if (alt3.equals("Forced")) {
-                    aPsy = "0.000662";
-                } else if (alt3.equals("Natural")) {
-                    aPsy = "0.00800";
-                }
-                String rPsy = multiply(aPsy, P);
                 ea = substract(e_tWet, multiply(rPsy, substract(alt1, alt2)));
 
             } // Method 5 use Tmin as an approximation of Tdew
@@ -261,6 +271,7 @@ public class WeatherHelper {
             Date w_date = convertFromAgmipDateString(getValueOr(dailyData, "w_date", ""));
             if (w_date == null) {
                 etoArr.add(null);
+                continue;
             }
             Calendar cal = Calendar.getInstance();
             cal.setTime((w_date));
@@ -278,20 +289,14 @@ public class WeatherHelper {
                 rs = alt1;
             } // Method 2. IF SUNH is available in the ACE data base
             else if (!(alt1 = getValueOr(dailyData, "sunh", "").trim()).equals("")) {
-                if ((alt2 = getValueOr(dailyData, "amth", "").trim()).equals("")) {
-                    alt2 = "0.25";
-                }
-                if ((alt3 = getValueOr(dailyData, "bmth", "").trim()).equals("")) {
-                    alt3 = "0.50";
-                }
-                rs = multiply(sum(alt2, divide(multiply(alt3, alt1), N)), ra);
+                rs = multiply(sum(amth, divide(multiply(bmth, alt1), N)), ra);
             } // Method 3. LSE use Tmin and Tmax to estimate Rs by means of the Hargreaves equation
             else {
                 rs = product(getKrsValue(wthData), sqrt(substract(tMax, tMin)), ra);
             }
 
             // Step 10. Clear-Sky solar radiation (Rso)
-            String rso = multiply(sum("0.75", product("2e-5"), wst_elev), ra);
+            String rso = multiply(sum("0.75", product("2e-5", wst_elev)), ra);
 
             // Step 11. Net solar radiation (Rns)
             String rns = multiply(substract("1", "0.23"), rs);
@@ -309,12 +314,12 @@ public class WeatherHelper {
             // Method 1. WIND is given in the ACE data base
             String u2;
             if (!(alt1 = getValueOr(dailyData, "wind", "").trim()).equals("")) {
+                String uz = divide(multiply("1000", alt1), "86400", 4);
                 // CASE 1. Reference height for wind speed measurement (WNDHT)  is 2 meter
                 if (compare(alt2 = getValueOr(wthData, "wndht", "").trim(), "2", CompareMode.EQUAL)) {
-                    u2 = divide(multiply("1000", alt1), "86400");
+                    u2 = uz;
                 } // CASE 2. Reference height for wind speed measurement (WNDHT)  is NOT 2 meter
                 else {
-                    String uz = divide(multiply("1000", alt1), "86400");
                     u2 = divide(multiply(uz, "4.87"), log(substract(multiply("67.8", alt2), "5.42")));
                 }
             } else {
@@ -325,7 +330,7 @@ public class WeatherHelper {
             String eto = divide(
                     sum(product("0.408", slope, rn), divide(product(gamma, "900", u2, vpDiff), sum(tMean, "273"))),
                     sum(slope, multiply(gamma, sum("1", multiply("0.34", u2)))));
-            etoArr.add(eto);
+            etoArr.add(round(eto, 2));
         }
         results.put("eto", etoArr);
         return results;
