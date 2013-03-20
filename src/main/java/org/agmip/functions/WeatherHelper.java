@@ -1,6 +1,5 @@
 package org.agmip.functions;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -8,7 +7,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import static org.agmip.common.Functions.*;
 import org.agmip.common.Functions.CompareMode;
-import org.agmip.util.JSONAdapter;
 import org.agmip.util.MapUtil;
 import static org.agmip.util.MapUtil.*;
 import org.agmip.util.MapUtil.BucketEntry;
