@@ -499,6 +499,149 @@ public class Functions {
     }
 
     /**
+     * Returns the value of the first argument raised to the power of the second
+     * argument.
+     *
+     * Any numeric string recognized by {@code BigDecimal} is supported.
+     *
+     * @param base the base.
+     * @param exponent the exponent.
+     * @return the value {@code base}<sup>{@code exponent}</sup>.
+     */
+    public static String pow(String base, String exponent) {
+        try {
+            BigDecimal bdBase = new BigDecimal(base);
+            BigDecimal bdExp = new BigDecimal(exponent);
+            return Math.pow(bdBase.doubleValue(), bdExp.doubleValue()) + "";
+        } catch (Exception ex) {
+            return null;
+        }
+    }
+
+    /**
+     * Returns the correctly rounded positive square root of a {@code double}
+     * value.
+     *
+     * Any numeric string recognized by {@code BigDecimal} is supported.
+     *
+     * @param value A valid number
+     * @return the positive square root of {@code value}.
+     */
+    public static String sqrt(String value) {
+        try {
+            BigDecimal bd = new BigDecimal(value);
+            return Math.sqrt(bd.doubleValue()) + "";
+        } catch (Exception ex) {
+            return null;
+        }
+    }
+
+    /**
+     * Returns the trigonometric cosine of an angle.
+     *
+     * Any numeric string recognized by {@code BigDecimal} is supported.
+     *
+     * @param value A valid number for an angle, in radians
+     * @return the cosine of the argument
+     */
+    public static String cos(String value) {
+        try {
+            BigDecimal bd = new BigDecimal(value);
+            return Math.cos(bd.doubleValue()) + "";
+        } catch (Exception ex) {
+            return null;
+        }
+    }
+
+    /**
+     * Returns the trigonometric sine of an angle.
+     *
+     * Any numeric string recognized by {@code BigDecimal} is supported.
+     *
+     * @param value A valid number for an angle, in radians
+     * @return the sine of the argument
+     */
+    public static String sin(String value) {
+        try {
+            BigDecimal bd = new BigDecimal(value);
+            return Math.sin(bd.doubleValue()) + "";
+        } catch (Exception ex) {
+            return null;
+        }
+    }
+
+    /**
+     * Returns the trigonometric tangent of an angle.
+     *
+     * Any numeric string recognized by {@code BigDecimal} is supported.
+     *
+     * @param value A valid number for an angle, in radians
+     * @return the tangent of the argument
+     */
+    public static String tan(String value) {
+        try {
+            BigDecimal bd = new BigDecimal(value);
+            return Math.tan(bd.doubleValue()) + "";
+        } catch (Exception ex) {
+            return null;
+        }
+    }
+
+    /**
+     * Returns the arc cosine of a value; the returned angle is in the range 0.0
+     * through <i>pi</i>.
+     *
+     * Any numeric string recognized by {@code BigDecimal} is supported.
+     *
+     * @param value A valid number for an angle, in radians
+     * @return the arc cosine of the argument.
+     */
+    public static String acos(String value) {
+        try {
+            BigDecimal bd = new BigDecimal(value);
+            return Math.acos(bd.doubleValue()) + "";
+        } catch (Exception ex) {
+            return null;
+        }
+    }
+
+    /**
+     * Returns the arc sine of a value; the returned angle is in the range
+     * -<i>pi</i>/2 through <i>pi</i>/2.
+     *
+     * Any numeric string recognized by {@code BigDecimal} is supported.
+     *
+     * @param value A valid number for an angle, in radians
+     * @return the arc sine of the argument.
+     */
+    public static String asin(String value) {
+        try {
+            BigDecimal bd = new BigDecimal(value);
+            return Math.asin(bd.doubleValue()) + "";
+        } catch (Exception ex) {
+            return null;
+        }
+    }
+
+    /**
+     * Returns the arc tangent of a value; the returned angle is in the range
+     * -<i>pi</i>/2 through <i>pi</i>/2.
+     *
+     * Any numeric string recognized by {@code BigDecimal} is supported.
+     *
+     * @param value A valid number for an angle, in radians
+     * @return the arc tangent of the argument.
+     */
+    public static String atan(String value) {
+        try {
+            BigDecimal bd = new BigDecimal(value);
+            return Math.atan(bd.doubleValue()) + "";
+        } catch (Exception ex) {
+            return null;
+        }
+    }
+
+    /**
      * Returns the closest {@code decimal} to the argument, with given scale,
      * using HALF_UP mode
      *

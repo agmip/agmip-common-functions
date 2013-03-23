@@ -1,9 +1,11 @@
 package org.agmip.functions;
 
-
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import org.agmip.ace.AcePathfinder;
 import org.agmip.ace.util.AcePathfinderUtil;
+import org.agmip.util.JSONAdapter;
 import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
@@ -1216,5 +1218,326 @@ public class WeatherHelperTest {
         acctual = WeatherHelper.getTavAndAmp(data);
         assertEquals("getRootDistribution: one year data case failed", expected, acctual);
         log.info("getRootDistribution() output: {}", acctual.toString());
+    }
+
+    @Test
+    public void testGetEto() throws IOException, Exception {
+
+        ArrayList<String> expected = new ArrayList();
+        expected.add("3.18");
+        expected.add("3.25");
+        expected.add("4.01");
+        expected.add("2.15");
+        expected.add("3.33");
+        expected.add("3.21");
+        expected.add("4.65");
+        expected.add("4.29");
+        expected.add("2.85");
+        expected.add("3.05");
+
+        HashMap<String, ArrayList<String>> acctual;
+
+        HashMap<String, Object> data = new HashMap<String, Object>();
+        AcePathfinderUtil.insertValue(data, "wst_lat", "26.65");
+        AcePathfinderUtil.insertValue(data, "wst_long", "-80.633");
+        AcePathfinderUtil.insertValue(data, "wst_elev", "3.00");
+        AcePathfinderUtil.insertValue(data, "wndht", "10.00");
+        AcePathfinderUtil.insertValue(data, "amth", "0.3", "weather");
+        AcePathfinderUtil.insertValue(data, "bmth", "0.4", "weather");
+        AcePathfinderUtil.insertValue(data, "psyvnt", "Forced", "weather");
+
+        // All variable valid
+        AcePathfinderUtil.insertValue(data, "w_date", "19890823");
+        AcePathfinderUtil.insertValue(data, "srad", "13.6");
+        AcePathfinderUtil.insertValue(data, "tmax", "26.4");
+        AcePathfinderUtil.insertValue(data, "tmin", "12.8");
+        AcePathfinderUtil.insertValue(data, "sunh", "");
+        AcePathfinderUtil.insertValue(data, "tavd", "");
+        AcePathfinderUtil.insertValue(data, "wind", "180");
+        AcePathfinderUtil.insertValue(data, "rhmnd", "30", AcePathfinder.INSTANCE.getPath("w_date"));
+        AcePathfinderUtil.insertValue(data, "rhmxd", "50", AcePathfinder.INSTANCE.getPath("w_date"));
+        AcePathfinderUtil.insertValue(data, "vprsd", "1.6");
+        AcePathfinderUtil.insertValue(data, "tdew", "13.5");
+        AcePathfinderUtil.insertValue(data, "tdry", "25.3");
+        AcePathfinderUtil.insertValue(data, "twet", "22.2");
+        // VPRSD missing
+        AcePathfinderUtil.insertValue(data, "w_date", "19890823");
+        AcePathfinderUtil.insertValue(data, "srad", "13.6");
+        AcePathfinderUtil.insertValue(data, "tmax", "26.4");
+        AcePathfinderUtil.insertValue(data, "tmin", "12.8");
+        AcePathfinderUtil.insertValue(data, "sunh", "");
+        AcePathfinderUtil.insertValue(data, "tavd", "");
+        AcePathfinderUtil.insertValue(data, "wind", "180");
+        AcePathfinderUtil.insertValue(data, "rhmnd", "30", AcePathfinder.INSTANCE.getPath("w_date"));
+        AcePathfinderUtil.insertValue(data, "rhmxd", "50", AcePathfinder.INSTANCE.getPath("w_date"));
+        AcePathfinderUtil.insertValue(data, "vprsd", "");
+        AcePathfinderUtil.insertValue(data, "tdew", "13.5");
+        AcePathfinderUtil.insertValue(data, "tdry", "25.3");
+        AcePathfinderUtil.insertValue(data, "twet", "22.2");
+        // VPRSD and TDEW missing
+        AcePathfinderUtil.insertValue(data, "w_date", "19890823");
+        AcePathfinderUtil.insertValue(data, "srad", "13.6");
+        AcePathfinderUtil.insertValue(data, "tmax", "26.4");
+        AcePathfinderUtil.insertValue(data, "tmin", "12.8");
+        AcePathfinderUtil.insertValue(data, "sunh", "");
+        AcePathfinderUtil.insertValue(data, "tavd", "");
+        AcePathfinderUtil.insertValue(data, "wind", "180");
+        AcePathfinderUtil.insertValue(data, "rhmnd", "30", AcePathfinder.INSTANCE.getPath("w_date"));
+        AcePathfinderUtil.insertValue(data, "rhmxd", "50", AcePathfinder.INSTANCE.getPath("w_date"));
+        AcePathfinderUtil.insertValue(data, "vprsd", "");
+        AcePathfinderUtil.insertValue(data, "tdew", "");
+        AcePathfinderUtil.insertValue(data, "tdry", "25.3");
+        AcePathfinderUtil.insertValue(data, "twet", "22.2");
+        // VPRSD, TDEW, RHMND and RHMXD missing with psyvnt = Forced
+        AcePathfinderUtil.insertValue(data, "w_date", "19890823");
+        AcePathfinderUtil.insertValue(data, "srad", "13.6");
+        AcePathfinderUtil.insertValue(data, "tmax", "26.4");
+        AcePathfinderUtil.insertValue(data, "tmin", "12.8");
+        AcePathfinderUtil.insertValue(data, "sunh", "");
+        AcePathfinderUtil.insertValue(data, "tavd", "");
+        AcePathfinderUtil.insertValue(data, "wind", "180");
+        AcePathfinderUtil.insertValue(data, "rhmnd", "", AcePathfinder.INSTANCE.getPath("w_date"));
+        AcePathfinderUtil.insertValue(data, "rhmxd", "", AcePathfinder.INSTANCE.getPath("w_date"));
+        AcePathfinderUtil.insertValue(data, "vprsd", "");
+        AcePathfinderUtil.insertValue(data, "tdew", "");
+        AcePathfinderUtil.insertValue(data, "tdry", "25.3");
+        AcePathfinderUtil.insertValue(data, "twet", "22.2");
+        // VPRSD, TDEW, RHMND, RHMXD, TDRY, TWET missing
+        AcePathfinderUtil.insertValue(data, "w_date", "19890823");
+        AcePathfinderUtil.insertValue(data, "srad", "13.6");
+        AcePathfinderUtil.insertValue(data, "tmax", "26.4");
+        AcePathfinderUtil.insertValue(data, "tmin", "12.8");
+        AcePathfinderUtil.insertValue(data, "sunh", "");
+        AcePathfinderUtil.insertValue(data, "tavd", "");
+        AcePathfinderUtil.insertValue(data, "wind", "180");
+        AcePathfinderUtil.insertValue(data, "rhmnd", "", AcePathfinder.INSTANCE.getPath("w_date"));
+        AcePathfinderUtil.insertValue(data, "rhmxd", "", AcePathfinder.INSTANCE.getPath("w_date"));
+        AcePathfinderUtil.insertValue(data, "vprsd", "");
+        AcePathfinderUtil.insertValue(data, "tdew", "");
+        AcePathfinderUtil.insertValue(data, "tdry", "");
+        AcePathfinderUtil.insertValue(data, "twet", "");
+        // SRAD not misssing
+        AcePathfinderUtil.insertValue(data, "w_date", "19890427");
+        AcePathfinderUtil.insertValue(data, "srad", "13.6");
+        AcePathfinderUtil.insertValue(data, "tmax", "26.4");
+        AcePathfinderUtil.insertValue(data, "tmin", "12.8");
+        AcePathfinderUtil.insertValue(data, "sunh", "12");
+        AcePathfinderUtil.insertValue(data, "tavd", "");
+        AcePathfinderUtil.insertValue(data, "wind", "180");
+        AcePathfinderUtil.insertValue(data, "rhmnd", "", AcePathfinder.INSTANCE.getPath("w_date"));
+        AcePathfinderUtil.insertValue(data, "rhmxd", "", AcePathfinder.INSTANCE.getPath("w_date"));
+        AcePathfinderUtil.insertValue(data, "vprsd", "1.6");
+        AcePathfinderUtil.insertValue(data, "tdew", "");
+        AcePathfinderUtil.insertValue(data, "tdry", "");
+        AcePathfinderUtil.insertValue(data, "twet", "");
+        // SRAD misssing
+        AcePathfinderUtil.insertValue(data, "w_date", "19890427");
+        AcePathfinderUtil.insertValue(data, "srad", "");
+        AcePathfinderUtil.insertValue(data, "tmax", "26.4");
+        AcePathfinderUtil.insertValue(data, "tmin", "12.8");
+        AcePathfinderUtil.insertValue(data, "sunh", "12");
+        AcePathfinderUtil.insertValue(data, "tavd", "");
+        AcePathfinderUtil.insertValue(data, "wind", "180");
+        AcePathfinderUtil.insertValue(data, "rhmnd", "", AcePathfinder.INSTANCE.getPath("w_date"));
+        AcePathfinderUtil.insertValue(data, "rhmxd", "", AcePathfinder.INSTANCE.getPath("w_date"));
+        AcePathfinderUtil.insertValue(data, "vprsd", "1.6");
+        AcePathfinderUtil.insertValue(data, "tdew", "");
+        AcePathfinderUtil.insertValue(data, "tdry", "");
+        AcePathfinderUtil.insertValue(data, "twet", "");
+        // SRAD, SUNH missing
+        AcePathfinderUtil.insertValue(data, "w_date", "19890427");
+        AcePathfinderUtil.insertValue(data, "srad", "");
+        AcePathfinderUtil.insertValue(data, "tmax", "26.4");
+        AcePathfinderUtil.insertValue(data, "tmin", "12.8");
+        AcePathfinderUtil.insertValue(data, "sunh", "");
+        AcePathfinderUtil.insertValue(data, "tavd", "");
+        AcePathfinderUtil.insertValue(data, "wind", "180");
+        AcePathfinderUtil.insertValue(data, "rhmnd", "", AcePathfinder.INSTANCE.getPath("w_date"));
+        AcePathfinderUtil.insertValue(data, "rhmxd", "", AcePathfinder.INSTANCE.getPath("w_date"));
+        AcePathfinderUtil.insertValue(data, "vprsd", "1.6");
+        AcePathfinderUtil.insertValue(data, "tdew", "");
+        AcePathfinderUtil.insertValue(data, "tdry", "");
+        AcePathfinderUtil.insertValue(data, "twet", "");
+        // Wind not missing and wndht != 2
+        AcePathfinderUtil.insertValue(data, "w_date", "19890214");
+        AcePathfinderUtil.insertValue(data, "srad", "13.6");
+        AcePathfinderUtil.insertValue(data, "tmax", "26.4");
+        AcePathfinderUtil.insertValue(data, "tmin", "12.8");
+        AcePathfinderUtil.insertValue(data, "sunh", "");
+        AcePathfinderUtil.insertValue(data, "tavd", "");
+        AcePathfinderUtil.insertValue(data, "wind", "180");
+        AcePathfinderUtil.insertValue(data, "rhmnd", "", AcePathfinder.INSTANCE.getPath("w_date"));
+        AcePathfinderUtil.insertValue(data, "rhmxd", "", AcePathfinder.INSTANCE.getPath("w_date"));
+        AcePathfinderUtil.insertValue(data, "vprsd", "1.6");
+        AcePathfinderUtil.insertValue(data, "tdew", "");
+        AcePathfinderUtil.insertValue(data, "tdry", "");
+        AcePathfinderUtil.insertValue(data, "twet", "");
+        // Wind missing
+        AcePathfinderUtil.insertValue(data, "w_date", "19890214");
+        AcePathfinderUtil.insertValue(data, "srad", "13.6");
+        AcePathfinderUtil.insertValue(data, "tmax", "26.4");
+        AcePathfinderUtil.insertValue(data, "tmin", "12.8");
+        AcePathfinderUtil.insertValue(data, "sunh", "");
+        AcePathfinderUtil.insertValue(data, "tavd", "");
+        AcePathfinderUtil.insertValue(data, "wind", "");
+        AcePathfinderUtil.insertValue(data, "rhmnd", "", AcePathfinder.INSTANCE.getPath("w_date"));
+        AcePathfinderUtil.insertValue(data, "rhmxd", "", AcePathfinder.INSTANCE.getPath("w_date"));
+        AcePathfinderUtil.insertValue(data, "vprsd", "1.6");
+        AcePathfinderUtil.insertValue(data, "tdew", "");
+        AcePathfinderUtil.insertValue(data, "tdry", "");
+        AcePathfinderUtil.insertValue(data, "twet", "");
+
+        log.debug("getEto() intput1: {}", JSONAdapter.toJSON(data));
+        acctual = WeatherHelper.getEto(data);
+        assertEquals("getEto: ", expected, acctual.get("eto"));
+        log.info("getEto() output1: {}", acctual.toString());
+    }
+
+    @Test
+    public void testGetEto2() throws IOException, Exception {
+
+        ArrayList<String> expected = new ArrayList();
+        expected.add("4.76");
+        HashMap<String, ArrayList<String>> acctual;
+
+        HashMap<String, Object> data = new HashMap<String, Object>();
+        AcePathfinderUtil.insertValue(data, "wst_lat", "26.65");
+        AcePathfinderUtil.insertValue(data, "wst_long", "-80.633");
+        AcePathfinderUtil.insertValue(data, "wst_elev", "3.00");
+        AcePathfinderUtil.insertValue(data, "wndht", "10.00");
+//        AcePathfinderUtil.insertValue(data, "amth", "0.3", "weather");
+//        AcePathfinderUtil.insertValue(data, "bmth", "0.4", "weather");
+        AcePathfinderUtil.insertValue(data, "psyvnt", "Natural", "weather");
+
+        // VPRSD, TDEW, RHMND, RHMXD missing with psyvnt = Natural
+        AcePathfinderUtil.insertValue(data, "w_date", "19890823");
+        AcePathfinderUtil.insertValue(data, "srad", "13.6");
+        AcePathfinderUtil.insertValue(data, "tmax", "26.4");
+        AcePathfinderUtil.insertValue(data, "tmin", "12.8");
+        AcePathfinderUtil.insertValue(data, "sunh", "");
+        AcePathfinderUtil.insertValue(data, "tavd", "");
+        AcePathfinderUtil.insertValue(data, "wind", "180");
+        AcePathfinderUtil.insertValue(data, "rhmnd", "", AcePathfinder.INSTANCE.getPath("w_date"));
+        AcePathfinderUtil.insertValue(data, "rhmxd", "", AcePathfinder.INSTANCE.getPath("w_date"));
+        AcePathfinderUtil.insertValue(data, "vprsd", "");
+        AcePathfinderUtil.insertValue(data, "tdew", "");
+        AcePathfinderUtil.insertValue(data, "tdry", "25.3");
+        AcePathfinderUtil.insertValue(data, "twet", "22.2");
+
+        log.debug("getEto() intput2: {}", JSONAdapter.toJSON(data));
+        acctual = WeatherHelper.getEto(data);
+        assertEquals("getEto2: ", expected, acctual.get("eto"));
+        log.info("getEto() output2: {}", acctual.toString());
+    }
+
+    @Test
+    public void testGetEto3() throws IOException, Exception {
+
+        ArrayList<String> expected = new ArrayList();
+        expected.add("5.07");
+        HashMap<String, ArrayList<String>> acctual;
+
+        HashMap<String, Object> data = new HashMap<String, Object>();
+        AcePathfinderUtil.insertValue(data, "wst_lat", "26.65");
+        AcePathfinderUtil.insertValue(data, "wst_long", "-80.633");
+        AcePathfinderUtil.insertValue(data, "wst_elev", "3.00");
+        AcePathfinderUtil.insertValue(data, "wndht", "10.00");
+        AcePathfinderUtil.insertValue(data, "amth", "0.3", "weather");
+//        AcePathfinderUtil.insertValue(data, "bmth", "0.4", "weather");
+        AcePathfinderUtil.insertValue(data, "psyvnt", "Forced", "weather");
+
+        // SRAD, BMTH misssing
+        AcePathfinderUtil.insertValue(data, "w_date", "19890427");
+        AcePathfinderUtil.insertValue(data, "srad", "");
+        AcePathfinderUtil.insertValue(data, "tmax", "26.4");
+        AcePathfinderUtil.insertValue(data, "tmin", "12.8");
+        AcePathfinderUtil.insertValue(data, "sunh", "12");
+        AcePathfinderUtil.insertValue(data, "tavd", "");
+        AcePathfinderUtil.insertValue(data, "wind", "180");
+        AcePathfinderUtil.insertValue(data, "rhmnd", "", AcePathfinder.INSTANCE.getPath("w_date"));
+        AcePathfinderUtil.insertValue(data, "rhmxd", "", AcePathfinder.INSTANCE.getPath("w_date"));
+        AcePathfinderUtil.insertValue(data, "vprsd", "1.6");
+        AcePathfinderUtil.insertValue(data, "tdew", "");
+        AcePathfinderUtil.insertValue(data, "tdry", "");
+        AcePathfinderUtil.insertValue(data, "twet", "");
+
+        log.debug("getEto() intput3: {}", JSONAdapter.toJSON(data));
+        acctual = WeatherHelper.getEto(data);
+        assertEquals("getEto3: ", expected, acctual.get("eto"));
+        log.info("getEto() output3: {}", acctual.toString());
+    }
+
+    @Test
+    public void testGetEto4() throws IOException, Exception {
+
+        ArrayList<String> expected = new ArrayList();
+        expected.add("4.43");
+        HashMap<String, ArrayList<String>> acctual;
+
+        HashMap<String, Object> data = new HashMap<String, Object>();
+        AcePathfinderUtil.insertValue(data, "wst_lat", "26.65");
+        AcePathfinderUtil.insertValue(data, "wst_long", "-80.633");
+        AcePathfinderUtil.insertValue(data, "wst_elev", "3.00");
+        AcePathfinderUtil.insertValue(data, "wndht", "10.00");
+//        AcePathfinderUtil.insertValue(data, "amth", "0.3", "weather");
+        AcePathfinderUtil.insertValue(data, "bmth", "0.4", "weather");
+        AcePathfinderUtil.insertValue(data, "psyvnt", "Forced", "weather");
+
+        // SRAD, AMTH misssing
+        AcePathfinderUtil.insertValue(data, "w_date", "19890427");
+        AcePathfinderUtil.insertValue(data, "srad", "");
+        AcePathfinderUtil.insertValue(data, "tmax", "26.4");
+        AcePathfinderUtil.insertValue(data, "tmin", "12.8");
+        AcePathfinderUtil.insertValue(data, "sunh", "12");
+        AcePathfinderUtil.insertValue(data, "tavd", "");
+        AcePathfinderUtil.insertValue(data, "wind", "180");
+        AcePathfinderUtil.insertValue(data, "rhmnd", "", AcePathfinder.INSTANCE.getPath("w_date"));
+        AcePathfinderUtil.insertValue(data, "rhmxd", "", AcePathfinder.INSTANCE.getPath("w_date"));
+        AcePathfinderUtil.insertValue(data, "vprsd", "1.6");
+        AcePathfinderUtil.insertValue(data, "tdew", "");
+        AcePathfinderUtil.insertValue(data, "tdry", "");
+        AcePathfinderUtil.insertValue(data, "twet", "");
+
+        log.debug("getEto() intput4: {}", JSONAdapter.toJSON(data));
+        acctual = WeatherHelper.getEto(data);
+        assertEquals("getEto4: ", expected, acctual.get("eto"));
+        log.info("getEto() output4: {}", acctual.toString());
+    }
+
+    @Test
+    public void testGetEto5() throws IOException, Exception {
+
+        ArrayList<String> expected = new ArrayList();
+        expected.add("3.08");
+        HashMap<String, ArrayList<String>> acctual;
+
+        HashMap<String, Object> data = new HashMap<String, Object>();
+        AcePathfinderUtil.insertValue(data, "wst_lat", "26.65");
+        AcePathfinderUtil.insertValue(data, "wst_long", "-80.633");
+        AcePathfinderUtil.insertValue(data, "wst_elev", "3.00");
+        AcePathfinderUtil.insertValue(data, "wndht", "2.00");
+//        AcePathfinderUtil.insertValue(data, "amth", "0.3", "weather");
+//        AcePathfinderUtil.insertValue(data, "bmth", "0.4", "weather");
+        AcePathfinderUtil.insertValue(data, "psyvnt", "Forced", "weather");
+
+        // Wind not missing and wndht = 2
+        AcePathfinderUtil.insertValue(data, "w_date", "19890214");
+        AcePathfinderUtil.insertValue(data, "srad", "13.6");
+        AcePathfinderUtil.insertValue(data, "tmax", "26.4");
+        AcePathfinderUtil.insertValue(data, "tmin", "12.8");
+        AcePathfinderUtil.insertValue(data, "sunh", "");
+        AcePathfinderUtil.insertValue(data, "tavd", "");
+        AcePathfinderUtil.insertValue(data, "wind", "180");
+        AcePathfinderUtil.insertValue(data, "rhmnd", "", AcePathfinder.INSTANCE.getPath("w_date"));
+        AcePathfinderUtil.insertValue(data, "rhmxd", "", AcePathfinder.INSTANCE.getPath("w_date"));
+        AcePathfinderUtil.insertValue(data, "vprsd", "1.6");
+        AcePathfinderUtil.insertValue(data, "tdew", "");
+        AcePathfinderUtil.insertValue(data, "tdry", "");
+        AcePathfinderUtil.insertValue(data, "twet", "");
+
+        log.debug("getEto() intput5: {}", JSONAdapter.toJSON(data));
+        acctual = WeatherHelper.getEto(data);
+        assertEquals("getEto5: ", expected, acctual.get("eto"));
+        log.info("getEto() output5: {}", acctual.toString());
     }
 }
