@@ -1,10 +1,9 @@
 package org.agmip.functions;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import org.agmip.ace.util.AcePathfinderUtil;
 import org.agmip.common.Event;
@@ -713,6 +712,64 @@ public class ExperimentHelper {
 //            LOG.debug((String)icLayers.get(i).get("icbl") + ", " + (String)icLayers.get(i).get("slsc"));
         }
         results.put("slsc", slscArr);
+        return results;
+    }
+
+    /**
+     * This function will use the first planting date to generate the other
+     * planting dates for the following year in the experiment duration. The
+     * month and date will be same with the original one. If experiment duration
+     * is no longer than 1 year, this will return empty result set.
+     *
+     * @param data The HashMap of experiment (including weather data)
+     *
+     * @return An {@code ArrayList} of {@code pdate} for each year in the
+     * experiment duration, includes the original first {@code pdate} when {@code duration} > 1.
+     */
+    public static HashMap<String, ArrayList<String>> getAutoPlantingDate(Map data) {
+
+        HashMap<String, ArrayList<String>> results = new HashMap<String, ArrayList<String>>();
+        ArrayList<String> pdates = new ArrayList<String>();
+
+        // Get Experiment duration
+        int expDur;
+        try {
+            expDur = Integer.parseInt(getValueOr(data, "exp_dur", "1"));
+        } catch (Exception e) {
+            expDur = 1;
+        }
+        // If no more planting event is required
+        if (expDur <= 1) {
+            LOG.info("Experiment duration is not more than 1, AUTO_FILL_PDATE exists.");
+            return results;
+        }
+
+        // Get PDATE
+        ArrayList<HashMap<String, String>> events = MapUtil.getBucket(data, "management").getDataList();
+        Event event = new Event(events, "planting");
+        String pdate = getValueOr(event.getCurrentEvent(), "date", "");
+        Date dPdate = convertFromAgmipDateString(pdate);
+        if (dPdate == null) {
+            LOG.error("Initial PDATE is invalid, AUTO_FILL_PDATE exists.");
+            return results;
+        } else {
+            pdates.add(pdate);
+        }
+
+        // Calculate the new PDATEs
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(dPdate);
+        int year = cal.get(Calendar.YEAR);
+        String monthAndDay = String.format("%1$02d%2$02d",
+                cal.get(Calendar.MONTH) + 1,
+                cal.get(Calendar.DATE));
+        for (int i = 1; i < expDur; i++) {
+            pdates.add(String.format("%1$04d%2$s",
+                    year + i,
+                    monthAndDay));
+        }
+
+        results.put("pdate", pdates);
         return results;
     }
 }

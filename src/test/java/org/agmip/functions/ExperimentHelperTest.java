@@ -380,4 +380,35 @@ public class ExperimentHelperTest {
             }
         }
     }
+
+    @Test
+    public void testGetAutoPlantingDate2() throws IOException, Exception {
+        String line;
+        ArrayList<String> expected_1 = new ArrayList<String>();
+        expected_1.add("19820203");
+        expected_1.add("19830203");
+        expected_1.add("19840203");
+        int expected_2 = 3;
+        ArrayList<String> acctual_1 = null;
+        URL test_resource = this.getClass().getResource("/auto_plant_single_year_test.json");
+        ArrayList<Map<String, String>> events = new ArrayList<Map<String, String>>();
+        HashMap<String, ArrayList<String>> results = new HashMap<String, ArrayList<String>>();
+        BufferedReader br = new BufferedReader(
+                new InputStreamReader(
+                new FileInputStream(test_resource.getPath())));
+
+        if ((line = br.readLine()) != null) {
+            HashMap<String, Object> data = JSONAdapter.fromJSON(line);
+            AcePathfinderUtil.insertValue(data, "pdate", "19820203");
+            AcePathfinderUtil.insertValue(data, "crid", "MAZ");
+            data.put("exp_dur", "3");
+            results = ExperimentHelper.getAutoPlantingDate(data);
+            acctual_1 = results.get("pdate");
+        }
+        log.info("Results: {}", results);
+
+        assertEquals("getAutoPlantingDate: unexpected result", expected_1, acctual_1);
+        assertEquals("getAutoPlantingDate: empty result", expected_2, acctual_1.size());
+
+    }
 }
