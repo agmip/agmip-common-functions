@@ -153,6 +153,34 @@ public class Functions {
     }
 
     /**
+     * Offset an AgMIP standard date string (YYYYMMDD) by a set number of years.
+     *
+     * @param initial AgMIP standard date string
+     * @param offset number of years to offset (can be positive or negative
+     * integer)
+     *
+     * @return AgMIP standard date string of <code>initial + offset</code>
+     */
+    public static String yearOffset(String initial, String offset) {
+        Date date = convertFromAgmipDateString(initial);
+        BigInteger iOffset;
+        if (date == null) {
+            // Invalid date
+            return null;
+        }
+        GregorianCalendar cal = new GregorianCalendar();
+        cal.setTime(date);
+
+        try {
+            iOffset = new BigInteger(offset);
+            cal.add(GregorianCalendar.YEAR, iOffset.intValue());
+        } catch (Exception ex) {
+            return null;
+        }
+        return convertToAgmipDateString(cal.getTime());
+    }
+
+    /**
      * Offset a numeric string by another numeric string.
      *
      * Any numeric string recognized by {@code BigDecimal} is supported.

@@ -716,20 +716,21 @@ public class ExperimentHelper {
     }
 
     /**
-     * This function will use the first planting date to generate the other
-     * planting dates for the following year in the experiment duration. The
-     * month and date will be same with the original one. If experiment duration
-     * is no longer than 1 year, this will return empty result set.
+     * This function will use the first event data of each type to generate the
+     * other events of that type for the following year in the experiment
+     * duration. The month and date will be same with the original one. If
+     * experiment duration is no longer than 1 year, this will return empty
+     * result set.
      *
      * @param data The HashMap of experiment (including weather data)
      *
-     * @return An {@code ArrayList} of {@code pdate} for each year in the
-     * experiment duration, includes the original first {@code pdate} when {@code duration} > 1.
+     * @return Several groups of {@code ArrayList} of {@code Event} for each
+     * year in the experiment duration. The original group of {@code Event} will
+     * only be included when {@code duration} > 1.
      */
-    public static HashMap<String, ArrayList<String>> getAutoPlantingDate(Map data) {
+    public static ArrayList<ArrayList<HashMap<String, String>>> getAutoEventDate(Map data) {
 
-        HashMap<String, ArrayList<String>> results = new HashMap<String, ArrayList<String>>();
-        ArrayList<String> pdates = new ArrayList<String>();
+        ArrayList<ArrayList<HashMap<String, String>>> results = new ArrayList<ArrayList<HashMap<String, String>>>();
 
         // Get Experiment duration
         int expDur;
@@ -740,36 +741,53 @@ public class ExperimentHelper {
         }
         // If no more planting event is required
         if (expDur <= 1) {
-            LOG.info("Experiment duration is not more than 1, AUTO_FILL_PDATE exists.");
+            LOG.info("Experiment duration is not more than 1, AUTO_REPLICATE_EVENTS won't be applied.");
             return results;
         }
 
-        // Get PDATE
+        // Get Event date
         ArrayList<HashMap<String, String>> events = MapUtil.getBucket(data, "management").getDataList();
-        Event event = new Event(events, "planting");
-        String pdate = getValueOr(event.getCurrentEvent(), "date", "");
-        Date dPdate = convertFromAgmipDateString(pdate);
-        if (dPdate == null) {
-            LOG.error("Initial PDATE is invalid, AUTO_FILL_PDATE exists.");
-            return results;
-        } else {
-            pdates.add(pdate);
+        while (results.size() < expDur) {
+            results.add(new ArrayList());
         }
 
-        // Calculate the new PDATEs
         Calendar cal = Calendar.getInstance();
-        cal.setTime(dPdate);
-        int year = cal.get(Calendar.YEAR);
-        String monthAndDay = String.format("%1$02d%2$02d",
-                cal.get(Calendar.MONTH) + 1,
-                cal.get(Calendar.DATE));
-        for (int i = 1; i < expDur; i++) {
-            pdates.add(String.format("%1$04d%2$s",
-                    year + i,
-                    monthAndDay));
-        }
+        for (int i = 0; i < events.size(); i++) {
+            HashMap<String, String> event = events.get(i);
+            
+//            if (convertFromAgmipDateString(date) == null) {
+//                String eventType = getValueOr(event, "event", "unknown");
+//                LOG.error("Original {} event has an invalid date: [{}].", eventType, date);
+//                LOG.info("Only copy this {} event for each year without calculating date", eventType);
+//                for (int j = 1; j < expDur; j++) {
+//                    results.get(j).add(event);
+//                }
+//                continue;
+//            }
 
-        results.put("pdate", pdates);
+//            cal.setTime(dDate);
+//            int year = cal.get(Calendar.YEAR);
+//            String monthAndDay = String.format("%1$02d%2$02d",
+//                    cal.get(Calendar.MONTH) + 1,
+//                    cal.get(Calendar.DATE));
+            String date = getValueOr(event, "date", "");
+            String edate = getValueOr(event, "edate", "");
+            for (int j = 0; j < expDur; j++) {
+                HashMap<String, String> newEvent = new HashMap();
+                newEvent.putAll(event);
+                if (!date.equals("")) {
+                    newEvent.put("date", yearOffset(date, j + ""));
+                } else {
+                    String eventType = getValueOr(event, "event", "unknown");
+                    LOG.error("Original {} event has an invalid date: [{}].", eventType, date);
+                }
+                if (!edate.equals("")) {
+                    newEvent.put("edate", yearOffset(edate, j + ""));
+                }
+                
+                results.get(j).add(newEvent);
+            }
+        }
         return results;
     }
 }

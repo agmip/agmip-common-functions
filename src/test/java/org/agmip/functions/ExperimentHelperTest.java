@@ -16,6 +16,7 @@ import org.agmip.util.JSONAdapter;
 import static org.agmip.util.MapUtil.*;
 import static org.junit.Assert.*;
 import org.agmip.ace.util.AcePathfinderUtil;
+import org.agmip.util.MapUtil;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.Ignore;
@@ -382,33 +383,101 @@ public class ExperimentHelperTest {
     }
 
     @Test
-    public void testGetAutoPlantingDate2() throws IOException, Exception {
-        String line;
-        ArrayList<String> expected_1 = new ArrayList<String>();
-        expected_1.add("19820203");
-        expected_1.add("19830203");
-        expected_1.add("19840203");
-        int expected_2 = 3;
-        ArrayList<String> acctual_1 = null;
-        URL test_resource = this.getClass().getResource("/auto_plant_single_year_test.json");
-        ArrayList<Map<String, String>> events = new ArrayList<Map<String, String>>();
-        HashMap<String, ArrayList<String>> results = new HashMap<String, ArrayList<String>>();
-        BufferedReader br = new BufferedReader(
-                new InputStreamReader(
-                new FileInputStream(test_resource.getPath())));
+    public void testGetAutoEventDate() throws IOException, Exception {
 
-        if ((line = br.readLine()) != null) {
-            HashMap<String, Object> data = JSONAdapter.fromJSON(line);
-            AcePathfinderUtil.insertValue(data, "pdate", "19820203");
-            AcePathfinderUtil.insertValue(data, "crid", "MAZ");
-            data.put("exp_dur", "3");
-            results = ExperimentHelper.getAutoPlantingDate(data);
-            acctual_1 = results.get("pdate");
+        ArrayList<ArrayList<HashMap<String, String>>> expected = new ArrayList();
+        int expDur = 3;
+        HashMap pEvent = new HashMap();
+        int pdate = 19820203;
+        int edate = 19820204;
+        pEvent.put("event", "planting");
+        pEvent.put("crid", "MAZ");
+        HashMap iEvent = new HashMap();
+        int idate = 19820213;
+        iEvent.put("event", "irrigation");
+        iEvent.put("irop", "ir001");
+        HashMap iaEvent = new HashMap();
+        int iadate = 19820313;
+        iaEvent.put("event", "auto_irrig");
+        iaEvent.put("irmdp", "1234");
+        HashMap feEvent = new HashMap();
+        int fedate = 19820413;
+        feEvent.put("event", "fertilizer");
+        feEvent.put("fecd", "123");
+        HashMap tEvent = new HashMap();
+        int tdate = 19820513;
+        tEvent.put("event", "tillage");
+        tEvent.put("tiimp", "123456");
+        HashMap omEvent = new HashMap();
+        int omdate = 19820613;
+        omEvent.put("event", "organic_matter");
+        omEvent.put("omcd", "12345");
+        HashMap hEvent = new HashMap();
+        int hdate = 19820713;
+        hEvent.put("event", "harvest");
+        hEvent.put("harm", "111");
+        HashMap cEvent = new HashMap();
+        int cdate = 19820813;
+        cEvent.put("event", "chemicals");
+        cEvent.put("chcd", "222");
+        HashMap mEvent = new HashMap();
+        int mdate = 19820913;
+        mEvent.put("event", "mulch");
+        mEvent.put("mltp", "333");
+
+        for (int i = 0; i < expDur; i++) {
+            expected.add(new ArrayList());
+            expected.get(i).add(createEvent(pEvent, pdate, i));
+            expected.get(i).get(expected.get(i).size() - 1).put("edate", edate + 10000 * i + "");
+            expected.get(i).add(createEvent(iEvent, idate, i));
+            expected.get(i).add(createEvent(iaEvent, iadate, i));
+            expected.get(i).add(createEvent(feEvent, fedate, i));
+            expected.get(i).add(createEvent(tEvent, tdate, i));
+            expected.get(i).add(createEvent(omEvent, omdate, i));
+            expected.get(i).add(createEvent(hEvent, hdate, i));
+            expected.get(i).add(createEvent(cEvent, cdate, i));
+            expected.get(i).add(createEvent(mEvent, mdate, i));
         }
+
+        HashMap<String, Object> data = new HashMap();
+        AcePathfinderUtil.insertValue(data, "pdate", "19820203");
+        MapUtil.getBucket(data, "management").getDataList().get(0).put("edate", "19820204");
+        AcePathfinderUtil.insertValue(data, "crid", "MAZ");
+        AcePathfinderUtil.insertValue(data, "idate", "19820213");
+        AcePathfinderUtil.insertValue(data, "irop", "ir001");
+//        AcePathfinderUtil.insertValue(data, "iadate", "19820313");
+        AcePathfinderUtil.insertValue(data, "irmdp", "1234");
+        MapUtil.getBucket(data, "management").getDataList().get(2).put("date", "19820313");
+        AcePathfinderUtil.insertValue(data, "fedate", "19820413");
+        AcePathfinderUtil.insertValue(data, "fecd", "123");
+        AcePathfinderUtil.insertValue(data, "tdate", "19820513");
+        AcePathfinderUtil.insertValue(data, "tiimp", "123456");
+        AcePathfinderUtil.insertValue(data, "omdat", "19820613");
+        AcePathfinderUtil.insertValue(data, "omcd", "12345");
+        AcePathfinderUtil.insertValue(data, "hadat", "19820713");
+        AcePathfinderUtil.insertValue(data, "harm", "111");
+        AcePathfinderUtil.insertValue(data, "cdate", "19820813");
+        AcePathfinderUtil.insertValue(data, "chcd", "222");
+        AcePathfinderUtil.insertValue(data, "mladat", "19820913");
+        AcePathfinderUtil.insertValue(data, "mltp", "333");
+        data.put("exp_dur", expDur + "");
+
+//        HashMap dummyEvent = new HashMap();
+//        dummyEvent.put("date", "abc");
+//        MapUtil.getBucket(data, "management").getDataList().add(dummyEvent);
+
+        log.info("Inputs: {}", data);
+        ArrayList<ArrayList<HashMap<String, String>>> results = ExperimentHelper.getAutoEventDate(data);
         log.info("Results: {}", results);
 
-        assertEquals("getAutoPlantingDate: unexpected result", expected_1, acctual_1);
-        assertEquals("getAutoPlantingDate: empty result", expected_2, acctual_1.size());
+        assertEquals("getAutoPlantingDate: unexpected result", expected, results);
 
+    }
+
+    private HashMap createEvent(HashMap template, int date, int yearIndex) {
+        HashMap event = new HashMap();
+        event.putAll(template);
+        event.put("date", (date + yearIndex * 10000) + "");
+        return event;
     }
 }
