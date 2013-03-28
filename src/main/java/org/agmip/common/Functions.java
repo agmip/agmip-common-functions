@@ -86,7 +86,7 @@ public class Functions {
     public static Date convertFromAgmipDateString(String agmipDate) {
         try {
             return dateFormatter.parse(agmipDate);
-        } catch (ParseException ex) {
+        } catch (Exception ex) {
             return null;
         }
     }
@@ -119,7 +119,7 @@ public class Functions {
             SimpleDateFormat fmt = new SimpleDateFormat(format);
             Date d = dateFormatter.parse(agmipDate);
             return fmt.format(d);
-        } catch (ParseException ex) {
+        } catch (Exception ex) {
             return null;
         }
     }
@@ -146,6 +146,34 @@ public class Functions {
         try {
             iOffset = new BigInteger(offset);
             cal.add(GregorianCalendar.DAY_OF_MONTH, iOffset.intValue());
+        } catch (Exception ex) {
+            return null;
+        }
+        return convertToAgmipDateString(cal.getTime());
+    }
+
+    /**
+     * Offset an AgMIP standard date string (YYYYMMDD) by a set number of years.
+     *
+     * @param initial AgMIP standard date string
+     * @param offset number of years to offset (can be positive or negative
+     * integer)
+     *
+     * @return AgMIP standard date string of <code>initial + offset</code>
+     */
+    public static String yearOffset(String initial, String offset) {
+        Date date = convertFromAgmipDateString(initial);
+        BigInteger iOffset;
+        if (date == null) {
+            // Invalid date
+            return null;
+        }
+        GregorianCalendar cal = new GregorianCalendar();
+        cal.setTime(date);
+
+        try {
+            iOffset = new BigInteger(offset);
+            cal.add(GregorianCalendar.YEAR, iOffset.intValue());
         } catch (Exception ex) {
             return null;
         }
