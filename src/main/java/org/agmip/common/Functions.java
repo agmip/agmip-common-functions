@@ -86,7 +86,7 @@ public class Functions {
     public static Date convertFromAgmipDateString(String agmipDate) {
         try {
             return dateFormatter.parse(agmipDate);
-        } catch (ParseException ex) {
+        } catch (Exception ex) {
             return null;
         }
     }
@@ -119,7 +119,7 @@ public class Functions {
             SimpleDateFormat fmt = new SimpleDateFormat(format);
             Date d = dateFormatter.parse(agmipDate);
             return fmt.format(d);
-        } catch (ParseException ex) {
+        } catch (Exception ex) {
             return null;
         }
     }
