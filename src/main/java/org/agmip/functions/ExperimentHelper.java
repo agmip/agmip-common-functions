@@ -360,7 +360,7 @@ public class ExperimentHelper {
         date2 = date2.replace(separator, "");
         if (date2.equals("0229")) {
             try {
-                int year1 = Integer.parseInt(date2.substring(2, 4));
+                int year1 = Integer.parseInt(date1.substring(2, 4));
                 if (year1 % 4 != 0) {
                     return date1.endsWith("0228");
                 }
