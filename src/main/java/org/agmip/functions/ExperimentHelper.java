@@ -1,6 +1,7 @@
 package org.agmip.functions;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
@@ -421,7 +422,7 @@ public class ExperimentHelper {
      * @param offsets The array of date as offset from planting date (days)
      * (must be paired with ptps)
      * @param ptps The array of proportion of total N added (%) (must be paired
-     * with offsets)
+     * with offsets, the sum must be 100%)
      * @param data The experiment data holder
      *
      * @return An {@code ArrayList} of generated {@code fertilizer event} based
@@ -439,6 +440,10 @@ public class ExperimentHelper {
 
         try {
             iNum = Integer.parseInt(num);
+            if (iNum < 1) {
+                LOG.error("INPUT NUMBER OF FERTILIZER APPLICATIONS MUST BE A POSIIVE NUMBER");
+                return results;
+            }
         } catch (Exception e) {
             LOG.error("INPUT NUMBER OF FERTILIZER APPLICATIONS IS NOT A NUMBERIC STRING [" + num + "]");
             return results;
@@ -446,7 +451,13 @@ public class ExperimentHelper {
 
         // Check if the two input array have "num" pairs of these data
         if (iNum != offsets.length || iNum != ptps.length) {
-            LOG.error("THE SPECIFIC DATA TO EACH APPLICATION MUST HAVE " + num + " PAIRS OF THESE DATA");
+            if (iNum > offsets.length || !compare("100", round(sum(Arrays.copyOfRange(ptps, 0, iNum)), 0), CompareMode.EQUAL)) {
+                LOG.error("THE REQUESTED NUMBER OF APPLICATION IS NOT MATCH WITH THE GIVEN OFFSET DATA");
+                return results;
+            }
+        } // Check if the sum of PTPs is 100%
+        else if (!compare("100", round(sum(ptps), 0), CompareMode.EQUAL)) {
+            LOG.error("THE SUM OF PROPORTION OF TOTAL N ADDED (%) IS NOT EQUAL TO 100%");
             return results;
         }
 
