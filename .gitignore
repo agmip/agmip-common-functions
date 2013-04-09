@@ -1,2 +1,11 @@
-target/*
+.settings/*
+bin/*
+.classpath
 *.sw?
+*.jar
+.project
+intermediate_crop*
+pretty_print*
+target/*
+*.tmp
+.DS_Store
