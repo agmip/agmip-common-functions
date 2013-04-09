@@ -1,7 +1,7 @@
 .settings/*
 bin/*
 .classpath
-*.sw?
+*.swp
 *.jar
 .project
 intermediate_crop*
