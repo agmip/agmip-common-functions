@@ -1,10 +1,7 @@
 package org.agmip.functions;
 
-import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
@@ -12,14 +9,14 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import org.agmip.ace.AcePathfinder;
+import org.agmip.ace.util.AcePathfinderUtil;
 import org.agmip.util.JSONAdapter;
+import org.agmip.util.MapUtil;
 import static org.agmip.util.MapUtil.*;
 import static org.junit.Assert.*;
-import org.agmip.ace.util.AcePathfinderUtil;
-import org.agmip.util.MapUtil;
-import org.junit.Before;
-import org.junit.Test;
 import org.junit.Ignore;
+import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -207,8 +204,8 @@ public class ExperimentHelperTest {
         expected_2.put("feacd", "AP002");
         expected_2.put("fedep", "10");
         expected_2.put("feamn", "73");
-        Map acctual_1 = null;
-        Map acctual_2 = null;
+        Map acctual_1;
+        Map acctual_2;
 
         HashMap<String, Object> data = new HashMap<String, Object>();
 
@@ -231,12 +228,14 @@ public class ExperimentHelperTest {
         acctual_1 = events.get(0);
         acctual_2 = events.get(1);
         //}
-        try {
-            assertEquals("getRootDistribution: fert app 1", expected_1, acctual_1);
-            assertEquals("getRootDistribution: fert app 2", expected_2, acctual_2);
-        } catch (Error e) {
-            log.error(e.getMessage());
-        }
+//        try {
+//            assertEquals("getRootDistribution: fert app 1", expected_1, acctual_1);
+//            assertEquals("getRootDistribution: fert app 2", expected_2, acctual_2);
+//        } catch (Error e) {
+//            log.error(e.getMessage());
+//        }
+        assertEquals("getRootDistribution: fert app 1", expected_1, acctual_1);
+        assertEquals("getRootDistribution: fert app 2", expected_2, acctual_2);
         log.info("getFertDistribution Output: {}", events.toString());
     }
 
@@ -260,7 +259,7 @@ public class ExperimentHelperTest {
         expected_1.put("omdep", "5");
         expected_1.put("ominp", "50");
         expected_1.put("omn%", "4.82");
-        Map acctual_1 = null;
+        Map acctual_1;
 
         // BufferedReader br = new BufferedReader(
         //         new InputStreamReader(
@@ -283,11 +282,12 @@ public class ExperimentHelperTest {
         ArrayList<HashMap<String, String>> events = ExperimentHelper.getOMDistribution(data, offset, omcd, omc2n, omdep, ominp, dmr);
         acctual_1 = events.get(1);
         //}
-        try {
-            assertEquals("getRootDistribution: om app 1", expected_1, acctual_1);
-        } catch (Error e) {
-            log.error(e.getMessage());
-        }
+//        try {
+//            assertEquals("getRootDistribution: om app 1", expected_1, acctual_1);
+//        } catch (Error e) {
+//            log.error(e.getMessage());
+//        }
+        assertEquals("getRootDistribution: om app 1", expected_1, acctual_1);
         log.info("getOMDistribution output: {}", data.toString());
     }
 
@@ -305,12 +305,45 @@ public class ExperimentHelperTest {
         AcePathfinderUtil.insertValue(data, "pdate", "19990415");
         ArrayList<HashMap<String, String>> events = ExperimentHelper.getOMDistribution(data, offset, omcd, omc2n, omdep, ominp, dmr);
 
-        try {
-            assertEquals("getRootDistribution: om no data", 1, events.size());
-        } catch (Error e) {
-            log.error(e.getMessage());
-        }
+//        try {
+//            assertEquals("getRootDistribution: om no data", 1, events.size());
+//        } catch (Error e) {
+//            log.error(e.getMessage());
+//        }
+        assertEquals("getRootDistribution: om no data", 1, events.size());
         log.info("getOMDistribution output: {}", data.toString());
+    }
+
+    @Test
+    public void testGetOMDistribution2() throws IOException, Exception {
+        String offset = "-7";
+        String omcd = "RE003";
+        String omc2n = "8.3";
+        String omdep = "5";
+        String ominp = "50";
+        String dmr = "2.5";
+
+        Map expected_1 = new HashMap();
+        expected_1.put("event", "organic_matter");
+        expected_1.put("date", "19990408");
+        expected_1.put("omcd", "RE003");
+        expected_1.put("omamt", "1000");
+        expected_1.put("om_tot", "1000");
+        expected_1.put("omc2n", "8.3");
+        expected_1.put("omdep", "5");
+        expected_1.put("ominp", "50");
+        expected_1.put("omn%", "4.82");
+        Map acctual_1 = null;
+
+        HashMap<String, Object> data = new HashMap<String, Object>();
+        AcePathfinderUtil.insertValue(data, "pdate", "19990415");
+        AcePathfinderUtil.insertValue(data, "om_tot", "1000");
+        log.debug(AcePathfinder.INSTANCE.getPath("om_tot"));
+        ArrayList<HashMap<String, String>> events = ExperimentHelper.getOMDistribution(data, offset, omcd, omc2n, omdep, ominp, dmr);
+        acctual_1 = events.get(1);
+
+        assertEquals("getRootDistribution: om app 2", expected_1, acctual_1);
+        log.info("getOMDistribution output 2: {}", data.toString());
     }
 
     @Test
@@ -374,11 +407,12 @@ public class ExperimentHelperTest {
 //        acctual = getObjectOr(icData, "soilLayer", new ArrayList());
         acctual = getObjectOr(result, "slsc", new ArrayList());
         for (int i = 0; i < expected.length; i++) {
-            try {
-                assertEquals("getStableCDistribution: normal case " + i, expected[i], (String) acctual.get(i));
-            } catch (Error e) {
-                log.error(e.getMessage());
-            }
+//            try {
+//                assertEquals("getStableCDistribution: normal case " + i, expected[i], (String) acctual.get(i));
+//            } catch (Error e) {
+//                log.error(e.getMessage());
+//            }
+            assertEquals("getStableCDistribution: normal case " + i, expected[i], (String) acctual.get(i));
         }
     }
 
