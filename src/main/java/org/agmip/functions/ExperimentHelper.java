@@ -589,9 +589,13 @@ public class ExperimentHelper {
         //    }
         // Get the omamt from the first? OM event
         Event omEvent = new Event(eventData, "organic_matter");
-        omamt = (String) omEvent.getCurrentEvent().get("omamt");
+        omamt = (String) omEvent.getCurrentEvent().get("om_tot");
         if (omamt == null || omamt.equals("")) {
-            LOG.error("OMAMT IS NOT AVAILABLE");
+            LOG.debug("OM_TOT IS NOT AVAILABLE, USING OMAMT");
+            omamt = (String) omEvent.getCurrentEvent().get("omamt");
+        }
+        if (omamt == null || omamt.equals("")) {
+            LOG.error("NEITHER OM_TOT NOR OMAMT ARE AVAILABLE");
             return eventData;
         }
         //omamt = getValueOr(expData, "omamt", ""); // TODO will be replace by generic getting method
