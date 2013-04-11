@@ -137,6 +137,98 @@ public class ExperimentHelperTest {
     }
 
     @Test
+    public void testGetAutoFillPlantingDate_machakos() throws IOException, Exception {
+        URL test_resource = this.getClass().getResource("/machakos_wth_only.json");
+        String line;
+        String startDate = "01-15";
+        String endDate = "02-28";
+        String accRainAmt = "9.0";
+        String dayNum = "6";
+        String expected_1 = "19810218";
+        int expected_3 = 1;
+        String acctual_1 = "";
+        int acctual_3 = 0;
+
+        BufferedReader br = new BufferedReader(
+                new InputStreamReader(
+                new FileInputStream(test_resource.getPath())));
+
+        if ((line = br.readLine()) != null) {
+
+            HashMap<String, Object> data = JSONAdapter.fromJSON(line);
+            AcePathfinderUtil.insertValue(data, "crid", "MAZ");
+            data.put("sc_year", "1981");
+            HashMap<String, ArrayList<String>> results = ExperimentHelper.getAutoFillPlantingDate(data, startDate, endDate, accRainAmt, dayNum);
+            acctual_1 = results.get("pdate").get(0);
+            acctual_3 = results.get("pdate").size();
+            log.info("Results: {}", results);
+        }
+
+        assertEquals("getAutoFillPlantingDate: normal case", expected_1, acctual_1);
+        assertEquals("getAutoFillPlantingDate: no date find case", expected_3, acctual_3);
+    }
+
+    @Test
+    public void testGetAutoFillPlantingDate_machakos_NOSCYear() throws IOException, Exception {
+        URL test_resource = this.getClass().getResource("/machakos_wth_only.json");
+        String line;
+        String startDate = "01-15";
+        String endDate = "02-28";
+        String accRainAmt = "9.0";
+        String dayNum = "6";
+        String expected_1 = "19800124";
+        int expected_3 = 1;
+        String acctual_1 = "";
+        int acctual_3 = 0;
+
+        BufferedReader br = new BufferedReader(
+                new InputStreamReader(
+                new FileInputStream(test_resource.getPath())));
+
+        if ((line = br.readLine()) != null) {
+
+            HashMap<String, Object> data = JSONAdapter.fromJSON(line);
+            AcePathfinderUtil.insertValue(data, "crid", "MAZ");
+            HashMap<String, ArrayList<String>> results = ExperimentHelper.getAutoFillPlantingDate(data, startDate, endDate, accRainAmt, dayNum);
+            acctual_1 = results.get("pdate").get(0);
+            acctual_3 = results.get("pdate").size();
+            log.info("Results: {}", results);
+        }
+
+        assertEquals("getAutoFillPlantingDate: normal case", expected_1, acctual_1);
+        assertEquals("getAutoFillPlantingDate: no date find case", expected_3, acctual_3);
+    }
+
+    @Test
+    public void testGetAutoFillPlantingDate_machakos_ValidPdate() throws IOException, Exception {
+        URL test_resource = this.getClass().getResource("/machakos_wth_only.json");
+        String line;
+        String startDate = "01-15";
+        String endDate = "02-28";
+        String accRainAmt = "9.0";
+        String dayNum = "6";
+        int expected_3 = 0;
+        int acctual_3 = 0;
+
+        BufferedReader br = new BufferedReader(
+                new InputStreamReader(
+                new FileInputStream(test_resource.getPath())));
+
+        if ((line = br.readLine()) != null) {
+
+            HashMap<String, Object> data = JSONAdapter.fromJSON(line);
+            data.put("sc_year", "1981");
+            AcePathfinderUtil.insertValue(data, "crid", "MAZ");
+            AcePathfinderUtil.insertValue(data, "pdate", "19830101");
+            HashMap<String, ArrayList<String>> results = ExperimentHelper.getAutoFillPlantingDate(data, startDate, endDate, accRainAmt, dayNum);
+            acctual_3 = results.size();
+            log.info("Results: {}", results);
+        }
+
+        assertEquals("getAutoFillPlantingDate: pdate valid case", expected_3, acctual_3);
+    }
+
+    @Test
     @Ignore
     public void testGetAutoPlantingDate_machakos_scYear() throws IOException, Exception {
         String line;
