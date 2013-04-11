@@ -131,7 +131,7 @@ public class ExperimentHelper {
             try {
                 startYear = Integer.parseInt(getValueOr(data, "sc_year", "").substring(0, 4));
             } catch (Exception e) {
-                startYear = 0;
+                startYear = -99;
             }
         }
 
@@ -153,6 +153,7 @@ public class ExperimentHelper {
                     try {
                         startYear = Integer.parseInt(getValueOr(plEvent, "date", "").substring(0, 4));
                     } catch (Exception e) {
+                        LOG.info("EXPCETION: {}", startYear);
                         startYear = -99;
                     }
                 } else {
@@ -169,7 +170,7 @@ public class ExperimentHelper {
                 startYearIndex = 0;
             } // If multiple year duration, then report error and end function
             else {
-                LOG.error("THE START YEAR IS OUT OF DATA RANGE (SC_YEAR:[" + startYear + "]");
+                LOG.error("THE START YEAR IS OUT OF DATA RANGE (SC_YEAR:[" + startYear + "]) {}", startYearIndex);
                 return new HashMap<String, ArrayList<String>>();
             }
         }
@@ -279,7 +280,6 @@ public class ExperimentHelper {
         int duration;
         double accRainAmtTotal;
         double accRainAmt;
-//        int expDur;
         int startYear;
         ArrayList<Window> windows = new ArrayList<Window>();
         ArrayList<String> pdates = new ArrayList<String>();
