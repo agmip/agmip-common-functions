@@ -82,7 +82,7 @@ public class ExperimentHelperTest {
 
         if ((line = br.readLine()) != null) {
 
-            Map<String, ArrayList<Map>> data = new LinkedHashMap<String, ArrayList<Map>>();
+            HashMap<String, ArrayList<Map>> data = new LinkedHashMap<String, ArrayList<Map>>();
             Map<String, Object> expData = JSONAdapter.fromJSON(line);
             data.put("experiments", new ArrayList());
             data.put("weathers", new ArrayList());
@@ -122,7 +122,7 @@ public class ExperimentHelperTest {
 
         if ((line = br.readLine()) != null) {
 
-            Map<String, Object> data = JSONAdapter.fromJSON(line);
+            HashMap<String, Object> data = JSONAdapter.fromJSON(line);
             data.put("exp_dur", "3");
             HashMap<String, ArrayList<String>> results = ExperimentHelper.getAutoPlantingDate(data, startDate, endDate, accRainAmt, dayNum);
             acctual_1 = results.get("pdate").get(0);
@@ -160,7 +160,7 @@ public class ExperimentHelperTest {
 
         if ((line = br.readLine()) != null) {
 
-            Map<String, Object> data = JSONAdapter.fromJSON(line);
+            HashMap<String, Object> data = JSONAdapter.fromJSON(line);
             data.put("exp_dur", "3");
             data.put("sc_year", "1983");
             HashMap<String, ArrayList<String>> result = ExperimentHelper.getAutoPlantingDate(data, startDate, endDate, accRainAmt, dayNum);
