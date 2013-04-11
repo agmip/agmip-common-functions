@@ -143,7 +143,7 @@ public class ExperimentHelper {
         // Check if there is eventData existing
         if (eventData.isEmpty()) {
             LOG.warn("EMPTY EVENT DATA.");
-            event = new Event(new ArrayList(), "planting");
+//            event = new Event(new ArrayList(), "planting");
         } else {
             event = new Event(eventData, "planting");
             // If only one year is to be simulated, the recorded planting date year will be used (if available).
@@ -270,7 +270,6 @@ public class ExperimentHelper {
      */
     public static HashMap<String, ArrayList<String>> getAutoFillPlantingDate(HashMap data, String eDate, String lDate, String rain, String days) {
 
-        Map wthData;
         ArrayList<Map> dailyData;
         ArrayList<HashMap<String, String>> eventData;
         Event event;
@@ -281,7 +280,7 @@ public class ExperimentHelper {
         double accRainAmtTotal;
         double accRainAmt;
 //        int expDur;
-        int startYear = 0;
+        int startYear;
         ArrayList<Window> windows = new ArrayList<Window>();
         ArrayList<String> pdates = new ArrayList<String>();
         HashMap<String, ArrayList<String>> results = new HashMap<String, ArrayList<String>>();
