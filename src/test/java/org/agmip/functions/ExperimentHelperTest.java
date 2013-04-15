@@ -137,6 +137,41 @@ public class ExperimentHelperTest {
     }
 
     @Test
+    public void testGetAutoPlantingDate_machakos_lastDate() throws IOException, Exception {
+        URL test_resource = this.getClass().getResource("/machakos_wth_only.json");
+        String line;
+        String startDate = "01-15";
+        String endDate = "02-28";
+        String accRainAmt = "50.0";
+        String dayNum = "6";
+        String expected_1 = "19800228";
+        String expected_2 = "19810228";
+        int expected_3 = 3;
+        String acctual_1 = "";
+        String acctual_2 = "";
+        int acctual_3 = 0;
+
+        BufferedReader br = new BufferedReader(
+                new InputStreamReader(
+                new FileInputStream(test_resource.getPath())));
+
+        if ((line = br.readLine()) != null) {
+
+            HashMap<String, Object> data = JSONAdapter.fromJSON(line);
+            data.put("exp_dur", "3");
+            HashMap<String, ArrayList<String>> results = ExperimentHelper.getAutoPlantingDate(data, startDate, endDate, accRainAmt, dayNum);
+            acctual_1 = results.get("pdate").get(0);
+            acctual_2 = results.get("pdate").get(1);
+            acctual_3 = results.get("pdate").size();
+            log.info("Results: {}", results);
+        }
+
+        assertEquals("getAutoPlantingDate: normal case", expected_1, acctual_1);
+        assertEquals("getAutoPlantingDate: copy case", expected_2, acctual_2);
+        assertEquals("getAutoPlantingDate: no date find case", expected_3, acctual_3);
+    }
+
+    @Test
     public void testGetAutoFillPlantingDate_machakos() throws IOException, Exception {
         URL test_resource = this.getClass().getResource("/machakos_wth_only.json");
         String line;
@@ -226,6 +261,40 @@ public class ExperimentHelperTest {
         }
 
         assertEquals("getAutoFillPlantingDate: pdate valid case", expected_3, acctual_3);
+    }
+
+    @Test
+    public void testGetAutoFillPlantingDate_machakos_lastDate() throws IOException, Exception {
+        log.debug("== testGetAutoFillPlantingDate_machakos_lastDate() == Start");
+        URL test_resource = this.getClass().getResource("/machakos_wth_only.json");
+        String line;
+        String startDate = "01-15";
+        String endDate = "02-28";
+        String accRainAmt = "50.0";
+        String dayNum = "6";
+        String expected_1 = "19810228";
+        int expected_3 = 1;
+        String acctual_1 = "";
+        int acctual_3 = 0;
+
+        BufferedReader br = new BufferedReader(
+                new InputStreamReader(
+                new FileInputStream(test_resource.getPath())));
+
+        if ((line = br.readLine()) != null) {
+
+            HashMap<String, Object> data = JSONAdapter.fromJSON(line);
+            AcePathfinderUtil.insertValue(data, "crid", "MAZ");
+            data.put("sc_year", "1981");
+            HashMap<String, ArrayList<String>> results = ExperimentHelper.getAutoFillPlantingDate(data, startDate, endDate, accRainAmt, dayNum);
+            acctual_1 = results.get("pdate").get(0);
+            acctual_3 = results.get("pdate").size();
+            log.info("Results: {}", results);
+        }
+
+        assertEquals("getAutoFillPlantingDate: normal case", expected_1, acctual_1);
+        assertEquals("getAutoFillPlantingDate: no date find case", expected_3, acctual_3);
+        log.debug("== testGetAutoFillPlantingDate_machakos_lastDate() == End");
     }
 
     @Test

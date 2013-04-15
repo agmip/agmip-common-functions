@@ -226,7 +226,7 @@ public class ExperimentHelper {
 
             // Check following days
             int outIndex = last;
-            for (int j = last; j < windows[i].end; j++) {
+            for (int j = last; j <= windows[i].end; j++) {
 
                 try {
                     accRainAmt -= Double.parseDouble(getValueOr(dailyData.get(j - intDays), "rain", "0"));
@@ -245,7 +245,12 @@ public class ExperimentHelper {
             }
 
             if (accRainAmt < accRainAmtTotal) {
-                String lastDay = getValueOr(dailyData.get(windows[i].end - 1), "w_date", "");
+                String lastDay;
+                if (windows[i].end >= dailyData.size()) {
+                    lastDay = getValueOr(dailyData.get(dailyData.size() - 1), "w_date", "");
+                } else {
+                    lastDay = getValueOr(dailyData.get(windows[i].end), "w_date", "");
+                }
                 LOG.error("Could not find an appropriate day to plant, using {}", lastDay);
                 pdates.add(lastDay);
             }
@@ -400,7 +405,7 @@ public class ExperimentHelper {
 
             // Check following days
             int outIndex = last;
-            for (int j = last; j < windows.get(i).end; j++) {
+            for (int j = last; j <= windows.get(i).end; j++) {
 
                 try {
                     accRainAmt -= Double.parseDouble(getValueOr(dailyData.get(j - intDays), "rain", "0"));
@@ -419,7 +424,12 @@ public class ExperimentHelper {
             }
 
             if (accRainAmt < accRainAmtTotal) {
-                String lastDay = getValueOr(dailyData.get(windows.get(i).end - 1), "w_date", "");
+                String lastDay;
+                if (windows.get(i).end >= dailyData.size()) {
+                    lastDay = getValueOr(dailyData.get(dailyData.size() - 1), "w_date", "");
+                } else {
+                    lastDay = getValueOr(dailyData.get(windows.get(i).end), "w_date", "");
+                }
                 LOG.error("Could not find an appropriate day to plant, using {}", lastDay);
                 pdates.add(lastDay);
             }
