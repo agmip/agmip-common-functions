@@ -683,6 +683,7 @@ public class ExperimentHelper {
                     String feamn = round(product(fen_tot, ptps[i], "0.01"), 0);
                     output.add(String.format("%s|%s", fdates[i], feamn));
                 }
+                break;
             }
         }
         HashMap result = new HashMap();
@@ -963,6 +964,100 @@ public class ExperimentHelper {
                 results.get(j).add(newEvent);
             }
         }
+        return results;
+    }
+
+    /**
+     * This function allows standard paddy management inputs to be generalized
+     * for a field or group of fields.
+     *
+     * @param data The experiment data holder
+     * @param bundNum Number of Bund height entries
+     * @param percRate The Percolation rate (mm/d)
+     * @param plowpanDept The Plowpan depth (mm)
+     * @param offsets The array of date as offset from planting date (days)
+     * (must be paired with Max and Min)
+     * @param maxVals The array of Max flood (bund) height (mm)
+     * @param minVals The array of Min flood height (mm)
+     * 
+     * @return An {@code ArrayList} of generated {@code irrigation event} based
+     * on first planting date
+     */
+    public static ArrayList<HashMap<String, String>> getPaddyIrrigation(HashMap data, String bundNum, String percRate, String plowpanDept, String[] offsets, String[] maxVals, String[] minVals) {
+        int iNum;
+        ArrayList<HashMap<String, String>> eventData;
+        String[] idates;
+        Event events;
+        String pdate;
+        ArrayList<HashMap<String, String>> results = new ArrayList<HashMap<String, String>>();
+
+        try {
+            iNum = Integer.parseInt(bundNum);
+            if (iNum < 1) {
+                LOG.error("INPUT NUMBER OF BUND HEIGHT MUST BE A POSITIVE NUMBER");
+                return results;
+            }
+        } catch (Exception e) {
+            LOG.error("INPUT NUMBER OF FERTILIZER APPLICATIONS IS NOT A NUMBERIC STRING [" + bundNum + "]");
+            return results;
+        }
+
+        // Check if the two input array have "num" pairs of these data
+        if (iNum != offsets.length || iNum != maxVals.length || iNum != minVals.length) {
+            LOG.error("THE REQUESTED NUMBER OF APPLICATION IS NOT MATCH WITH THE GIVEN OFFSET DATA");
+            return results;
+        }
+
+        // Get original event data array
+        Map mgnData = getObjectOr(data, "management", new HashMap());
+        eventData = getObjectOr(mgnData, "events", new ArrayList());
+
+        // Get planting date and om_date
+        events = new Event(eventData, "planting");
+        pdate = (String) events.getCurrentEvent().get("date");
+        if (pdate == null || pdate.equals("")) {
+            LOG.error("PLANTING DATE IS NOT AVAILABLE");
+            return eventData;
+        }
+
+        // Create irrigation dates based on planting date and given offset days
+        idates = new String[iNum];
+        try {
+            for (int i = 0; i < iNum; i++) {
+                idates[i] = dateOffset(pdate, offsets[i]);
+                if (idates[i] == null) {
+                    LOG.error("INVALID OFFSET NUMBER OF DAYS [" + offsets[i] + "]");
+                    return results;
+                }
+            }
+        } catch (Exception e) {
+            LOG.error("PAIR DATA IS IN VALID [" + e.getMessage() + "]");
+            return results;
+        }
+
+        // Generate new irrigation event
+        HashMap result = new HashMap();
+        // puddling, plowpan depth
+        AcePathfinderUtil.insertValue(result, "idate", idates[0]);
+        AcePathfinderUtil.insertValue(result, "irop", "IR010");
+        AcePathfinderUtil.insertValue(result, "irval", plowpanDept);
+        // percolation rate
+        AcePathfinderUtil.insertValue(result, "idate", idates[0]);
+        AcePathfinderUtil.insertValue(result, "irop", "IR008");
+        AcePathfinderUtil.insertValue(result, "irval", percRate);
+        // For each irrigation date
+        for (int i = 0; i < idates.length; i++) {
+            // bund height
+            AcePathfinderUtil.insertValue(result, "idate", idates[i]);
+            AcePathfinderUtil.insertValue(result, "irop", "IR009");
+            AcePathfinderUtil.insertValue(result, "irval", maxVals[i]);
+            // target minimum flood level
+            AcePathfinderUtil.insertValue(result, "idate", idates[i]);
+            AcePathfinderUtil.insertValue(result, "irop", "IR011");
+            AcePathfinderUtil.insertValue(result, "irval", minVals[i]);
+        }
+        results = MapUtil.getBucket(result, "management").getDataList();
+
         return results;
     }
 }

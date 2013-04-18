@@ -494,7 +494,7 @@ public class ExperimentHelperTest {
         expected_1.put("omdep", "5");
         expected_1.put("ominp", "50");
         expected_1.put("omn%", "4.82");
-        Map acctual_1 = null;
+        Map acctual_1;
 
         HashMap<String, Object> data = new HashMap<String, Object>();
         AcePathfinderUtil.insertValue(data, "pdate", "19990415");
@@ -514,7 +514,7 @@ public class ExperimentHelperTest {
         String pp = "20";
         String rd = "60";
         String[] expected = {"1.10", "0.55", "0.65", "0.48", "0.10", "0.10", "0.04", "0.23"};
-        ArrayList<String> acctual = null;
+        ArrayList<String> acctual;
 
 //         BufferedReader br = new BufferedReader(
 //                 new InputStreamReader(
@@ -674,5 +674,51 @@ public class ExperimentHelperTest {
         event.putAll(template);
         event.put("date", (date + yearIndex * 10000) + "");
         return event;
+    }
+
+    @Test
+    public void testGetPaddyIrrigation() throws IOException, Exception {
+        log.debug("==testGetPaddyIrrigation() Test Start ==");
+        String num = "3";
+        String percRate = "2";
+        String dept = "150";
+        String[] offsets = {"-3", "4", "11"};
+        String[] maxVals = {"20", "30", "50"};
+        String[] minVals = {"5", "10", "15"};
+        // planting data is 19990415
+        HashMap expected = new HashMap();
+        AcePathfinderUtil.insertValue(expected, "idate", "19990412");
+        AcePathfinderUtil.insertValue(expected, "irop", "IR010");
+        AcePathfinderUtil.insertValue(expected, "irval", "150");
+        AcePathfinderUtil.insertValue(expected, "idate", "19990412");
+        AcePathfinderUtil.insertValue(expected, "irop", "IR008");
+        AcePathfinderUtil.insertValue(expected, "irval", "2");
+        AcePathfinderUtil.insertValue(expected, "idate", "19990412");
+        AcePathfinderUtil.insertValue(expected, "irop", "IR009");
+        AcePathfinderUtil.insertValue(expected, "irval", "20");
+        AcePathfinderUtil.insertValue(expected, "idate", "19990412");
+        AcePathfinderUtil.insertValue(expected, "irop", "IR011");
+        AcePathfinderUtil.insertValue(expected, "irval", "5");
+        AcePathfinderUtil.insertValue(expected, "idate", "19990419");
+        AcePathfinderUtil.insertValue(expected, "irop", "IR009");
+        AcePathfinderUtil.insertValue(expected, "irval", "30");
+        AcePathfinderUtil.insertValue(expected, "idate", "19990419");
+        AcePathfinderUtil.insertValue(expected, "irop", "IR011");
+        AcePathfinderUtil.insertValue(expected, "irval", "10");
+        AcePathfinderUtil.insertValue(expected, "idate", "19990426");
+        AcePathfinderUtil.insertValue(expected, "irop", "IR009");
+        AcePathfinderUtil.insertValue(expected, "irval", "50");
+        AcePathfinderUtil.insertValue(expected, "idate", "19990426");
+        AcePathfinderUtil.insertValue(expected, "irop", "IR011");
+        AcePathfinderUtil.insertValue(expected, "irval", "15");
+        ArrayList<HashMap<String, String>> expArr = MapUtil.getBucket(expected, "management").getDataList();
+
+        HashMap<String, Object> data = new HashMap<String, Object>();
+        AcePathfinderUtil.insertValue(data, "pdate", "19990415");
+        ArrayList<HashMap<String, String>> actArr = ExperimentHelper.getPaddyIrrigation(data, num, percRate, dept, offsets, maxVals, minVals);
+        
+        assertEquals("getPaddyIrrigation: unexpected output", expArr, actArr);
+        log.info("getFertDistribution Output: {}", actArr.toString());
+        log.debug("==testGetPaddyIrrigation() Test End ==");
     }
 }
