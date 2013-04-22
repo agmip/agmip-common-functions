@@ -55,7 +55,7 @@ public class WeatherHelper {
             HashMap<String, String> dailyData = dailyArr.get(i);
             date = getValueOr(dailyData, "w_date", "").trim();
             if (date.equals("")) {
-                LOG.debug("There is daily data do not having a valid date");
+                LOG.warn("There is daily data do not having a valid date");
                 continue;
             } else {
                 Calendar cal = Calendar.getInstance();

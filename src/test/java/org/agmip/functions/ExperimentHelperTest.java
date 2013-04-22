@@ -82,7 +82,7 @@ public class ExperimentHelperTest {
 
         if ((line = br.readLine()) != null) {
 
-            Map<String, ArrayList<Map>> data = new LinkedHashMap<String, ArrayList<Map>>();
+            HashMap<String, ArrayList<Map>> data = new LinkedHashMap<String, ArrayList<Map>>();
             Map<String, Object> expData = JSONAdapter.fromJSON(line);
             data.put("experiments", new ArrayList());
             data.put("weathers", new ArrayList());
@@ -122,7 +122,7 @@ public class ExperimentHelperTest {
 
         if ((line = br.readLine()) != null) {
 
-            Map<String, Object> data = JSONAdapter.fromJSON(line);
+            HashMap<String, Object> data = JSONAdapter.fromJSON(line);
             data.put("exp_dur", "3");
             HashMap<String, ArrayList<String>> results = ExperimentHelper.getAutoPlantingDate(data, startDate, endDate, accRainAmt, dayNum);
             acctual_1 = results.get("pdate").get(0);
@@ -134,6 +134,167 @@ public class ExperimentHelperTest {
         assertEquals("getAutoPlantingDate: normal case", expected_1, acctual_1);
         assertEquals("getAutoPlantingDate: copy case", expected_2, acctual_2);
         assertEquals("getAutoPlantingDate: no date find case", expected_3, acctual_3);
+    }
+
+    @Test
+    public void testGetAutoPlantingDate_machakos_lastDate() throws IOException, Exception {
+        URL test_resource = this.getClass().getResource("/machakos_wth_only.json");
+        String line;
+        String startDate = "01-15";
+        String endDate = "02-28";
+        String accRainAmt = "50.0";
+        String dayNum = "6";
+        String expected_1 = "19800228";
+        String expected_2 = "19810228";
+        int expected_3 = 3;
+        String acctual_1 = "";
+        String acctual_2 = "";
+        int acctual_3 = 0;
+
+        BufferedReader br = new BufferedReader(
+                new InputStreamReader(
+                new FileInputStream(test_resource.getPath())));
+
+        if ((line = br.readLine()) != null) {
+
+            HashMap<String, Object> data = JSONAdapter.fromJSON(line);
+            data.put("exp_dur", "3");
+            HashMap<String, ArrayList<String>> results = ExperimentHelper.getAutoPlantingDate(data, startDate, endDate, accRainAmt, dayNum);
+            acctual_1 = results.get("pdate").get(0);
+            acctual_2 = results.get("pdate").get(1);
+            acctual_3 = results.get("pdate").size();
+            log.info("Results: {}", results);
+        }
+
+        assertEquals("getAutoPlantingDate: normal case", expected_1, acctual_1);
+        assertEquals("getAutoPlantingDate: copy case", expected_2, acctual_2);
+        assertEquals("getAutoPlantingDate: no date find case", expected_3, acctual_3);
+    }
+
+    @Test
+    public void testGetAutoFillPlantingDate_machakos() throws IOException, Exception {
+        URL test_resource = this.getClass().getResource("/machakos_wth_only.json");
+        String line;
+        String startDate = "01-15";
+        String endDate = "02-28";
+        String accRainAmt = "9.0";
+        String dayNum = "6";
+        String expected_1 = "19810218";
+        int expected_3 = 1;
+        String acctual_1 = "";
+        int acctual_3 = 0;
+
+        BufferedReader br = new BufferedReader(
+                new InputStreamReader(
+                new FileInputStream(test_resource.getPath())));
+
+        if ((line = br.readLine()) != null) {
+
+            HashMap<String, Object> data = JSONAdapter.fromJSON(line);
+            AcePathfinderUtil.insertValue(data, "crid", "MAZ");
+            data.put("sc_year", "1981");
+            HashMap<String, ArrayList<String>> results = ExperimentHelper.getAutoFillPlantingDate(data, startDate, endDate, accRainAmt, dayNum);
+            acctual_1 = results.get("pdate").get(0);
+            acctual_3 = results.get("pdate").size();
+            log.info("Results: {}", results);
+        }
+
+        assertEquals("getAutoFillPlantingDate: normal case", expected_1, acctual_1);
+        assertEquals("getAutoFillPlantingDate: no date find case", expected_3, acctual_3);
+    }
+
+    @Test
+    public void testGetAutoFillPlantingDate_machakos_NOSCYear() throws IOException, Exception {
+        URL test_resource = this.getClass().getResource("/machakos_wth_only.json");
+        String line;
+        String startDate = "01-15";
+        String endDate = "02-28";
+        String accRainAmt = "9.0";
+        String dayNum = "6";
+        String expected_1 = "19800124";
+        int expected_3 = 1;
+        String acctual_1 = "";
+        int acctual_3 = 0;
+
+        BufferedReader br = new BufferedReader(
+                new InputStreamReader(
+                new FileInputStream(test_resource.getPath())));
+
+        if ((line = br.readLine()) != null) {
+
+            HashMap<String, Object> data = JSONAdapter.fromJSON(line);
+            AcePathfinderUtil.insertValue(data, "crid", "MAZ");
+            HashMap<String, ArrayList<String>> results = ExperimentHelper.getAutoFillPlantingDate(data, startDate, endDate, accRainAmt, dayNum);
+            acctual_1 = results.get("pdate").get(0);
+            acctual_3 = results.get("pdate").size();
+            log.info("Results: {}", results);
+        }
+
+        assertEquals("getAutoFillPlantingDate: normal case", expected_1, acctual_1);
+        assertEquals("getAutoFillPlantingDate: no date find case", expected_3, acctual_3);
+    }
+
+    @Test
+    public void testGetAutoFillPlantingDate_machakos_ValidPdate() throws IOException, Exception {
+        URL test_resource = this.getClass().getResource("/machakos_wth_only.json");
+        String line;
+        String startDate = "01-15";
+        String endDate = "02-28";
+        String accRainAmt = "9.0";
+        String dayNum = "6";
+        int expected_3 = 0;
+        int acctual_3 = 0;
+
+        BufferedReader br = new BufferedReader(
+                new InputStreamReader(
+                new FileInputStream(test_resource.getPath())));
+
+        if ((line = br.readLine()) != null) {
+
+            HashMap<String, Object> data = JSONAdapter.fromJSON(line);
+            data.put("sc_year", "1981");
+            AcePathfinderUtil.insertValue(data, "crid", "MAZ");
+            AcePathfinderUtil.insertValue(data, "pdate", "19830101");
+            HashMap<String, ArrayList<String>> results = ExperimentHelper.getAutoFillPlantingDate(data, startDate, endDate, accRainAmt, dayNum);
+            acctual_3 = results.size();
+            log.info("Results: {}", results);
+        }
+
+        assertEquals("getAutoFillPlantingDate: pdate valid case", expected_3, acctual_3);
+    }
+
+    @Test
+    public void testGetAutoFillPlantingDate_machakos_lastDate() throws IOException, Exception {
+        log.debug("== testGetAutoFillPlantingDate_machakos_lastDate() == Start");
+        URL test_resource = this.getClass().getResource("/machakos_wth_only.json");
+        String line;
+        String startDate = "01-15";
+        String endDate = "02-28";
+        String accRainAmt = "50.0";
+        String dayNum = "6";
+        String expected_1 = "19810228";
+        int expected_3 = 1;
+        String acctual_1 = "";
+        int acctual_3 = 0;
+
+        BufferedReader br = new BufferedReader(
+                new InputStreamReader(
+                new FileInputStream(test_resource.getPath())));
+
+        if ((line = br.readLine()) != null) {
+
+            HashMap<String, Object> data = JSONAdapter.fromJSON(line);
+            AcePathfinderUtil.insertValue(data, "crid", "MAZ");
+            data.put("sc_year", "1981");
+            HashMap<String, ArrayList<String>> results = ExperimentHelper.getAutoFillPlantingDate(data, startDate, endDate, accRainAmt, dayNum);
+            acctual_1 = results.get("pdate").get(0);
+            acctual_3 = results.get("pdate").size();
+            log.info("Results: {}", results);
+        }
+
+        assertEquals("getAutoFillPlantingDate: normal case", expected_1, acctual_1);
+        assertEquals("getAutoFillPlantingDate: no date find case", expected_3, acctual_3);
+        log.debug("== testGetAutoFillPlantingDate_machakos_lastDate() == End");
     }
 
     @Test
@@ -160,7 +321,7 @@ public class ExperimentHelperTest {
 
         if ((line = br.readLine()) != null) {
 
-            Map<String, Object> data = JSONAdapter.fromJSON(line);
+            HashMap<String, Object> data = JSONAdapter.fromJSON(line);
             data.put("exp_dur", "3");
             data.put("sc_year", "1983");
             HashMap<String, ArrayList<String>> result = ExperimentHelper.getAutoPlantingDate(data, startDate, endDate, accRainAmt, dayNum);
@@ -333,7 +494,7 @@ public class ExperimentHelperTest {
         expected_1.put("omdep", "5");
         expected_1.put("ominp", "50");
         expected_1.put("omn%", "4.82");
-        Map acctual_1 = null;
+        Map acctual_1;
 
         HashMap<String, Object> data = new HashMap<String, Object>();
         AcePathfinderUtil.insertValue(data, "pdate", "19990415");
@@ -353,7 +514,7 @@ public class ExperimentHelperTest {
         String pp = "20";
         String rd = "60";
         String[] expected = {"1.10", "0.55", "0.65", "0.48", "0.10", "0.10", "0.04", "0.23"};
-        ArrayList<String> acctual = null;
+        ArrayList<String> acctual;
 
 //         BufferedReader br = new BufferedReader(
 //                 new InputStreamReader(
@@ -513,5 +674,51 @@ public class ExperimentHelperTest {
         event.putAll(template);
         event.put("date", (date + yearIndex * 10000) + "");
         return event;
+    }
+
+    @Test
+    public void testGetPaddyIrrigation() throws IOException, Exception {
+        log.debug("==testGetPaddyIrrigation() Test Start ==");
+        String num = "3";
+        String percRate = "2";
+        String dept = "150";
+        String[] offsets = {"-3", "4", "11"};
+        String[] maxVals = {"20", "30", "50"};
+        String[] minVals = {"5", "10", "15"};
+        // planting data is 19990415
+        HashMap expected = new HashMap();
+        AcePathfinderUtil.insertValue(expected, "idate", "19990412");
+        AcePathfinderUtil.insertValue(expected, "irop", "IR010");
+        AcePathfinderUtil.insertValue(expected, "irval", "150");
+        AcePathfinderUtil.insertValue(expected, "idate", "19990412");
+        AcePathfinderUtil.insertValue(expected, "irop", "IR008");
+        AcePathfinderUtil.insertValue(expected, "irval", "2");
+        AcePathfinderUtil.insertValue(expected, "idate", "19990412");
+        AcePathfinderUtil.insertValue(expected, "irop", "IR009");
+        AcePathfinderUtil.insertValue(expected, "irval", "20");
+        AcePathfinderUtil.insertValue(expected, "idate", "19990412");
+        AcePathfinderUtil.insertValue(expected, "irop", "IR011");
+        AcePathfinderUtil.insertValue(expected, "irval", "5");
+        AcePathfinderUtil.insertValue(expected, "idate", "19990419");
+        AcePathfinderUtil.insertValue(expected, "irop", "IR009");
+        AcePathfinderUtil.insertValue(expected, "irval", "30");
+        AcePathfinderUtil.insertValue(expected, "idate", "19990419");
+        AcePathfinderUtil.insertValue(expected, "irop", "IR011");
+        AcePathfinderUtil.insertValue(expected, "irval", "10");
+        AcePathfinderUtil.insertValue(expected, "idate", "19990426");
+        AcePathfinderUtil.insertValue(expected, "irop", "IR009");
+        AcePathfinderUtil.insertValue(expected, "irval", "50");
+        AcePathfinderUtil.insertValue(expected, "idate", "19990426");
+        AcePathfinderUtil.insertValue(expected, "irop", "IR011");
+        AcePathfinderUtil.insertValue(expected, "irval", "15");
+        ArrayList<HashMap<String, String>> expArr = MapUtil.getBucket(expected, "management").getDataList();
+
+        HashMap<String, Object> data = new HashMap<String, Object>();
+        AcePathfinderUtil.insertValue(data, "pdate", "19990415");
+        ArrayList<HashMap<String, String>> actArr = ExperimentHelper.getPaddyIrrigation(data, num, percRate, dept, offsets, maxVals, minVals);
+        
+        assertEquals("getPaddyIrrigation: unexpected output", expArr, actArr);
+        log.info("getFertDistribution Output: {}", actArr.toString());
+        log.debug("==testGetPaddyIrrigation() Test End ==");
     }
 }
