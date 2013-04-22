@@ -69,6 +69,10 @@ public class LayerReducerUtil {
 		log.info("Init data size : " + initData.size());
 		log.info("Soil data size : " + soilsData.size());
 		for (HashMap<String, String> soilData : soilsData) {
+                    if (index >= initData.size()) {
+                        log.error("Unable to merge soil information, initial condition information unavailable");
+                        break;
+                    }
 			if (initData.get(index).get(SAReducerDecorator.ICBL).equals(soilData.get(LayerReducer.SLLB))) {
 				soilData.putAll(initData.get(index));
 			} else {
