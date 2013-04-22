@@ -131,6 +131,7 @@ public class ExperimentHelper {
             try {
                 startYear = Integer.parseInt(getValueOr(data, "sc_year", "").substring(0, 4));
             } catch (Exception e) {
+                LOG.warn("Invalid SC_YEAR: {}", data.get("sc_year"));
                 startYear = -99;
             }
         }
@@ -153,7 +154,7 @@ public class ExperimentHelper {
                     try {
                         startYear = Integer.parseInt(getValueOr(plEvent, "date", "").substring(0, 4));
                     } catch (Exception e) {
-                        LOG.info("EXPCETION: {}", startYear);
+                        LOG.warn("Invalid planting date: {}", plEvent.get("date"));
                         startYear = -99;
                     }
                 } else {
@@ -251,7 +252,7 @@ public class ExperimentHelper {
                 } else {
                     lastDay = getValueOr(dailyData.get(windows[i].end), "w_date", "");
                 }
-                LOG.error("Could not find an appropriate day to plant, using {}", lastDay);
+                LOG.warn("Could not find an appropriate day to plant, using {}", lastDay);
                 pdates.add(lastDay);
             }
         }
@@ -343,7 +344,7 @@ public class ExperimentHelper {
 
         // Check if there is eventData existing and if PDATE is already available
         if (eventData.isEmpty()) {
-            LOG.warn("EMPTY EVENT DATA");
+            LOG.error("EMPTY EVENT DATA");
 //            event = new Event(new ArrayList(), "planting");
             return new HashMap<String, ArrayList<String>>();
         } else {
