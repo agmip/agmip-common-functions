@@ -893,11 +893,10 @@ public class ExperimentHelper {
     }
 
     /**
-     * This function will use the first event data of each type to generate the
-     * other events of that type for the following year in the experiment
-     * duration. The month and date will be same with the original one. If
-     * experiment duration is no longer than 1 year, this will return empty
-     * result set.
+     * This function will clone the original management events for each year in
+     * the experiment duration. Only the date of each event will be increased
+     * year by year. If experiment duration is no longer than 1 year, no
+     * generation will be executed.
      *
      * @param data The HashMap of experiment (including weather data)
      *
@@ -965,7 +964,7 @@ public class ExperimentHelper {
      * (must be paired with Max and Min)
      * @param maxVals The array of Max flood (bund) height (mm)
      * @param minVals The array of Min flood height (mm)
-     * 
+     *
      * @return An {@code ArrayList} of generated {@code irrigation event} based
      * on first planting date
      */
