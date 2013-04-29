@@ -931,32 +931,17 @@ public class ExperimentHelper {
         Calendar cal = Calendar.getInstance();
         for (int i = 0; i < events.size(); i++) {
             HashMap<String, String> event = events.get(i);
-
-//            if (convertFromAgmipDateString(date) == null) {
-//                String eventType = getValueOr(event, "event", "unknown");
-//                LOG.error("Original {} event has an invalid date: [{}].", eventType, date);
-//                LOG.info("Only copy this {} event for each year without calculating date", eventType);
-//                for (int j = 1; j < expDur; j++) {
-//                    results.get(j).add(event);
-//                }
-//                continue;
-//            }
-
-//            cal.setTime(dDate);
-//            int year = cal.get(Calendar.YEAR);
-//            String monthAndDay = String.format("%1$02d%2$02d",
-//                    cal.get(Calendar.MONTH) + 1,
-//                    cal.get(Calendar.DATE));
             String date = getValueOr(event, "date", "");
+            if (date.equals("")) {
+                String eventType = getValueOr(event, "event", "unknown");
+                LOG.warn("Original {} event has an invalid date: [{}].", eventType, date);
+            }
             String edate = getValueOr(event, "edate", "");
             for (int j = 0; j < expDur; j++) {
                 HashMap<String, String> newEvent = new HashMap();
                 newEvent.putAll(event);
                 if (!date.equals("")) {
                     newEvent.put("date", yearOffset(date, j + ""));
-                } else {
-                    String eventType = getValueOr(event, "event", "unknown");
-                    LOG.error("Original {} event has an invalid date: [{}].", eventType, date);
                 }
                 if (!edate.equals("")) {
                     newEvent.put("edate", yearOffset(edate, j + ""));
