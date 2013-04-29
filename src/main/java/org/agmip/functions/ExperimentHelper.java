@@ -893,11 +893,10 @@ public class ExperimentHelper {
     }
 
     /**
-     * This function will use the first event data of each type to generate the
-     * other events of that type for the following year in the experiment
-     * duration. The month and date will be same with the original one. If
-     * experiment duration is no longer than 1 year, this will return empty
-     * result set.
+     * This function will clone the original management events for each year in
+     * the experiment duration. Only the date of each event will be increased
+     * year by year. If experiment duration is no longer than 1 year, no
+     * generation will be executed.
      *
      * @param data The HashMap of experiment (including weather data)
      *
@@ -931,32 +930,17 @@ public class ExperimentHelper {
         Calendar cal = Calendar.getInstance();
         for (int i = 0; i < events.size(); i++) {
             HashMap<String, String> event = events.get(i);
-
-//            if (convertFromAgmipDateString(date) == null) {
-//                String eventType = getValueOr(event, "event", "unknown");
-//                LOG.error("Original {} event has an invalid date: [{}].", eventType, date);
-//                LOG.info("Only copy this {} event for each year without calculating date", eventType);
-//                for (int j = 1; j < expDur; j++) {
-//                    results.get(j).add(event);
-//                }
-//                continue;
-//            }
-
-//            cal.setTime(dDate);
-//            int year = cal.get(Calendar.YEAR);
-//            String monthAndDay = String.format("%1$02d%2$02d",
-//                    cal.get(Calendar.MONTH) + 1,
-//                    cal.get(Calendar.DATE));
             String date = getValueOr(event, "date", "");
+            if (date.equals("")) {
+                String eventType = getValueOr(event, "event", "unknown");
+                LOG.warn("Original {} event has an invalid date: [{}].", eventType, date);
+            }
             String edate = getValueOr(event, "edate", "");
             for (int j = 0; j < expDur; j++) {
                 HashMap<String, String> newEvent = new HashMap();
                 newEvent.putAll(event);
                 if (!date.equals("")) {
                     newEvent.put("date", yearOffset(date, j + ""));
-                } else {
-                    String eventType = getValueOr(event, "event", "unknown");
-                    LOG.error("Original {} event has an invalid date: [{}].", eventType, date);
                 }
                 if (!edate.equals("")) {
                     newEvent.put("edate", yearOffset(edate, j + ""));
@@ -980,7 +964,7 @@ public class ExperimentHelper {
      * (must be paired with Max and Min)
      * @param maxVals The array of Max flood (bund) height (mm)
      * @param minVals The array of Min flood height (mm)
-     * 
+     *
      * @return An {@code ArrayList} of generated {@code irrigation event} based
      * on first planting date
      */
