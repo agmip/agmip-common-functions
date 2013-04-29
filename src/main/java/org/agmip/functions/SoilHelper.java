@@ -39,7 +39,7 @@ public class SoilHelper {
         String k;
         HashMap<String, ArrayList<String>> results = new HashMap<String, ArrayList<String>>();
         ArrayList<String> result = new ArrayList<String>();
-        ArrayList<HashMap<String, String>> soilLayers = MapUtil.getBucket(data, "soil").getDataList();
+        ArrayList<HashMap<String, String>> soilLayers = getSoilLayer(data);
 
         if (soilLayers == null) {
             return results;
