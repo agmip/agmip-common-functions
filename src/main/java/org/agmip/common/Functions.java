@@ -123,6 +123,20 @@ public class Functions {
             return null;
         }
     }
+    
+    public static String calcDAP(String date, String pdate) {
+        Date d = convertFromAgmipDateString(date);
+        Date p = convertFromAgmipDateString(pdate);
+        if (d == null || p == null) {
+            return "";
+        } else {
+            return convertMsToDay(d.getTime() - p.getTime());
+        }
+    }
+    
+    public static String convertMsToDay(long ms) {
+        return divide(ms + "", "86400000", 0);
+    }
 
     /**
      * Offset an AgMIP standard date string (YYYYMMDD) by a set number of days.
