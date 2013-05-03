@@ -1011,7 +1011,7 @@ public class ExperimentHelper {
                 } else {
                     orgDap = calcDAP(date, orgPdate);
                     LOG.debug("Original {} event date: [{}].", eventType, date);
-                    LOG.debug("Original {} event's DAP: [{}] with date {}", eventType, orgDap);
+                    LOG.debug("Original {} event's DAP: [{}]", eventType, orgDap);
                 }
             }
             // Special handling for edate
@@ -1019,7 +1019,7 @@ public class ExperimentHelper {
             String orgEDap = "";
             if (!edate.equals("")) {
                 orgEDap = calcDAP(edate, orgPdate);
-                LOG.debug("Original EDATE's DAP: [{}].", eventType, orgDap);
+                LOG.debug("Original EDATE's DAP: [{}].", orgDap);
             }
             for (int j = 0; j < pdates.length; j++) {
                 HashMap<String, String> newEvent = new HashMap();
