@@ -672,10 +672,11 @@ public class ExperimentHelperTest {
     @Test
     public void testgetAutoEventDate_machakos_givenPdates() throws IOException, Exception {
 
+        log.debug("==testgetAutoEventDate_machakos_givenPdates() Test Start ==");
         ArrayList<ArrayList<HashMap<String, String>>> expected = new ArrayList();
-        int expDur = 3;
+        int expDur = 2;
         HashMap pEvent = new HashMap();
-        int pdate = 19820205;
+        int pdate = 19820203;
         int edate = 19820206;
         pEvent.put("event", "planting");
         pEvent.put("crid", "MAZ");
@@ -749,7 +750,7 @@ public class ExperimentHelperTest {
         AcePathfinderUtil.insertValue(data, "mltp", "333");
         data.put("exp_dur", expDur + "");
         data.put("origin_pdate", "19820201");
-        String[] pdates = {"19820203"};
+        String[] pdates = {"19820203", "19830203"};
 
         log.info("Inputs: {}", data);
         ArrayList<ArrayList<HashMap<String, String>>> results = ExperimentHelper.getAutoEventDate(data, pdates);
