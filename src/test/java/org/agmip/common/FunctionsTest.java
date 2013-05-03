@@ -548,4 +548,36 @@ public class FunctionsTest {
         }
         assertEquals("Should return a empty array", test.length, in.length);
     }
+
+    @Test
+    public void calcDAPNormal() {
+        String date = "19810502";
+        String pdate = "19810318";
+        String expected = "45";
+        String actual;
+
+        actual = calcDAP(date, pdate);
+        assertEquals("Should return differences of days", expected, actual);
+    }
+
+    @Test
+    public void calcDAPInvalidDate() {
+        String date = "";
+        String pdate = "19810318";
+        String expected = "";
+        String actual;
+
+        actual = calcDAP(date, pdate);
+        assertEquals("Should return blank string", expected, actual);
+    }
+
+    @Test
+    public void convertMsToDayNormal() {
+        long ms = 3884400000l;
+        String expected = "45";
+        String actual;
+
+        actual = convertMsToDay(ms);
+        assertEquals("Should return correct number of days", expected, actual);
+    }
 }
