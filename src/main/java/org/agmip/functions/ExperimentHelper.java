@@ -69,8 +69,11 @@ public class ExperimentHelper {
         if (eDateCal.after(lDateCal)) {
             lDateCal.set(Calendar.YEAR, lDateCal.get(Calendar.YEAR) + 1);
         }
-        duration = (int) ((lDateCal.getTimeInMillis() - eDateCal.getTimeInMillis()) / 86400000);
-
+        try {
+            duration = Integer.parseInt(convertMsToDay(lDateCal.getTimeInMillis() - eDateCal.getTimeInMillis()));
+        } catch (Exception e) {
+            duration = 0;
+        }
         // Check Number of days of accumulation
         try {
             intDays = Integer.parseInt(days);
@@ -953,6 +956,88 @@ public class ExperimentHelper {
     }
 
     /**
+     * This function will clone the original management events based on given
+     * new planting dates. The generated event will keep the original days after
+     * planting date (DAP).
+     *
+     * For example: New event date = New planting date + original DAP.
+     *
+     * @param data The HashMap of experiment (including weather data)
+     * @param pdates The given planting dates for generation
+     *
+     * @return Several groups of {@code ArrayList} of {@code Event} for each
+     * planting date in the experiment duration.
+     */
+    public static ArrayList<ArrayList<HashMap<String, String>>> getAutoEventDate(Map data, String[] pdates) {
+
+        ArrayList<ArrayList<HashMap<String, String>>> results = new ArrayList<ArrayList<HashMap<String, String>>>();
+
+        // If no more planting event is required
+        if (pdates.length < 1) {
+            LOG.error("There is no PDATE can be used for event generation.");
+            return results;
+        }
+
+        // Get Event date
+        ArrayList<HashMap<String, String>> events = MapUtil.getBucket(data, "management").getDataList();
+        while (results.size() < pdates.length) {
+            results.add(new ArrayList());
+        }
+        
+        String orgPdate = getValueOr(data, "origin_pdate", "-99");
+        if (orgPdate.equals("")) {
+            LOG.error("The original PDATE is missing, can't calculate other event date");
+        } else if (orgPdate.equals("-99")) {
+            orgPdate = getFstPdate(data, "");
+        }
+        if (orgPdate.equals("")) {
+            LOG.warn("The original PDATE is missing, use first given PDATE {} as original one", pdates[0]);
+            orgPdate = pdates[0];
+        } else {
+            LOG.debug("Find original PDATE {}", orgPdate);
+        }
+        for (int i = 0; i < events.size(); i++) {
+            HashMap<String, String> event = events.get(i);
+            // Get days after planting for current event date
+            String date = getValueOr(event, "date", "");
+            String orgDap = "";
+            String eventType = getValueOr(event, "event", "unknown");
+            // if it is a planting event
+            if (eventType.equals("planting")) {
+                orgDap = "0";
+            } else {
+                if (date.equals("")) {
+                    LOG.debug("Original {} event has an invalid date: [{}].", eventType, date);
+                } else {
+                    orgDap = calcDAP(date, orgPdate);
+                    LOG.debug("Original {} event date: [{}].", eventType, date);
+                    LOG.debug("Original {} event's DAP: [{}] with date {}", eventType, orgDap);
+                }
+            }
+            // Special handling for edate
+            String edate = getValueOr(event, "edate", "");
+            String orgEDap = "";
+            if (!edate.equals("")) {
+                orgEDap = calcDAP(edate, orgPdate);
+                LOG.debug("Original EDATE's DAP: [{}].", eventType, orgDap);
+            }
+            for (int j = 0; j < pdates.length; j++) {
+                HashMap<String, String> newEvent = new HashMap();
+                newEvent.putAll(event);
+                if (!date.equals("")) {
+                    newEvent.put("date", dateOffset(pdates[j], orgDap));
+                }
+                if (!edate.equals("")) {
+                    newEvent.put("edate", dateOffset(pdates[j], orgEDap));
+                }
+
+                results.get(j).add(newEvent);
+            }
+        }
+        return results;
+    }
+
+    /**
      * This function allows standard paddy management inputs to be generalized
      * for a field or group of fields.
      *
@@ -1044,5 +1129,18 @@ public class ExperimentHelper {
         results = MapUtil.getBucket(result, "management").getDataList();
 
         return results;
+    }
+    
+    /**
+     * Get the first planting date from given data set.
+     * 
+     * @param data The experiment data holder
+     * @param defValue The value used for return when planting date is unavailable
+     * @return The planting date
+     */
+    public static String getFstPdate(Map data, String defValue) {
+        ArrayList<HashMap<String, String>> events = getBucket(data, "management").getDataList();
+        Event event = new Event(events, "planting");
+        return getValueOr(event.getCurrentEvent(), "date", defValue);
     }
 }
