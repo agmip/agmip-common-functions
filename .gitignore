@@ -1,2 +1,6 @@
-target/*
-*.sw?
+.settings/*
+bin/*
+.classpath
+/target/
+*.tmp
+.DS_Store

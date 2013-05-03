@@ -3,8 +3,10 @@ package org.agmip.functions;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import static org.agmip.common.Functions.*;
+import org.agmip.common.Functions.CompareMode;
+import org.agmip.util.MapUtil;
 import static org.agmip.util.MapUtil.*;
-import static org.agmip.ace.util.AcePathfinderUtil.insertValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,55 +22,115 @@ public class SoilHelper {
     /**
      * Calculate root growth factor (0-1) for each soil layer
      *
-     * @param sllbs The array of soil_layer_depth (cm)
+     * @param data The data map
+     * @param var The variable name that will be used for storing the result
+     * @param m Maximum value in the top PP cm of soil (units depend on
+     * variable)
      * @param pp depth of top of curve (pivot point) (cm)
+     * @param rd maximum rooting depth (cm), or depth at which the value is 2%
+     * of the maximum value
+     *
+     * @return An {@code ArrayList} of {@code root distribution} for each layer
+     * of given soil
      */
-    public static void getRootDistribution(String m, String pp, String rd, HashMap data) {
+    public static HashMap<String, ArrayList<String>> getRootDistribution(HashMap data, String var, String m, String pp, String rd) {
 
-        double[] dSllbs;
-        double mid;
-        double dPp;
-        double dRd;
-        double dM;
-        double dK;
-//        ArrayList<HashMap<String, Object>> soilLayers = traverseAndGetSiblings(data, "sllb");
-        ArrayList<HashMap<String, Object>> soilLayers = getSoilLayer(data);
-        // ArrayList<HashMap<String, String>> soilLayers = MapUtil.getBucket(data, "soils").getDataList();
+        String[] sllbs;
+        String k;
+        HashMap<String, ArrayList<String>> results = new HashMap<String, ArrayList<String>>();
+        ArrayList<String> result = new ArrayList<String>();
+        ArrayList<HashMap<String, String>> soilLayers = getSoilLayer(data);
 
         if (soilLayers == null) {
-            return;
+            return results;
         } else if (soilLayers.isEmpty()) {
             LOG.error("----  SOIL LAYER DATA IS EMPTY");
-            return;
+            return results;
         } else {
             try {
-                dPp = Double.parseDouble(pp);
-                dRd = Double.parseDouble(rd);
-                dM = Double.parseDouble(m);
-                dSllbs = new double[soilLayers.size()];
-                dK = Math.log(0.02) / (dRd - dPp);
+                sllbs = new String[soilLayers.size()];
+                k = divide(Math.log(0.02) + "", substract(rd, pp));
                 for (int i = 0; i < soilLayers.size(); i++) {
-                    dSllbs[i] = Double.parseDouble(getObjectOr(soilLayers.get(i), "sllb", "").toString());
+                    sllbs[i] = soilLayers.get(i).get("sllb");
                 }
             } catch (NumberFormatException e) {
                 LOG.error("INVALID INPUT NUMBER [" + e.getMessage() + "]");
-                return;
+                return results;
             }
         }
 
         // First layer
-        soilLayers.get(0).put("slrgf", getGrowthFactor(dSllbs[0] / 2, dPp, dK, dM, 3));
-//        insertValue(data, "slrgf", getGrowthFactor(dSllbs[0] / 2, dPp, dK, dM, 3));
+        result.add(round(getGrowthFactor(divide(sllbs[0], "2"), pp, k, m), 3));
 
         // Other layers
-        for (int i = 1; i < dSllbs.length; i++) {
-            mid = (dSllbs[i] + dSllbs[i - 1]) / 2;
-            String slrgf = getGrowthFactor(mid, dPp, dK, dM, 3);
-            soilLayers.get(i).put("slrgf", slrgf);
-//            insertValue(data, "slrgf", slrgf);
-//            LOG.debug("Layer " + (i + 1) + " : sllb= " + dSllbs[i] + ", mid=" + mid + ", factor=" + slrgf);
+        for (int i = 1; i < sllbs.length; i++) {
+            result.add(round(getGrowthFactor(average(sllbs[i], sllbs[i - 1]), pp, k, m), 3));
         }
 
+        results.put(var, result);
+        return results;
+    }
+
+    /**
+     * Given a total inorganic N amount for the soil profile, this function
+     * distributes the N over the soil layers assuming a constant concentration
+     * of NO3 (90%) and NH4 (10%)
+     *
+     * @param data The data set
+     * @param icin Total soil N over the profile (kg[N]/ha)
+     * @return Three {@code ArrayList} Corresponded to
+     * {@code ICN_TOT, ICNO3 ICNH4} for each layer of given soil
+     */
+    public static HashMap<String, ArrayList<String>> getIcnDistribution(HashMap data, String icin) {
+        HashMap<String, ArrayList<String>> results = new HashMap<String, ArrayList<String>>();
+        ArrayList<HashMap<String, String>> soilLayers;
+        soilLayers = getSoilLayer(data);
+
+        icin = sum(icin);
+        if (icin == null) {
+            LOG.error("Input variable ICIN come with invalid  value icin={}", icin);
+            return results;
+        }
+
+        String lastSllb = "0";
+        String[] productSBXTH = new String[soilLayers.size()];
+        for (int i = 0; i < soilLayers.size(); i++) {
+            HashMap<String, String> soilLayer = soilLayers.get(i);
+            String sllb = getValueOr(soilLayer, "sllb", "");
+            String slbdm = getValueOr(soilLayer, "slbdm", "");
+            String thick = substract(sllb, lastSllb);
+            productSBXTH[i] = product(slbdm, thick);
+            if (productSBXTH[i] == null) {
+                LOG.error("Invalid SLLB and/or SLBDM in the soil layer data with value sllb={}, slbdm={}", sllb, slbdm);
+                return results;
+            }
+            lastSllb = sllb;
+        }
+
+        String totalSBXTH = sum(productSBXTH);
+        if (compare(totalSBXTH, "0", CompareMode.EQUAL)) {
+            LOG.error("Total SLBDM * thick is 0");
+            return results;
+        }
+        String nppm = divide(product(icin, "10"), totalSBXTH);
+        String icnh4 = product("0.1", nppm);
+        String icno3 = product("0.9", nppm);
+
+        ArrayList<String> icnTotArr = new ArrayList();
+        ArrayList<String> icnh4Arr = new ArrayList();
+        ArrayList<String> icno3Arr = new ArrayList();
+
+        for (int i = 0; i < productSBXTH.length; i++) {
+            String icn_tot = divide(product(productSBXTH[i], icin), totalSBXTH);
+            icnTotArr.add(round(icn_tot, 2));
+            icnh4Arr.add(round(icnh4, 2));
+            icno3Arr.add(round(icno3, 2));
+        }
+
+        results.put("icn_tot", icnTotArr);
+        results.put("icnh4", icnh4Arr);
+        results.put("icno3", icno3Arr);
+        return results;
     }
 
     /**
@@ -78,76 +140,28 @@ public class SoilHelper {
      * @param mid The mid point value between two layers
      * @param pp depth of top soil, or pivot point of curve (cm)
      * @param k exponential decay rate
-     * @return The growth factor (0-1)
-     */
-    protected static double getGrowthFactor(double mid, double pp, double k) {
-        return getGrowthFactor(mid, pp, k, 1f);
-    }
-
-    /**
-     * soil factors which decline exponentially between PP and RD (units depend
-     * on variable, same units as M
-     *
-     * @param mid The mid point value between two layers
-     * @param pp depth of top soil, or pivot point of curve (cm)
-     * @param k exponential decay rate
      * @param m Maximum value in the top PP cm of soil (units depend on
-     * variable)
-     * @return The growth factor (0-M)
+     * @return The growth factor (0-m)
      */
-    protected static double getGrowthFactor(double mid, double pp, double k, double m) {
-        if (mid <= pp) {
+    protected static String getGrowthFactor(String mid, String pp, String k, String m) {
+        if (compare(mid, pp, CompareMode.NOTGREATER)) {
             return m;
         } else {
-            return m * Math.exp(k * (mid - pp));
+            return multiply(m, exp(multiply(k, substract(mid, pp))));
         }
     }
 
     /**
-     * soil factors which decline exponentially between PP and RD (units depend
-     * on variable, same units as M, the output accuracy will depend on prec
-     *
-     * @param mid The mid point value between two layers
-     * @param pp depth of top soil, or pivot point of curve (cm)
-     * @param k exponential decay rate
-     * @param m Maximum value in the top PP cm of soil (units depend on
-     * variable)
-     * @param prec The output decimal precision (0 for no decimal part)
-     * @return The growth factor (0-M)
-     */
-    protected static String getGrowthFactor(double mid, double pp, double k, double m, int prec) {
-        prec = prec < 0 ? 0 : prec;
-        return String.format("%." + prec + "f", getGrowthFactor(mid, pp, k, m));
-    }
-
-    /**
-     * soil factors which decline exponentially between PP and RD (units depend
-     * on variable, same units as M, the output accuracy will depend on prec
-     *
-     * @param mid The mid point value between two layers
-     * @param pp depth of top soil, or pivot point of curve (cm)
-     * @param k exponential decay rate
-     * @param prec The output decimal precision (0 for no decimal part)
-     * @return The growth factor (0-1)
-     */
-    protected static String getGrowthFactor(double mid, double pp, double k, int prec) {
-        return String.format("%." + prec + "f", getGrowthFactor(mid, pp, k, 1, prec));
-    }
-
-    /**
-     * Get soil layer data array from data holder. Only get the first soil site.
+     * Get soil layer data array from data holder.
      *
      * @param data The experiment data holder
-     * @return
+     * @return The soil layer data array
      */
-    protected static ArrayList getSoilLayer(Map data) {
-        HashMap soils = (HashMap) getObjectOr(data, "soil", new HashMap());
-
-        if (soils.isEmpty()) {
-            LOG.error("SOIL DATA IS EMPTY");
-            return null;
+    protected static ArrayList getSoilLayer(HashMap data) {
+        if (data.containsKey("soil")) {
+            return MapUtil.getBucket(data, "soil").getDataList();
         } else {
-            return getObjectOr(soils, "soilLayer", new ArrayList());
+            return new BucketEntry(data).getDataList();
         }
     }
 }

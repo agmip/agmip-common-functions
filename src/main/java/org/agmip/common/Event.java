@@ -2,7 +2,6 @@ package org.agmip.common;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Map;
 import static org.agmip.util.MapUtil.*;
 
 /**
@@ -13,17 +12,17 @@ import static org.agmip.util.MapUtil.*;
 public class Event {
 
     private int next = -1;
-    private Map template;
-    private ArrayList<Map> events;
+    private HashMap template;
+    private ArrayList<HashMap<String, String>> events;
     private String eventType;
 
     /**
      * Constructor
      *
      * @param events The event data array
-     * @eventType The type of events which will be handled
+     * @param eventType The type of events which will be handled
      */
-    public Event(ArrayList<Map> events, String eventType) {
+    public Event(ArrayList<HashMap<String, String>> events, String eventType) {
         this.events = events;
         this.eventType = eventType;
         getNextEventIndex();
@@ -45,7 +44,7 @@ public class Event {
     /**
      * Set template with selected event type
      */
-    public void setTemplate() {
+    public final void setTemplate() {
         template = new HashMap();
         if (isEventExist()) {
             template.putAll(events.get(next));
@@ -81,7 +80,7 @@ public class Event {
      *
      * @param key The variable's key for a event
      * @param value The input value for the key
-     * @toNext True for got to next event
+     * @param toNext The flag for if move the pointer to the next event
      */
     public void updateEvent(String key, String value, boolean toNext) {
         updateEvent(key, value, true, toNext);
@@ -93,14 +92,14 @@ public class Event {
      *
      * @param key The variable's key for a event
      * @param value The input value for the key
-     * @useTemp True for use template to create new event
-     * @toNext True for got to next event
+     * @param useTemp The flag for if using the template to build new event
+     * @param toNext The flag for if move the pointer to the next event
      */
     public void updateEvent(String key, String value, boolean useTemp, boolean toNext) {
         if (isEventExist()) {
             getCurrentEvent().put(key, value);
         } else {
-            Map tmp;
+            HashMap tmp;
             if ("date".equals(key)) {
                 tmp = addEvent(value, useTemp);
             } else {
@@ -121,8 +120,8 @@ public class Event {
      * @param useTemp True for using template to create new data
      * @return The generated event data map
      */
-    public Map addEvent(String date, boolean useTemp) {
-        Map ret = new HashMap();
+    public HashMap addEvent(String date, boolean useTemp) {
+        HashMap ret = new HashMap();
         if (useTemp) {
             ret.putAll(template);
         } else {
@@ -151,7 +150,7 @@ public class Event {
     /**
      * Check if the selected event is existed in the array
      *
-     * @return
+     * @return True for exist
      */
     public boolean isEventExist() {
         return next >= 0 && next < events.size();
@@ -160,9 +159,9 @@ public class Event {
     /**
      * Get the current pointed event, if not available will return empty map
      *
-     * @return
+     * @return current pointed event
      */
-    public Map getCurrentEvent() {
+    public HashMap getCurrentEvent() {
         if (isEventExist()) {
             return events.get(next);
         } else {
@@ -176,7 +175,7 @@ public class Event {
      *
      * @param event The new event data
      */
-    private void getInertIndex(Map event) {
+    private void getInertIndex(HashMap event) {
         int iDate;
         try {
             iDate = Integer.parseInt(getValueOr(event, "date", ""));

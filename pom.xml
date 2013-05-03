@@ -3,7 +3,7 @@
 
   <groupId>org.agmip</groupId>
   <artifactId>agmip-common-functions</artifactId>
-  <version>1.1</version>
+  <version>1.2</version>
   <packaging>jar</packaging>
 
   <name>AgMIP Common Functions</name>
@@ -31,7 +31,7 @@
     <url>https://github.com/agmip/agmip-common-functions</url>
     <connection>scm:git:git://github.com/agmip/agmip-common-functions.git</connection>
     <developerConnection>scm:git:git@github.com:agmip/agmip-common-functions.git</developerConnection>
-    <tag>agmip-common-functions-1.1</tag>
+    <tag>agmip-common-functions-1.2</tag>
   </scm>
   <developers>
     <developer>
@@ -175,12 +175,12 @@
     <dependency>
       <groupId>org.agmip</groupId>
       <artifactId>ace-lookup</artifactId>
-      <version>1.0</version>
+      <version>1.1</version>
     </dependency>
     <dependency>
       <groupId>org.agmip</groupId>
       <artifactId>agmip-core</artifactId>
-      <version>0.15</version>
+      <version>1.1</version>
     </dependency>
   </dependencies>
 </project>
