@@ -1166,7 +1166,7 @@ public class ExperimentHelper {
         
         EventType type;
         try {
-            type = EventType.valueOf(typeStr);
+            type = EventType.valueOf(typeStr.toUpperCase());
         } catch (IllegalArgumentException e) {
             LOG.error("{} event is not recognized, please try other event name", typeStr);
             return new HashMap<String, String>();

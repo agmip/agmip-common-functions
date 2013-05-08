@@ -840,7 +840,7 @@ public class ExperimentHelperTest {
     @Test
     public void testCreateEvent_invalidType() throws IOException, Exception {
         log.debug("== testCreateEvent_invalidType() Test Start ==");
-        String type = "Irrigation";
+        String type = "IRRIGATIONs";
         String dap = "15";
         String pdate = "19820315";
         HashMap<String, String> info = new HashMap();
@@ -882,7 +882,7 @@ public class ExperimentHelperTest {
     @Test
     public void testCreateEvent_invalidPdate() throws IOException, Exception {
         log.debug("== testCreateEvent_invalidPdate() Test Start ==");
-        String type = "IRRIGATION";
+        String type = "Irrigation";
         String dap = "15";
         String pdate = "";
         HashMap<String, String> info = new HashMap();
