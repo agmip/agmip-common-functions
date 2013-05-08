@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 import org.agmip.ace.util.AcePathfinderUtil;
 import org.agmip.common.Event;
+import org.agmip.common.Functions;
 import static org.agmip.common.Functions.*;
 import org.agmip.common.Functions.CompareMode;
 import static org.agmip.functions.SoilHelper.*;
@@ -1142,5 +1143,54 @@ public class ExperimentHelper {
         ArrayList<HashMap<String, String>> events = getBucket(data, "management").getDataList();
         Event event = new Event(events, "planting");
         return getValueOr(event.getCurrentEvent(), "date", defValue);
+    }
+    
+    /**
+     * Event Type
+     */
+    public enum EventType {
+
+        PLANTING, IRRIGATION, AUTO_IRRIG, FERTILIZER, TILLAGE, ORGANIC_MATTER, HARVEST, CHEMICALS, MULCH
+    }
+    
+    /**
+     * 
+     * 
+     * @param typeStr
+     * @param date
+     * @param info
+     * @return 
+     */
+    public static HashMap<String, String> createEvent(HashMap data, String typeStr, String dap, HashMap<String, String> info) {
+        HashMap newEvent = new HashMap<String, String>();
+        
+        EventType type;
+        try {
+            type = EventType.valueOf(typeStr);
+        } catch (IllegalArgumentException e) {
+            LOG.error("{} event is not recognized, please try other event name", typeStr);
+            return new HashMap<String, String>();
+        } catch (Exception e) {
+            LOG.error(getStackTrace(e));
+            return new HashMap<String, String>();
+        }
+        newEvent.put("event", type.toString().toLowerCase());
+        
+        String pdate = getFstPdate(data, "");
+        if (!pdate.equals("")) {
+            String date = dateOffset(pdate, dap);
+            if (date != null) {
+                newEvent.put("date", date);
+            } else {
+                LOG.error("Given days after planting has a invalid value {}", dap);
+                return new HashMap<String, String>();
+            }
+        } else {
+            LOG.error("Planting date is not available in the given data set");
+            return new HashMap<String, String>();
+        }
+        
+        newEvent.putAll(info);
+        return newEvent;
     }
 }

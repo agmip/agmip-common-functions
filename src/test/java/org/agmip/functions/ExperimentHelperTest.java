@@ -769,7 +769,7 @@ public class ExperimentHelperTest {
 
     @Test
     public void testGetPaddyIrrigation() throws IOException, Exception {
-        log.debug("==testGetPaddyIrrigation() Test Start ==");
+        log.debug("== testGetPaddyIrrigation() Test Start ==");
         String num = "3";
         String percRate = "2";
         String dept = "150";
@@ -807,9 +807,96 @@ public class ExperimentHelperTest {
         HashMap<String, Object> data = new HashMap<String, Object>();
         AcePathfinderUtil.insertValue(data, "pdate", "19990415");
         ArrayList<HashMap<String, String>> actArr = ExperimentHelper.getPaddyIrrigation(data, num, percRate, dept, offsets, maxVals, minVals);
-        
+
         assertEquals("getPaddyIrrigation: unexpected output", expArr, actArr);
-        log.info("getFertDistribution Output: {}", actArr.toString());
-        log.debug("==testGetPaddyIrrigation() Test End ==");
+        log.info("getPaddyIrrigation Output: {}", actArr.toString());
+        log.debug("== testGetPaddyIrrigation() Test End ==");
+    }
+
+    @Test
+    public void testCreateEvent() throws IOException, Exception {
+        log.debug("== testCreateEvent() Test Start ==");
+        String type = "IRRIGATION";
+        String dap = "15";
+        String pdate = "19820315";
+        HashMap<String, String> info = new HashMap();
+        info.put("irop", "IR010");
+        info.put("irval", "150");
+        // planting data is 19990415
+        HashMap expected = new HashMap();
+        expected.put("date", "19820330");
+        expected.put("event", "irrigation");
+        expected.putAll(info);
+
+        HashMap<String, Object> data = new HashMap<String, Object>();
+        AcePathfinderUtil.insertValue(data, "pdate", pdate);
+        HashMap<String, String> actual = ExperimentHelper.createEvent(data, type, dap, info);
+
+        assertEquals("createEvent: unexpected output", expected, actual);
+        log.info("createEvent Output: {}", actual.toString());
+        log.debug("== testCreateEvent() Test End ==");
+    }
+
+    @Test
+    public void testCreateEvent_invalidType() throws IOException, Exception {
+        log.debug("== testCreateEvent_invalidType() Test Start ==");
+        String type = "Irrigation";
+        String dap = "15";
+        String pdate = "19820315";
+        HashMap<String, String> info = new HashMap();
+        info.put("irop", "IR010");
+        info.put("irval", "150");
+        // planting data is 19990415
+        HashMap expected = new HashMap();
+
+        HashMap<String, Object> data = new HashMap<String, Object>();
+        AcePathfinderUtil.insertValue(data, "pdate", pdate);
+        HashMap<String, String> actual = ExperimentHelper.createEvent(data, type, dap, info);
+
+        assertEquals("createEvent: unexpected output", expected, actual);
+        log.info("createEvent Output: {}", actual.toString());
+        log.debug("== testCreateEvent_invalidType() Test End ==");
+    }
+
+    @Test
+    public void testCreateEvent_InvalidDap() throws IOException, Exception {
+        log.debug("== testCreateEvent_InvalidDap() Test Start ==");
+        String type = "IRRIGATION";
+        String dap = "a";
+        String pdate = "19820315";
+        HashMap<String, String> info = new HashMap();
+        info.put("irop", "IR010");
+        info.put("irval", "150");
+        // planting data is 19990415
+        HashMap expected = new HashMap();
+
+        HashMap<String, Object> data = new HashMap<String, Object>();
+        AcePathfinderUtil.insertValue(data, "pdate", pdate);
+        HashMap<String, String> actual = ExperimentHelper.createEvent(data, type, dap, info);
+
+        assertEquals("createEvent: unexpected output", expected, actual);
+        log.info("createEvent Output: {}", actual.toString());
+        log.debug("== testCreateEvent_InvalidDap() Test End ==");
+    }
+
+    @Test
+    public void testCreateEvent_invalidPdate() throws IOException, Exception {
+        log.debug("== testCreateEvent_invalidPdate() Test Start ==");
+        String type = "IRRIGATION";
+        String dap = "15";
+        String pdate = "";
+        HashMap<String, String> info = new HashMap();
+        info.put("irop", "IR010");
+        info.put("irval", "150");
+        // planting data is 19990415
+        HashMap expected = new HashMap();
+
+        HashMap<String, Object> data = new HashMap<String, Object>();
+        AcePathfinderUtil.insertValue(data, "pdate", pdate);
+        HashMap<String, String> actual = ExperimentHelper.createEvent(data, type, dap, info);
+
+        assertEquals("createEvent: unexpected output", expected, actual);
+        log.info("createEvent Output: {}", actual.toString());
+        log.debug("== testCreateEvent_invalidPdate() Test End ==");
     }
 }
