@@ -402,6 +402,7 @@ public class ExperimentHelperTest {
 
     @Test
     public void testGetOMDistribution() throws IOException, Exception {
+        log.debug("== testGetOMDistribution() Test Start ==");
         String line;
         String offset = "-7";
         String omcd = "RE003";
@@ -441,7 +442,7 @@ public class ExperimentHelperTest {
         AcePathfinderUtil.insertValue(data, "pdate", "19990415");
         AcePathfinderUtil.insertValue(data, "omamt", "1000");
         ArrayList<HashMap<String, String>> events = ExperimentHelper.getOMDistribution(data, offset, omcd, omc2n, omdep, ominp, dmr);
-        acctual_1 = events.get(1);
+        acctual_1 = events.get(0);
         //}
 //        try {
 //            assertEquals("getRootDistribution: om app 1", expected_1, acctual_1);
@@ -450,11 +451,13 @@ public class ExperimentHelperTest {
 //        }
         assertEquals("getRootDistribution: om app 1", expected_1, acctual_1);
         log.info("getOMDistribution output: {}", data.toString());
+        log.debug("== testGetOMDistribution() Test End ==");
     }
 
     @Test
     public void testGetOMDistribution_NoOMData() throws IOException, Exception {
 
+        log.debug("== testGetOMDistribution_NoOMData() Test Start ==");
         String offset = "-7";
         String omcd = "RE003";
         String omc2n = "8.3";
@@ -471,12 +474,14 @@ public class ExperimentHelperTest {
 //        } catch (Error e) {
 //            log.error(e.getMessage());
 //        }
-        assertEquals("getRootDistribution: om no data", 1, events.size());
+        assertEquals("getRootDistribution: om no data", 0, events.size());
         log.info("getOMDistribution output: {}", data.toString());
+        log.debug("== testGetOMDistribution_NoOMData() Test End ==");
     }
 
     @Test
     public void testGetOMDistribution2() throws IOException, Exception {
+        log.debug("== testGetOMDistribution2() Test Start ==");
         String offset = "-7";
         String omcd = "RE003";
         String omc2n = "8.3";
@@ -489,7 +494,6 @@ public class ExperimentHelperTest {
         expected_1.put("date", "19990408");
         expected_1.put("omcd", "RE003");
         expected_1.put("omamt", "1000");
-        expected_1.put("om_tot", "1000");
         expected_1.put("omc2n", "8.3");
         expected_1.put("omdep", "5");
         expected_1.put("ominp", "50");
@@ -499,12 +503,13 @@ public class ExperimentHelperTest {
         HashMap<String, Object> data = new HashMap<String, Object>();
         AcePathfinderUtil.insertValue(data, "pdate", "19990415");
         AcePathfinderUtil.insertValue(data, "om_tot", "1000");
-        log.debug(AcePathfinder.INSTANCE.getPath("om_tot"));
+        log.debug((String) data.get("om_tot"));
         ArrayList<HashMap<String, String>> events = ExperimentHelper.getOMDistribution(data, offset, omcd, omc2n, omdep, ominp, dmr);
-        acctual_1 = events.get(1);
+        acctual_1 = events.get(0);
 
         assertEquals("getRootDistribution: om app 2", expected_1, acctual_1);
         log.info("getOMDistribution output 2: {}", data.toString());
+        log.debug("== testGetOMDistribution2() Test End ==");
     }
 
     @Test

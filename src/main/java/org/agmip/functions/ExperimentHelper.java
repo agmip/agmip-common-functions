@@ -369,7 +369,7 @@ public class ExperimentHelper {
                 Map plEvent = event.getCurrentEvent();
                 String pdate = getValueOr(plEvent, "date", "");
                 if (!pdate.equals("")) {
-                    LOG.info("Find oringal PDATE {}, NO calculation required, AUTO_PDATE() exist", pdate);
+                    LOG.debug("Find oringal PDATE {}, NO calculation required, AUTO_PDATE() exist", pdate);
                     return new HashMap<String, ArrayList<String>>();
                 } else {
                     windows.add(new Window(start, end));
@@ -746,18 +746,18 @@ public class ExperimentHelper {
 //        eventData = getObjectOr(mgnData, "events", new ArrayList());
         eventData = new ArrayList();
         ArrayList<HashMap<String, String>> originalEvents = MapUtil.getBucket(expData, "management").getDataList();
-        for (int i = 0; i < originalEvents.size(); i++) {
-            HashMap tmp = new HashMap();
-            tmp.putAll(originalEvents.get(i));
-            eventData.add(tmp);
-        }
+//        for (int i = 0; i < originalEvents.size(); i++) {
+//            HashMap tmp = new HashMap();
+//            tmp.putAll(originalEvents.get(i));
+//            eventData.add(tmp);
+//        }
 
         //    }
         // Get the omamt from the first? OM event
-        Event omEvent = new Event(eventData, "organic_matter");
-        omamt = (String) omEvent.getCurrentEvent().get("om_tot");
+        omamt = getValueOr(expData, "om_tot", "");
         if (omamt == null || omamt.equals("")) {
             LOG.debug("OM_TOT IS NOT AVAILABLE, USING OMAMT");
+            Event omEvent = new Event(originalEvents, "organic_matter");
             omamt = (String) omEvent.getCurrentEvent().get("omamt");
         }
         if (omamt == null || omamt.equals("")) {
@@ -769,7 +769,7 @@ public class ExperimentHelper {
         //}
 
         // Get planting date and om_date
-        events = new Event(eventData, "planting");
+        events = new Event(originalEvents, "planting");
         pdate = (String) events.getCurrentEvent().get("date");
         if (pdate == null || pdate.equals("")) {
             LOG.error("PLANTING DATE IS NOT AVAILABLE");
@@ -787,16 +787,25 @@ public class ExperimentHelper {
             return eventData;
         }
         // Update organic material event
-        events.setEventType("organic_matter");
-        if (events.isEventExist()) {
-            events.updateEvent("date", odate, false);
-            events.updateEvent("omcd", omcd, false);
-            events.updateEvent("omamt", omamt, false);
-            events.updateEvent("omc2n", omc2n, false);
-            events.updateEvent("omdep", omdep, false);
-            events.updateEvent("ominp", ominp, false);
-            events.updateEvent("omn%", omnpct, true);
-        }
+//        events.setEventType("organic_matter");
+//        if (events.isEventExist()) {
+//            events.updateEvent("date", odate, false);
+//            events.updateEvent("omcd", omcd, false);
+//            events.updateEvent("omamt", omamt, false);
+//            events.updateEvent("omc2n", omc2n, false);
+//            events.updateEvent("omdep", omdep, false);
+//            events.updateEvent("ominp", ominp, false);
+//            events.updateEvent("omn%", omnpct, true);
+//        }
+        HashMap result = new HashMap();
+        AcePathfinderUtil.insertValue(result, "omdat", odate);
+        AcePathfinderUtil.insertValue(result, "omcd", omcd);
+        AcePathfinderUtil.insertValue(result, "omamt", omamt);
+        AcePathfinderUtil.insertValue(result, "omc2n", omc2n);
+        AcePathfinderUtil.insertValue(result, "omdep", omdep);
+        AcePathfinderUtil.insertValue(result, "ominp", ominp);
+        AcePathfinderUtil.insertValue(result, "omn%", omnpct);
+        eventData = MapUtil.getBucket(result, "management").getDataList();
         return eventData;
     }
 
@@ -921,7 +930,7 @@ public class ExperimentHelper {
         }
         // If no more planting event is required
         if (expDur <= 1) {
-            LOG.info("Experiment duration is not more than 1, AUTO_REPLICATE_EVENTS won't be applied.");
+            LOG.warn("Experiment duration is not more than 1, AUTO_REPLICATE_EVENTS won't be applied.");
             return results;
         }
 
