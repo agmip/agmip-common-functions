@@ -686,6 +686,9 @@ public class ExperimentHelper {
                 //events.setEventType("fertilizer");
                 for (int i = 0; i < iNum; i++) {
                     String feamn = round(product(fen_tot, ptps[i], "0.01"), 0);
+                    if (feamn == null) {
+                        LOG.error("Invalid value for FEN_TOT {} or PTP {}", fen_tot, ptps[i]);
+                    }
                     output.add(String.format("%s|%s", fdates[i], feamn));
                 }
                 break;
@@ -698,7 +701,9 @@ public class ExperimentHelper {
             AcePathfinderUtil.insertValue(result, "fecd", fecd);
             AcePathfinderUtil.insertValue(result, "feacd", feacd);
             AcePathfinderUtil.insertValue(result, "fedep", fedep);
-            AcePathfinderUtil.insertValue(result, "feamn", tmp[1]);
+            if (!tmp[1].equals("null")) {
+                AcePathfinderUtil.insertValue(result, "feamn", tmp[1]);
+            }
         }
         results = MapUtil.getBucket(result, "management").getDataList();
 
