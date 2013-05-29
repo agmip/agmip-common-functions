@@ -1168,12 +1168,12 @@ public class ExperimentHelper {
     }
     
     /**
-     * 
+     * Generate {@code event} data with given information
      * 
      * @param typeStr
      * @param date
      * @param info
-     * @return 
+     * @return The generated {@code event}
      */
     public static HashMap<String, String> createEvent(HashMap data, String typeStr, String dap, HashMap<String, String> info) {
         HashMap newEvent = new HashMap<String, String>();
