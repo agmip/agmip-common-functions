@@ -5,9 +5,9 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
+import org.agmip.ace.AcePathfinder;
 import org.agmip.ace.util.AcePathfinderUtil;
 import org.agmip.common.Event;
-import org.agmip.common.Functions;
 import static org.agmip.common.Functions.*;
 import org.agmip.common.Functions.CompareMode;
 import static org.agmip.functions.SoilHelper.*;
@@ -1170,17 +1170,19 @@ public class ExperimentHelper {
     /**
      * Generate {@code event} data with given information
      * 
-     * @param typeStr
-     * @param date
-     * @param info
+     * @param typeStr The event type
+     * @param date The event date
+     * @param info The given event information
+     * @param isStrictID The flag for if check the id is only belong the given event type
      * @return The generated {@code event}
      */
-    public static HashMap<String, String> createEvent(HashMap data, String typeStr, String dap, HashMap<String, String> info) {
+    public static HashMap<String, String> createEvent(HashMap data, String typeStr, String dap, HashMap<String, String> info, boolean isStrictID) {
         HashMap newEvent = new HashMap<String, String>();
         
         EventType type;
         try {
             type = EventType.valueOf(typeStr.toUpperCase());
+            typeStr = type.toString().toLowerCase();
         } catch (IllegalArgumentException e) {
             LOG.error("{} event is not recognized, please try other event name", typeStr);
             return new HashMap<String, String>();
@@ -1188,7 +1190,7 @@ public class ExperimentHelper {
             LOG.error(getStackTrace(e));
             return new HashMap<String, String>();
         }
-        newEvent.put("event", type.toString().toLowerCase());
+        newEvent.put("event", typeStr);
         
         String pdate = getFstPdate(data, "");
         if (!pdate.equals("")) {
@@ -1204,6 +1206,16 @@ public class ExperimentHelper {
             return new HashMap<String, String>();
         }
         
+        if (isStrictID) {
+            String[] ids = info.keySet().toArray(new String[0]);
+            for (String id : ids) {
+                String path = AcePathfinder.INSTANCE.getPath(id);
+                if (path == null || !path.contains(typeStr)) {
+                    LOG.warn("{} is not belong to {} event, please check if it is a typo");
+//                    info.remove(id);
+                }
+            }
+        }
         newEvent.putAll(info);
         return newEvent;
     }

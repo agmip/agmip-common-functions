@@ -835,7 +835,7 @@ public class ExperimentHelperTest {
 
         HashMap<String, Object> data = new HashMap<String, Object>();
         AcePathfinderUtil.insertValue(data, "pdate", pdate);
-        HashMap<String, String> actual = ExperimentHelper.createEvent(data, type, dap, info);
+        HashMap<String, String> actual = ExperimentHelper.createEvent(data, type, dap, info, true);
 
         assertEquals("createEvent: unexpected output", expected, actual);
         log.info("createEvent Output: {}", actual.toString());
@@ -856,7 +856,7 @@ public class ExperimentHelperTest {
 
         HashMap<String, Object> data = new HashMap<String, Object>();
         AcePathfinderUtil.insertValue(data, "pdate", pdate);
-        HashMap<String, String> actual = ExperimentHelper.createEvent(data, type, dap, info);
+        HashMap<String, String> actual = ExperimentHelper.createEvent(data, type, dap, info, true);
 
         assertEquals("createEvent: unexpected output", expected, actual);
         log.info("createEvent Output: {}", actual.toString());
@@ -877,7 +877,7 @@ public class ExperimentHelperTest {
 
         HashMap<String, Object> data = new HashMap<String, Object>();
         AcePathfinderUtil.insertValue(data, "pdate", pdate);
-        HashMap<String, String> actual = ExperimentHelper.createEvent(data, type, dap, info);
+        HashMap<String, String> actual = ExperimentHelper.createEvent(data, type, dap, info, true);
 
         assertEquals("createEvent: unexpected output", expected, actual);
         log.info("createEvent Output: {}", actual.toString());
@@ -898,7 +898,7 @@ public class ExperimentHelperTest {
 
         HashMap<String, Object> data = new HashMap<String, Object>();
         AcePathfinderUtil.insertValue(data, "pdate", pdate);
-        HashMap<String, String> actual = ExperimentHelper.createEvent(data, type, dap, info);
+        HashMap<String, String> actual = ExperimentHelper.createEvent(data, type, dap, info, true);
 
         assertEquals("createEvent: unexpected output", expected, actual);
         log.info("createEvent Output: {}", actual.toString());
