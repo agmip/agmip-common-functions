@@ -2,7 +2,7 @@ package org.agmip.common;
 
 import java.util.Date;
 
-import static org.agmip.common.Functions.*;
+import static org.agmip.common.functions.BaseFunctions.*;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -192,7 +192,7 @@ public class FunctionsTest {
         String test = "1234";
         String f1 = "1234";
 
-        assertEquals("Substract incorrect", test, substract(f1));
+        assertEquals("Substract incorrect", test, subtract(f1));
     }
 
     @Test
@@ -201,7 +201,7 @@ public class FunctionsTest {
         String f1 = "1234";
         String f2 = "222";
 
-        assertEquals("Substract incorrect", test, substract(f1, f2));
+        assertEquals("Substract incorrect", test, subtract(f1, f2));
     }
 
     @Test
@@ -211,7 +211,7 @@ public class FunctionsTest {
         String f2 = "234";
         String f3 = "500.23";
 
-        assertEquals("Substract incorrect", test, substract(f1, f2, f3));
+        assertEquals("Substract incorrect", test, subtract(f1, f2, f3));
     }
 
     @Test
@@ -219,7 +219,7 @@ public class FunctionsTest {
         String f1 = null;
         String f2 = "Hi";
 
-        assertNull("This shouldn't work", substract(f1, f2));
+        assertNull("This shouldn't work", subtract(f1, f2));
     }
 
     @Test
@@ -556,18 +556,18 @@ public class FunctionsTest {
         String expected = "45";
         String actual;
 
-        actual = calcDAP(date, pdate);
+        actual = calcDaysAfterPlanting(date, pdate);
         assertEquals("Should return differences of days", expected, actual);
     }
 
     @Test
-    public void calcDAPInvalidDate() {
+    public void calcDaysAfterPlantingInvalidDate() {
         String date = "";
         String pdate = "19810318";
         String expected = "";
         String actual;
 
-        actual = calcDAP(date, pdate);
+        actual = calcDaysAfterPlanting(date, pdate);
         assertEquals("Should return blank string", expected, actual);
     }
 

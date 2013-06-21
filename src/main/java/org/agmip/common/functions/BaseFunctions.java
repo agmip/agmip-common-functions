@@ -1,12 +1,11 @@
-package org.agmip.common;
+package org.agmip.common.functions;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.Writer;
-import java.math.BigInteger;
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.math.RoundingMode;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -15,15 +14,15 @@ import java.util.GregorianCalendar;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class Functions {
+public class BaseFunctions {
 
-    private static final Logger log = LoggerFactory.getLogger(Functions.class);
+    private static final Logger LOG = LoggerFactory.getLogger(BaseFunctions.class);
     private static final SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyyMMdd");
 
     /**
      * Cannot instantiate this class.
      */
-    private Functions() {
+    private BaseFunctions() {
     }
 
     /**
@@ -66,6 +65,7 @@ public class Functions {
         try {
             decimal = new BigDecimal(numeric);
         } catch (Exception ex) {
+            LOG.error("numericStringToBigInteger() failed with {}", numeric);
             return null;
         }
 
@@ -124,7 +124,7 @@ public class Functions {
         }
     }
     
-    public static String calcDAP(String date, String pdate) {
+    public static String calcDaysAfterPlanting(String date, String pdate) {
         Date d = convertFromAgmipDateString(date);
         Date p = convertFromAgmipDateString(pdate);
         if (d == null || p == null) {
@@ -287,7 +287,7 @@ public class Functions {
      *
      * @see BigDecimal
      */
-    public static String substract(String minuend, String... subtrahends) {
+    public static String subtract(String minuend, String... subtrahends) {
 
         if (subtrahends == null) {
             return minuend;
@@ -781,7 +781,7 @@ public class Functions {
         if (in == null) {
             return new String[0];
         }
-        ArrayList<String> arr = new ArrayList();
+        ArrayList<String> arr = new ArrayList<>();
         for (int i = 0; i < in.length; i++) {
             if (in[i] != null) {
                 arr.add(in[i]);
