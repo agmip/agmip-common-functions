@@ -1,5 +1,5 @@
-/.settings/*
-/bin/*
+/.settings/
+/bin/
 .classpath
 /target/
 *.tmp
