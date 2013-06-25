@@ -183,10 +183,11 @@ public class WeatherHelper {
      */
     public static HashMap<String, ArrayList<String>> getEto(HashMap data) {
         HashMap<String, ArrayList<String>> results = new HashMap<String, ArrayList<String>>();
+        HashMap wthData = getWthData(data);
         ArrayList<HashMap<String, String>> dailyArr = getDailyData(data);
 
         // Step 1. Atmospheric pressure (P) [kPa]
-        String wst_elev = getValueOr(data, "wst_elev", "");
+        String wst_elev = getValueOr(wthData, "wst_elev", "");
         if (wst_elev.equals("")) {
             return results;
         }
@@ -197,11 +198,11 @@ public class WeatherHelper {
 
         // Eq.17 (Step 8)
         // latitude [rad]
-        String wst_lat = getValueOr(data, "wst_lat", "");
+        String wst_lat = getValueOr(wthData, "wst_lat", "");
         String phi = divide(product(wst_lat, Math.PI + ""), "180");
 
         // Get other potentially necessary meta data from Ace data set
-        String psyvnt = getValueOr(data, "psyvnt", "").trim();
+        String psyvnt = getValueOr(wthData, "psyvnt", "").trim();
         String aPsy = "";
         if (psyvnt.equals("Forced")) {
             aPsy = "0.000662";
@@ -209,8 +210,8 @@ public class WeatherHelper {
             aPsy = "0.00800";
         }
         String rPsy = multiply(aPsy, P);
-        String amth = getValueOr(data, "amth", "0.25");
-        String bmth = getValueOr(data, "bmth", "0.50");
+        String amth = getValueOr(wthData, "amth", "0.25");
+        String bmth = getValueOr(wthData, "bmth", "0.50");
 
         // Calculate daily ETO
         ArrayList<String> etoArr = new ArrayList<String>();
@@ -297,7 +298,7 @@ public class WeatherHelper {
                 rs = multiply(sum(amth, divide(multiply(bmth, alt1), N)), ra);
             } // Method 3. LSE use Tmin and Tmax to estimate Rs by means of the Hargreaves equation
             else {
-                rs = product(getKrsValue(data), sqrt(substract(tMax, tMin)), ra);
+                rs = product(getKrsValue(wthData), sqrt(substract(tMax, tMin)), ra);
             }
 
             // Step 10. Clear-Sky solar radiation (Rso)
@@ -321,7 +322,7 @@ public class WeatherHelper {
             if (!(alt1 = getValueOr(dailyData, "wind", "").trim()).equals("")) {
                 String uz = divide(multiply("1000", alt1), "86400", 4);
                 // CASE 1. Reference height for wind speed measurement (WNDHT)  is 2 meter
-                if (compare(alt2 = getValueOr(data, "wndht", "").trim(), "2", CompareMode.EQUAL)) {
+                if (compare(alt2 = getValueOr(wthData, "wndht", "").trim(), "2", CompareMode.EQUAL)) {
                     u2 = uz;
                 } // CASE 2. Reference height for wind speed measurement (WNDHT)  is NOT 2 meter
                 else {
