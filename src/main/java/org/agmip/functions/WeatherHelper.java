@@ -253,7 +253,7 @@ public class WeatherHelper {
 
             } // Method 3 IF RHMND and RHMXD are available in the ACE data base
             else if (!(alt1 = getValueOr(dailyData, "rhmxd", "").trim()).equals("")
-                    && !(alt2 = getValueOr(dailyData, "rhmnd", "").trim()).equals("")) {
+                    && !(alt2 = getValueOr(dailyData, "rhmnd", getValueOr(dailyData, "rhumd", "")).trim()).equals("")) {
                 // ea from the given maximum and minimum Relative Humidity
                 ea = average(product(e_tMin, alt1, "0.01"), product(e_tMax, alt2, "0.01"));
 
