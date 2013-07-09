@@ -1,13 +1,12 @@
 package org.agmip.common;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.Date;
-
 import static org.agmip.common.Functions.*;
-
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.After;
+import org.agmip.common.Functions.CompareMode;
 import static org.junit.Assert.*;
+import org.junit.Test;
 
 public class FunctionsTest {
 
@@ -579,5 +578,34 @@ public class FunctionsTest {
 
         actual = convertMsToDay(ms);
         assertEquals("Should return correct number of days", expected, actual);
+    }
+    
+    @Test
+    public void clearDirectoryNormalDir() throws IOException {
+        File f = new File("\\test");
+        f.mkdir();
+        assertTrue(clearDirectory(f));
+    }
+    
+    @Test
+    public void clearDirectoryNormalCombine() throws IOException {
+        File f = new File("\\test");
+        File f2 = new File("\\test\\a\\b.txt");
+        f2.getParentFile().mkdirs();
+        f2.createNewFile();
+        assertTrue(clearDirectory(f));
+    }
+    
+    @Test
+    public void clearDirectoryNormalFile() throws IOException {
+        File f = new File("test.txt");
+        f.createNewFile();
+        assertTrue(clearDirectory(f));
+    }
+    
+    @Test
+    public void clearDirectoryFailure() throws IOException {
+        File f = new File("\\test");
+        assertTrue(!clearDirectory(f));
     }
 }
