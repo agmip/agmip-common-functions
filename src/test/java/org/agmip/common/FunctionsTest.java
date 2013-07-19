@@ -1,6 +1,8 @@
 package org.agmip.common;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Date;
 import static org.agmip.common.Functions.*;
@@ -606,6 +608,18 @@ public class FunctionsTest {
     @Test
     public void clearDirectoryFailure() throws IOException {
         File f = new File("\\test");
+        File f2 = new File("\\test\\a\\b.txt");
+        f2.getParentFile().mkdirs();
+        f2.createNewFile();
+        FileWriter fw = new FileWriter(f2);
         assertTrue(!clearDirectory(f));
+        fw.close();
+        assertTrue(clearDirectory(f));
+    }
+    
+    @Test
+    public void clearDirectoryNotExist() throws IOException {
+        File f = new File("\\test");
+        assertTrue(clearDirectory(f));
     }
 }

@@ -797,7 +797,7 @@ public class Functions {
     
     public static boolean clearDirectory(File dir) {
         if (!dir.exists()) {
-            return false;
+            return true;
         } else if (dir.isDirectory()) {
             File[] subDirs = dir.listFiles();
             for (File subDir : subDirs) {
