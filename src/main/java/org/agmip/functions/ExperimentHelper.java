@@ -969,6 +969,45 @@ public class ExperimentHelper {
         }
         return results;
     }
+    
+    public static ArrayList<ArrayList<HashMap<String, String>>> getAutoEvent(Map data) {
+        // Get Experiment duration
+        String sc_year = getValueOr(data, "sc_year", "");
+        if (sc_year.equals("")) {
+            LOG.debug("SC_YEAR is unavailable in the data set, will use original planting date as start year");
+            return getAutoEventDate(data);
+        } else {
+            try {
+                // Get Experiment duration
+                int expDur;
+                try {
+                    expDur = Integer.parseInt(getValueOr(data, "exp_dur", "1"));
+                } catch (Exception e) {
+                    expDur = 1;
+                }
+                // If no more planting event is required
+                if (expDur <= 1) {
+                    LOG.warn("Experiment duration is not more than 1, AUTO_REPLICATE_EVENTS won't be applied.");
+                    return new ArrayList<ArrayList<HashMap<String, String>>>();
+                }
+                
+                String pdate = getFstPdate(data, "");
+                if (pdate.equals("")) {
+                    LOG.warn("PDATE is unavailable in the data set, will use original event date as start year");
+                    return getAutoEventDate(data);
+                }
+                String[] pdates = new String[expDur];
+                String newPdate = yearOffset(pdate, substract(sc_year, pdate.substring(0 ,4)));
+                for (int i = 0; i < pdates.length; i++) {
+                    pdates[i] = yearOffset(newPdate, i + "");
+                }
+                return getAutoEventDate(data, pdates);
+            } catch (Exception e) {
+                LOG.warn("SC_YEAR contain invalid value, will use original planting date as start year");
+                return getAutoEventDate(data);
+            }
+        }
+    }
 
     /**
      * This function will clone the original management events based on given
