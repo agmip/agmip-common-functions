@@ -152,7 +152,7 @@ public class WeatherHelper {
      * @return The weather daily data array
      */
     protected static ArrayList getDailyData(HashMap data) {
-        if (data.containsKey("weather")) {
+        if (data.containsKey("weather") || !data.containsKey("dailyWeather")) {
             return MapUtil.getBucket(data, "weather").getDataList();
         } else {
             return new BucketEntry(data).getDataList();
