@@ -969,7 +969,7 @@ public class ExperimentHelper {
         }
         return results;
     }
-    
+
     public static ArrayList<ArrayList<HashMap<String, String>>> getAutoEvent(Map data) {
         // Get Experiment duration
         String sc_year = getValueOr(data, "sc_year", "");
@@ -990,14 +990,14 @@ public class ExperimentHelper {
                     LOG.warn("Experiment duration is not more than 1, AUTO_REPLICATE_EVENTS won't be applied.");
                     return new ArrayList<ArrayList<HashMap<String, String>>>();
                 }
-                
+
                 String pdate = getFstPdate(data, "");
                 if (pdate.equals("")) {
                     LOG.warn("PDATE is unavailable in the data set, will use original event date as start year");
                     return getAutoEventDate(data);
                 }
                 String[] pdates = new String[expDur];
-                String newPdate = yearOffset(pdate, substract(sc_year, pdate.substring(0 ,4)));
+                String newPdate = yearOffset(pdate, substract(sc_year, pdate.substring(0, 4)));
                 for (int i = 0; i < pdates.length; i++) {
                     pdates[i] = yearOffset(newPdate, i + "");
                 }
@@ -1037,7 +1037,7 @@ public class ExperimentHelper {
         while (results.size() < pdates.length) {
             results.add(new ArrayList());
         }
-        
+
         String orgPdate = getValueOr(data, "origin_pdate", "-99");
         if (orgPdate.equals("")) {
             LOG.error("The original PDATE is missing, can't calculate other event date");
@@ -1184,10 +1184,10 @@ public class ExperimentHelper {
 
         return results;
     }
-    
+
     /**
      * Get the first planting date from given data set.
-     * 
+     *
      * @param data The experiment data holder
      * @param defValue The value used for return when planting date is unavailable
      * @return The planting date
@@ -1197,7 +1197,7 @@ public class ExperimentHelper {
         Event event = new Event(events, "planting");
         return getValueOr(event.getCurrentEvent(), "date", defValue);
     }
-    
+
     /**
      * Event Type
      */
@@ -1205,19 +1205,20 @@ public class ExperimentHelper {
 
         PLANTING, IRRIGATION, AUTO_IRRIG, FERTILIZER, TILLAGE, ORGANIC_MATTER, HARVEST, CHEMICALS, MULCH
     }
-    
+
     /**
      * Generate {@code event} data with given information
-     * 
+     *
+     * @param data experiment data holder
      * @param typeStr The event type
-     * @param date The event date
+     * @param dap The days after planting to operate the event
      * @param info The given event information
      * @param isStrictID The flag for if check the id is only belong the given event type
      * @return The generated {@code event}
      */
     public static HashMap<String, String> createEvent(HashMap data, String typeStr, String dap, HashMap<String, String> info, boolean isStrictID) {
         HashMap newEvent = new HashMap<String, String>();
-        
+
         EventType type;
         try {
             type = EventType.valueOf(typeStr.toUpperCase());
@@ -1230,7 +1231,7 @@ public class ExperimentHelper {
             return new HashMap<String, String>();
         }
         newEvent.put("event", typeStr);
-        
+
         String pdate = getFstPdate(data, "");
         if (!pdate.equals("")) {
             String date = dateOffset(pdate, dap);
@@ -1244,7 +1245,7 @@ public class ExperimentHelper {
             LOG.error("Planting date is not available in the given data set");
             return new HashMap<String, String>();
         }
-        
+
         if (isStrictID) {
             String[] ids = info.keySet().toArray(new String[0]);
             for (String id : ids) {
