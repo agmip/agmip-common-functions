@@ -1242,9 +1242,9 @@ public class WeatherHelperTest {
         AcePathfinderUtil.insertValue(data, "wst_long", "-80.633");
         AcePathfinderUtil.insertValue(data, "wst_elev", "3.00");
         AcePathfinderUtil.insertValue(data, "wndht", "10.00");
-        AcePathfinderUtil.insertValue(data, "amth", "0.3", "weather");
-        AcePathfinderUtil.insertValue(data, "bmth", "0.4", "weather");
-        AcePathfinderUtil.insertValue(data, "psyvnt", "Forced", "weather");
+        AcePathfinderUtil.insertValue(data, "amth", "0.3");
+        AcePathfinderUtil.insertValue(data, "bmth", "0.4");
+        AcePathfinderUtil.insertValue(data, "psyvnt", "Forced");
 
         // All variable valid
         AcePathfinderUtil.insertValue(data, "w_date", "19890823");
@@ -1254,8 +1254,8 @@ public class WeatherHelperTest {
         AcePathfinderUtil.insertValue(data, "sunh", "");
         AcePathfinderUtil.insertValue(data, "tavd", "");
         AcePathfinderUtil.insertValue(data, "wind", "180");
-        AcePathfinderUtil.insertValue(data, "rhmnd", "30", AcePathfinder.INSTANCE.getPath("w_date"));
-        AcePathfinderUtil.insertValue(data, "rhmxd", "50", AcePathfinder.INSTANCE.getPath("w_date"));
+        AcePathfinderUtil.insertValue(data, "rhmnd", "30");
+        AcePathfinderUtil.insertValue(data, "rhmxd", "50");
         AcePathfinderUtil.insertValue(data, "vprsd", "1.6");
         AcePathfinderUtil.insertValue(data, "tdew", "13.5");
         AcePathfinderUtil.insertValue(data, "tdry", "25.3");
@@ -1268,8 +1268,8 @@ public class WeatherHelperTest {
         AcePathfinderUtil.insertValue(data, "sunh", "");
         AcePathfinderUtil.insertValue(data, "tavd", "");
         AcePathfinderUtil.insertValue(data, "wind", "180");
-        AcePathfinderUtil.insertValue(data, "rhmnd", "30", AcePathfinder.INSTANCE.getPath("w_date"));
-        AcePathfinderUtil.insertValue(data, "rhmxd", "50", AcePathfinder.INSTANCE.getPath("w_date"));
+        AcePathfinderUtil.insertValue(data, "rhmnd", "30");
+        AcePathfinderUtil.insertValue(data, "rhmxd", "50");
         AcePathfinderUtil.insertValue(data, "vprsd", "");
         AcePathfinderUtil.insertValue(data, "tdew", "13.5");
         AcePathfinderUtil.insertValue(data, "tdry", "25.3");
@@ -1282,8 +1282,8 @@ public class WeatherHelperTest {
         AcePathfinderUtil.insertValue(data, "sunh", "");
         AcePathfinderUtil.insertValue(data, "tavd", "");
         AcePathfinderUtil.insertValue(data, "wind", "180");
-        AcePathfinderUtil.insertValue(data, "rhmnd", "30", AcePathfinder.INSTANCE.getPath("w_date"));
-        AcePathfinderUtil.insertValue(data, "rhmxd", "50", AcePathfinder.INSTANCE.getPath("w_date"));
+        AcePathfinderUtil.insertValue(data, "rhmnd", "30");
+        AcePathfinderUtil.insertValue(data, "rhmxd", "50");
         AcePathfinderUtil.insertValue(data, "vprsd", "");
         AcePathfinderUtil.insertValue(data, "tdew", "");
         AcePathfinderUtil.insertValue(data, "tdry", "25.3");
@@ -1296,8 +1296,8 @@ public class WeatherHelperTest {
         AcePathfinderUtil.insertValue(data, "sunh", "");
         AcePathfinderUtil.insertValue(data, "tavd", "");
         AcePathfinderUtil.insertValue(data, "wind", "180");
-        AcePathfinderUtil.insertValue(data, "rhmnd", "", AcePathfinder.INSTANCE.getPath("w_date"));
-        AcePathfinderUtil.insertValue(data, "rhmxd", "", AcePathfinder.INSTANCE.getPath("w_date"));
+        AcePathfinderUtil.insertValue(data, "rhmnd", "");
+        AcePathfinderUtil.insertValue(data, "rhmxd", "");
         AcePathfinderUtil.insertValue(data, "vprsd", "");
         AcePathfinderUtil.insertValue(data, "tdew", "");
         AcePathfinderUtil.insertValue(data, "tdry", "25.3");
@@ -1310,8 +1310,8 @@ public class WeatherHelperTest {
         AcePathfinderUtil.insertValue(data, "sunh", "");
         AcePathfinderUtil.insertValue(data, "tavd", "");
         AcePathfinderUtil.insertValue(data, "wind", "180");
-        AcePathfinderUtil.insertValue(data, "rhmnd", "", AcePathfinder.INSTANCE.getPath("w_date"));
-        AcePathfinderUtil.insertValue(data, "rhmxd", "", AcePathfinder.INSTANCE.getPath("w_date"));
+        AcePathfinderUtil.insertValue(data, "rhmnd", "");
+        AcePathfinderUtil.insertValue(data, "rhmxd", "");
         AcePathfinderUtil.insertValue(data, "vprsd", "");
         AcePathfinderUtil.insertValue(data, "tdew", "");
         AcePathfinderUtil.insertValue(data, "tdry", "");
@@ -1324,8 +1324,8 @@ public class WeatherHelperTest {
         AcePathfinderUtil.insertValue(data, "sunh", "12");
         AcePathfinderUtil.insertValue(data, "tavd", "");
         AcePathfinderUtil.insertValue(data, "wind", "180");
-        AcePathfinderUtil.insertValue(data, "rhmnd", "", AcePathfinder.INSTANCE.getPath("w_date"));
-        AcePathfinderUtil.insertValue(data, "rhmxd", "", AcePathfinder.INSTANCE.getPath("w_date"));
+        AcePathfinderUtil.insertValue(data, "rhmnd", "");
+        AcePathfinderUtil.insertValue(data, "rhmxd", "");
         AcePathfinderUtil.insertValue(data, "vprsd", "1.6");
         AcePathfinderUtil.insertValue(data, "tdew", "");
         AcePathfinderUtil.insertValue(data, "tdry", "");
@@ -1338,8 +1338,8 @@ public class WeatherHelperTest {
         AcePathfinderUtil.insertValue(data, "sunh", "12");
         AcePathfinderUtil.insertValue(data, "tavd", "");
         AcePathfinderUtil.insertValue(data, "wind", "180");
-        AcePathfinderUtil.insertValue(data, "rhmnd", "", AcePathfinder.INSTANCE.getPath("w_date"));
-        AcePathfinderUtil.insertValue(data, "rhmxd", "", AcePathfinder.INSTANCE.getPath("w_date"));
+        AcePathfinderUtil.insertValue(data, "rhmnd", "");
+        AcePathfinderUtil.insertValue(data, "rhmxd", "");
         AcePathfinderUtil.insertValue(data, "vprsd", "1.6");
         AcePathfinderUtil.insertValue(data, "tdew", "");
         AcePathfinderUtil.insertValue(data, "tdry", "");
@@ -1352,8 +1352,8 @@ public class WeatherHelperTest {
         AcePathfinderUtil.insertValue(data, "sunh", "");
         AcePathfinderUtil.insertValue(data, "tavd", "");
         AcePathfinderUtil.insertValue(data, "wind", "180");
-        AcePathfinderUtil.insertValue(data, "rhmnd", "", AcePathfinder.INSTANCE.getPath("w_date"));
-        AcePathfinderUtil.insertValue(data, "rhmxd", "", AcePathfinder.INSTANCE.getPath("w_date"));
+        AcePathfinderUtil.insertValue(data, "rhmnd", "");
+        AcePathfinderUtil.insertValue(data, "rhmxd", "");
         AcePathfinderUtil.insertValue(data, "vprsd", "1.6");
         AcePathfinderUtil.insertValue(data, "tdew", "");
         AcePathfinderUtil.insertValue(data, "tdry", "");
@@ -1366,8 +1366,8 @@ public class WeatherHelperTest {
         AcePathfinderUtil.insertValue(data, "sunh", "");
         AcePathfinderUtil.insertValue(data, "tavd", "");
         AcePathfinderUtil.insertValue(data, "wind", "180");
-        AcePathfinderUtil.insertValue(data, "rhmnd", "", AcePathfinder.INSTANCE.getPath("w_date"));
-        AcePathfinderUtil.insertValue(data, "rhmxd", "", AcePathfinder.INSTANCE.getPath("w_date"));
+        AcePathfinderUtil.insertValue(data, "rhmnd", "");
+        AcePathfinderUtil.insertValue(data, "rhmxd", "");
         AcePathfinderUtil.insertValue(data, "vprsd", "1.6");
         AcePathfinderUtil.insertValue(data, "tdew", "");
         AcePathfinderUtil.insertValue(data, "tdry", "");
@@ -1380,8 +1380,8 @@ public class WeatherHelperTest {
         AcePathfinderUtil.insertValue(data, "sunh", "");
         AcePathfinderUtil.insertValue(data, "tavd", "");
         AcePathfinderUtil.insertValue(data, "wind", "");
-        AcePathfinderUtil.insertValue(data, "rhmnd", "", AcePathfinder.INSTANCE.getPath("w_date"));
-        AcePathfinderUtil.insertValue(data, "rhmxd", "", AcePathfinder.INSTANCE.getPath("w_date"));
+        AcePathfinderUtil.insertValue(data, "rhmnd", "");
+        AcePathfinderUtil.insertValue(data, "rhmxd", "");
         AcePathfinderUtil.insertValue(data, "vprsd", "1.6");
         AcePathfinderUtil.insertValue(data, "tdew", "");
         AcePathfinderUtil.insertValue(data, "tdry", "");
@@ -1405,9 +1405,9 @@ public class WeatherHelperTest {
         AcePathfinderUtil.insertValue(data, "wst_long", "-80.633");
         AcePathfinderUtil.insertValue(data, "wst_elev", "3.00");
         AcePathfinderUtil.insertValue(data, "wndht", "10.00");
-//        AcePathfinderUtil.insertValue(data, "amth", "0.3", "weather");
-//        AcePathfinderUtil.insertValue(data, "bmth", "0.4", "weather");
-        AcePathfinderUtil.insertValue(data, "psyvnt", "Natural", "weather");
+//        AcePathfinderUtil.insertValue(data, "amth", "0.3");
+//        AcePathfinderUtil.insertValue(data, "bmth", "0.4");
+        AcePathfinderUtil.insertValue(data, "psyvnt", "Natural");
 
         // VPRSD, TDEW, RHMND, RHMXD missing with psyvnt = Natural
         AcePathfinderUtil.insertValue(data, "w_date", "19890823");
@@ -1417,8 +1417,8 @@ public class WeatherHelperTest {
         AcePathfinderUtil.insertValue(data, "sunh", "");
         AcePathfinderUtil.insertValue(data, "tavd", "");
         AcePathfinderUtil.insertValue(data, "wind", "180");
-        AcePathfinderUtil.insertValue(data, "rhmnd", "", AcePathfinder.INSTANCE.getPath("w_date"));
-        AcePathfinderUtil.insertValue(data, "rhmxd", "", AcePathfinder.INSTANCE.getPath("w_date"));
+        AcePathfinderUtil.insertValue(data, "rhmnd", "");
+        AcePathfinderUtil.insertValue(data, "rhmxd", "");
         AcePathfinderUtil.insertValue(data, "vprsd", "");
         AcePathfinderUtil.insertValue(data, "tdew", "");
         AcePathfinderUtil.insertValue(data, "tdry", "25.3");
@@ -1442,9 +1442,9 @@ public class WeatherHelperTest {
         AcePathfinderUtil.insertValue(data, "wst_long", "-80.633");
         AcePathfinderUtil.insertValue(data, "wst_elev", "3.00");
         AcePathfinderUtil.insertValue(data, "wndht", "10.00");
-        AcePathfinderUtil.insertValue(data, "amth", "0.3", "weather");
-//        AcePathfinderUtil.insertValue(data, "bmth", "0.4", "weather");
-        AcePathfinderUtil.insertValue(data, "psyvnt", "Forced", "weather");
+        AcePathfinderUtil.insertValue(data, "amth", "0.3");
+//        AcePathfinderUtil.insertValue(data, "bmth", "0.4");
+        AcePathfinderUtil.insertValue(data, "psyvnt", "Forced");
 
         // SRAD, BMTH misssing
         AcePathfinderUtil.insertValue(data, "w_date", "19890427");
@@ -1454,8 +1454,8 @@ public class WeatherHelperTest {
         AcePathfinderUtil.insertValue(data, "sunh", "12");
         AcePathfinderUtil.insertValue(data, "tavd", "");
         AcePathfinderUtil.insertValue(data, "wind", "180");
-        AcePathfinderUtil.insertValue(data, "rhmnd", "", AcePathfinder.INSTANCE.getPath("w_date"));
-        AcePathfinderUtil.insertValue(data, "rhmxd", "", AcePathfinder.INSTANCE.getPath("w_date"));
+        AcePathfinderUtil.insertValue(data, "rhmnd", "");
+        AcePathfinderUtil.insertValue(data, "rhmxd", "");
         AcePathfinderUtil.insertValue(data, "vprsd", "1.6");
         AcePathfinderUtil.insertValue(data, "tdew", "");
         AcePathfinderUtil.insertValue(data, "tdry", "");
@@ -1479,9 +1479,9 @@ public class WeatherHelperTest {
         AcePathfinderUtil.insertValue(data, "wst_long", "-80.633");
         AcePathfinderUtil.insertValue(data, "wst_elev", "3.00");
         AcePathfinderUtil.insertValue(data, "wndht", "10.00");
-//        AcePathfinderUtil.insertValue(data, "amth", "0.3", "weather");
-        AcePathfinderUtil.insertValue(data, "bmth", "0.4", "weather");
-        AcePathfinderUtil.insertValue(data, "psyvnt", "Forced", "weather");
+//        AcePathfinderUtil.insertValue(data, "amth", "0.3");
+        AcePathfinderUtil.insertValue(data, "bmth", "0.4");
+        AcePathfinderUtil.insertValue(data, "psyvnt", "Forced");
 
         // SRAD, AMTH misssing
         AcePathfinderUtil.insertValue(data, "w_date", "19890427");
@@ -1491,8 +1491,8 @@ public class WeatherHelperTest {
         AcePathfinderUtil.insertValue(data, "sunh", "12");
         AcePathfinderUtil.insertValue(data, "tavd", "");
         AcePathfinderUtil.insertValue(data, "wind", "180");
-        AcePathfinderUtil.insertValue(data, "rhmnd", "", AcePathfinder.INSTANCE.getPath("w_date"));
-        AcePathfinderUtil.insertValue(data, "rhmxd", "", AcePathfinder.INSTANCE.getPath("w_date"));
+        AcePathfinderUtil.insertValue(data, "rhmnd", "");
+        AcePathfinderUtil.insertValue(data, "rhmxd", "");
         AcePathfinderUtil.insertValue(data, "vprsd", "1.6");
         AcePathfinderUtil.insertValue(data, "tdew", "");
         AcePathfinderUtil.insertValue(data, "tdry", "");
@@ -1516,9 +1516,9 @@ public class WeatherHelperTest {
         AcePathfinderUtil.insertValue(data, "wst_long", "-80.633");
         AcePathfinderUtil.insertValue(data, "wst_elev", "3.00");
         AcePathfinderUtil.insertValue(data, "wndht", "2.00");
-//        AcePathfinderUtil.insertValue(data, "amth", "0.3", "weather");
-//        AcePathfinderUtil.insertValue(data, "bmth", "0.4", "weather");
-        AcePathfinderUtil.insertValue(data, "psyvnt", "Forced", "weather");
+//        AcePathfinderUtil.insertValue(data, "amth", "0.3");
+//        AcePathfinderUtil.insertValue(data, "bmth", "0.4");
+        AcePathfinderUtil.insertValue(data, "psyvnt", "Forced");
 
         // Wind not missing and wndht = 2
         AcePathfinderUtil.insertValue(data, "w_date", "19890214");
@@ -1528,8 +1528,8 @@ public class WeatherHelperTest {
         AcePathfinderUtil.insertValue(data, "sunh", "");
         AcePathfinderUtil.insertValue(data, "tavd", "");
         AcePathfinderUtil.insertValue(data, "wind", "180");
-        AcePathfinderUtil.insertValue(data, "rhmnd", "", AcePathfinder.INSTANCE.getPath("w_date"));
-        AcePathfinderUtil.insertValue(data, "rhmxd", "", AcePathfinder.INSTANCE.getPath("w_date"));
+        AcePathfinderUtil.insertValue(data, "rhmnd", "");
+        AcePathfinderUtil.insertValue(data, "rhmxd", "");
         AcePathfinderUtil.insertValue(data, "vprsd", "1.6");
         AcePathfinderUtil.insertValue(data, "tdew", "");
         AcePathfinderUtil.insertValue(data, "tdry", "");

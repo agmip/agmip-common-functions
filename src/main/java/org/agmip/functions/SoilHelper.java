@@ -158,7 +158,7 @@ public class SoilHelper {
      * @return The soil layer data array
      */
     protected static ArrayList getSoilLayer(HashMap data) {
-        if (data.containsKey("soil")) {
+        if (data.containsKey("soil") || !data.containsKey("soilLayer")) {
             return MapUtil.getBucket(data, "soil").getDataList();
         } else {
             return new BucketEntry(data).getDataList();
