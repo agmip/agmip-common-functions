@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
+import org.agmip.ace.AcePathfinder;
 import org.agmip.ace.util.AcePathfinderUtil;
 import org.agmip.common.Event;
 import static org.agmip.common.Functions.*;
@@ -368,7 +369,7 @@ public class ExperimentHelper {
                 Map plEvent = event.getCurrentEvent();
                 String pdate = getValueOr(plEvent, "date", "");
                 if (!pdate.equals("")) {
-                    LOG.info("Find oringal PDATE {}, NO calculation required, AUTO_PDATE() exist", pdate);
+                    LOG.debug("Find oringal PDATE {}, NO calculation required, AUTO_PDATE() exist", pdate);
                     return new HashMap<String, ArrayList<String>>();
                 } else {
                     windows.add(new Window(start, end));
@@ -685,6 +686,9 @@ public class ExperimentHelper {
                 //events.setEventType("fertilizer");
                 for (int i = 0; i < iNum; i++) {
                     String feamn = round(product(fen_tot, ptps[i], "0.01"), 0);
+                    if (feamn == null) {
+                        LOG.error("Invalid value for FEN_TOT {} or PTP {}", fen_tot, ptps[i]);
+                    }
                     output.add(String.format("%s|%s", fdates[i], feamn));
                 }
                 break;
@@ -697,7 +701,9 @@ public class ExperimentHelper {
             AcePathfinderUtil.insertValue(result, "fecd", fecd);
             AcePathfinderUtil.insertValue(result, "feacd", feacd);
             AcePathfinderUtil.insertValue(result, "fedep", fedep);
-            AcePathfinderUtil.insertValue(result, "feamn", tmp[1]);
+            if (!tmp[1].equals("null")) {
+                AcePathfinderUtil.insertValue(result, "feamn", tmp[1]);
+            }
         }
         results = MapUtil.getBucket(result, "management").getDataList();
 
@@ -745,18 +751,18 @@ public class ExperimentHelper {
 //        eventData = getObjectOr(mgnData, "events", new ArrayList());
         eventData = new ArrayList();
         ArrayList<HashMap<String, String>> originalEvents = MapUtil.getBucket(expData, "management").getDataList();
-        for (int i = 0; i < originalEvents.size(); i++) {
-            HashMap tmp = new HashMap();
-            tmp.putAll(originalEvents.get(i));
-            eventData.add(tmp);
-        }
+//        for (int i = 0; i < originalEvents.size(); i++) {
+//            HashMap tmp = new HashMap();
+//            tmp.putAll(originalEvents.get(i));
+//            eventData.add(tmp);
+//        }
 
         //    }
         // Get the omamt from the first? OM event
-        Event omEvent = new Event(eventData, "organic_matter");
-        omamt = (String) omEvent.getCurrentEvent().get("om_tot");
+        omamt = getValueOr(expData, "om_tot", "");
         if (omamt == null || omamt.equals("")) {
             LOG.debug("OM_TOT IS NOT AVAILABLE, USING OMAMT");
+            Event omEvent = new Event(originalEvents, "organic_matter");
             omamt = (String) omEvent.getCurrentEvent().get("omamt");
         }
         if (omamt == null || omamt.equals("")) {
@@ -768,7 +774,7 @@ public class ExperimentHelper {
         //}
 
         // Get planting date and om_date
-        events = new Event(eventData, "planting");
+        events = new Event(originalEvents, "planting");
         pdate = (String) events.getCurrentEvent().get("date");
         if (pdate == null || pdate.equals("")) {
             LOG.error("PLANTING DATE IS NOT AVAILABLE");
@@ -786,16 +792,25 @@ public class ExperimentHelper {
             return eventData;
         }
         // Update organic material event
-        events.setEventType("organic_matter");
-        if (events.isEventExist()) {
-            events.updateEvent("date", odate, false);
-            events.updateEvent("omcd", omcd, false);
-            events.updateEvent("omamt", omamt, false);
-            events.updateEvent("omc2n", omc2n, false);
-            events.updateEvent("omdep", omdep, false);
-            events.updateEvent("ominp", ominp, false);
-            events.updateEvent("omn%", omnpct, true);
-        }
+//        events.setEventType("organic_matter");
+//        if (events.isEventExist()) {
+//            events.updateEvent("date", odate, false);
+//            events.updateEvent("omcd", omcd, false);
+//            events.updateEvent("omamt", omamt, false);
+//            events.updateEvent("omc2n", omc2n, false);
+//            events.updateEvent("omdep", omdep, false);
+//            events.updateEvent("ominp", ominp, false);
+//            events.updateEvent("omn%", omnpct, true);
+//        }
+        HashMap result = new HashMap();
+        AcePathfinderUtil.insertValue(result, "omdat", odate);
+        AcePathfinderUtil.insertValue(result, "omcd", omcd);
+        AcePathfinderUtil.insertValue(result, "omamt", omamt);
+        AcePathfinderUtil.insertValue(result, "omc2n", omc2n);
+        AcePathfinderUtil.insertValue(result, "omdep", omdep);
+        AcePathfinderUtil.insertValue(result, "ominp", ominp);
+        AcePathfinderUtil.insertValue(result, "omn%", omnpct);
+        eventData = MapUtil.getBucket(result, "management").getDataList();
         return eventData;
     }
 
@@ -920,7 +935,7 @@ public class ExperimentHelper {
         }
         // If no more planting event is required
         if (expDur <= 1) {
-            LOG.info("Experiment duration is not more than 1, AUTO_REPLICATE_EVENTS won't be applied.");
+            LOG.warn("Experiment duration is not more than 1, AUTO_REPLICATE_EVENTS won't be applied.");
             return results;
         }
 
@@ -955,6 +970,45 @@ public class ExperimentHelper {
         return results;
     }
 
+    public static ArrayList<ArrayList<HashMap<String, String>>> getAutoEvent(Map data) {
+        // Get Experiment duration
+        String sc_year = getValueOr(data, "sc_year", "");
+        if (sc_year.equals("")) {
+            LOG.debug("SC_YEAR is unavailable in the data set, will use original planting date as start year");
+            return getAutoEventDate(data);
+        } else {
+            try {
+                // Get Experiment duration
+                int expDur;
+                try {
+                    expDur = Integer.parseInt(getValueOr(data, "exp_dur", "1"));
+                } catch (Exception e) {
+                    expDur = 1;
+                }
+                // If no more planting event is required
+                if (expDur <= 1) {
+                    LOG.warn("Experiment duration is not more than 1, AUTO_REPLICATE_EVENTS won't be applied.");
+                    return new ArrayList<ArrayList<HashMap<String, String>>>();
+                }
+
+                String pdate = getFstPdate(data, "");
+                if (pdate.equals("")) {
+                    LOG.warn("PDATE is unavailable in the data set, will use original event date as start year");
+                    return getAutoEventDate(data);
+                }
+                String[] pdates = new String[expDur];
+                String newPdate = yearOffset(pdate, substract(sc_year, pdate.substring(0, 4)));
+                for (int i = 0; i < pdates.length; i++) {
+                    pdates[i] = yearOffset(newPdate, i + "");
+                }
+                return getAutoEventDate(data, pdates);
+            } catch (Exception e) {
+                LOG.warn("SC_YEAR contain invalid value, will use original planting date as start year");
+                return getAutoEventDate(data);
+            }
+        }
+    }
+
     /**
      * This function will clone the original management events based on given
      * new planting dates. The generated event will keep the original days after
@@ -983,7 +1037,7 @@ public class ExperimentHelper {
         while (results.size() < pdates.length) {
             results.add(new ArrayList());
         }
-        
+
         String orgPdate = getValueOr(data, "origin_pdate", "-99");
         if (orgPdate.equals("")) {
             LOG.error("The original PDATE is missing, can't calculate other event date");
@@ -1130,10 +1184,10 @@ public class ExperimentHelper {
 
         return results;
     }
-    
+
     /**
      * Get the first planting date from given data set.
-     * 
+     *
      * @param data The experiment data holder
      * @param defValue The value used for return when planting date is unavailable
      * @return The planting date
@@ -1142,5 +1196,67 @@ public class ExperimentHelper {
         ArrayList<HashMap<String, String>> events = getBucket(data, "management").getDataList();
         Event event = new Event(events, "planting");
         return getValueOr(event.getCurrentEvent(), "date", defValue);
+    }
+
+    /**
+     * Event Type
+     */
+    public enum EventType {
+
+        PLANTING, IRRIGATION, AUTO_IRRIG, FERTILIZER, TILLAGE, ORGANIC_MATTER, HARVEST, CHEMICALS, MULCH
+    }
+
+    /**
+     * Generate {@code event} data with given information
+     *
+     * @param data experiment data holder
+     * @param typeStr The event type
+     * @param dap The days after planting to operate the event
+     * @param info The given event information
+     * @param isStrictID The flag for if check the id is only belong the given event type
+     * @return The generated {@code event}
+     */
+    public static HashMap<String, String> createEvent(HashMap data, String typeStr, String dap, HashMap<String, String> info, boolean isStrictID) {
+        HashMap newEvent = new HashMap<String, String>();
+
+        EventType type;
+        try {
+            type = EventType.valueOf(typeStr.toUpperCase());
+            typeStr = type.toString().toLowerCase();
+        } catch (IllegalArgumentException e) {
+            LOG.error("{} event is not recognized, please try other event name", typeStr);
+            return new HashMap<String, String>();
+        } catch (Exception e) {
+            LOG.error(getStackTrace(e));
+            return new HashMap<String, String>();
+        }
+        newEvent.put("event", typeStr);
+
+        String pdate = getFstPdate(data, "");
+        if (!pdate.equals("")) {
+            String date = dateOffset(pdate, dap);
+            if (date != null) {
+                newEvent.put("date", date);
+            } else {
+                LOG.error("Given days after planting has a invalid value {}", dap);
+                return new HashMap<String, String>();
+            }
+        } else {
+            LOG.error("Planting date is not available in the given data set");
+            return new HashMap<String, String>();
+        }
+
+        if (isStrictID) {
+            String[] ids = info.keySet().toArray(new String[0]);
+            for (String id : ids) {
+                String path = AcePathfinder.INSTANCE.getPath(id);
+                if (path == null || !path.contains(typeStr)) {
+                    LOG.warn("{} is not belong to {} event, please check if it is a typo");
+//                    info.remove(id);
+                }
+            }
+        }
+        newEvent.putAll(info);
+        return newEvent;
     }
 }

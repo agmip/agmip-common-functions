@@ -1,5 +1,6 @@
 package org.agmip.common;
 
+import java.io.File;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.Writer;
@@ -791,6 +792,25 @@ public class Functions {
             return in;
         } else {
             return arr.toArray(new String[0]);
+        }
+    }
+    
+    public static boolean clearDirectory(File dir) {
+        if (!dir.exists()) {
+            return true;
+        } else if (dir.isDirectory()) {
+            File[] subDirs = dir.listFiles();
+            for (File subDir : subDirs) {
+                if (!clearDirectory(subDir)) {
+                    return false;
+                }
+            }
+        }
+        if (!dir.delete()) {
+            log.error("{} is failed to be removed.", dir.getPath());
+            return false;
+        } else {
+            return true;
         }
     }
 }

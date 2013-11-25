@@ -11,6 +11,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import org.agmip.ace.AcePathfinder;
 import org.agmip.ace.util.AcePathfinderUtil;
+import org.agmip.common.Functions;
 import org.agmip.util.JSONAdapter;
 import org.agmip.util.MapUtil;
 import static org.agmip.util.MapUtil.*;
@@ -402,6 +403,7 @@ public class ExperimentHelperTest {
 
     @Test
     public void testGetOMDistribution() throws IOException, Exception {
+        log.debug("== testGetOMDistribution() Test Start ==");
         String line;
         String offset = "-7";
         String omcd = "RE003";
@@ -441,7 +443,7 @@ public class ExperimentHelperTest {
         AcePathfinderUtil.insertValue(data, "pdate", "19990415");
         AcePathfinderUtil.insertValue(data, "omamt", "1000");
         ArrayList<HashMap<String, String>> events = ExperimentHelper.getOMDistribution(data, offset, omcd, omc2n, omdep, ominp, dmr);
-        acctual_1 = events.get(1);
+        acctual_1 = events.get(0);
         //}
 //        try {
 //            assertEquals("getRootDistribution: om app 1", expected_1, acctual_1);
@@ -450,11 +452,13 @@ public class ExperimentHelperTest {
 //        }
         assertEquals("getRootDistribution: om app 1", expected_1, acctual_1);
         log.info("getOMDistribution output: {}", data.toString());
+        log.debug("== testGetOMDistribution() Test End ==");
     }
 
     @Test
     public void testGetOMDistribution_NoOMData() throws IOException, Exception {
 
+        log.debug("== testGetOMDistribution_NoOMData() Test Start ==");
         String offset = "-7";
         String omcd = "RE003";
         String omc2n = "8.3";
@@ -471,12 +475,14 @@ public class ExperimentHelperTest {
 //        } catch (Error e) {
 //            log.error(e.getMessage());
 //        }
-        assertEquals("getRootDistribution: om no data", 1, events.size());
+        assertEquals("getRootDistribution: om no data", 0, events.size());
         log.info("getOMDistribution output: {}", data.toString());
+        log.debug("== testGetOMDistribution_NoOMData() Test End ==");
     }
 
     @Test
     public void testGetOMDistribution2() throws IOException, Exception {
+        log.debug("== testGetOMDistribution2() Test Start ==");
         String offset = "-7";
         String omcd = "RE003";
         String omc2n = "8.3";
@@ -489,7 +495,6 @@ public class ExperimentHelperTest {
         expected_1.put("date", "19990408");
         expected_1.put("omcd", "RE003");
         expected_1.put("omamt", "1000");
-        expected_1.put("om_tot", "1000");
         expected_1.put("omc2n", "8.3");
         expected_1.put("omdep", "5");
         expected_1.put("ominp", "50");
@@ -499,12 +504,13 @@ public class ExperimentHelperTest {
         HashMap<String, Object> data = new HashMap<String, Object>();
         AcePathfinderUtil.insertValue(data, "pdate", "19990415");
         AcePathfinderUtil.insertValue(data, "om_tot", "1000");
-        log.debug(AcePathfinder.INSTANCE.getPath("om_tot"));
+        log.debug((String) data.get("om_tot"));
         ArrayList<HashMap<String, String>> events = ExperimentHelper.getOMDistribution(data, offset, omcd, omc2n, omdep, ominp, dmr);
-        acctual_1 = events.get(1);
+        acctual_1 = events.get(0);
 
         assertEquals("getRootDistribution: om app 2", expected_1, acctual_1);
         log.info("getOMDistribution output 2: {}", data.toString());
+        log.debug("== testGetOMDistribution2() Test End ==");
     }
 
     @Test
@@ -575,6 +581,100 @@ public class ExperimentHelperTest {
 //            }
             assertEquals("getStableCDistribution: normal case " + i, expected[i], (String) acctual.get(i));
         }
+    }
+
+    @Test
+    public void testGetAutoEvent() throws IOException, Exception {
+
+        ArrayList<ArrayList<HashMap<String, String>>> expected = new ArrayList();
+        int expDur = 3;
+        int sc_year = 2010;
+        HashMap pEvent = new HashMap();
+        int pdate = 20100203;
+        int edate = 20100204;
+        pEvent.put("event", "planting");
+        pEvent.put("crid", "MAZ");
+        HashMap iEvent = new HashMap();
+        int idate = 20100213;
+        iEvent.put("event", "irrigation");
+        iEvent.put("irop", "ir001");
+        HashMap iaEvent = new HashMap();
+        int iadate = 20100313;
+        iaEvent.put("event", "auto_irrig");
+        iaEvent.put("irmdp", "1234");
+        HashMap feEvent = new HashMap();
+        int fedate = 20100413;
+        feEvent.put("event", "fertilizer");
+        feEvent.put("fecd", "123");
+        HashMap tEvent = new HashMap();
+        int tdate = 20100513;
+        tEvent.put("event", "tillage");
+        tEvent.put("tiimp", "123456");
+        HashMap omEvent = new HashMap();
+        int omdate = 20100613;
+        omEvent.put("event", "organic_matter");
+        omEvent.put("omcd", "12345");
+        HashMap hEvent = new HashMap();
+        int hdate = 20100713;
+        hEvent.put("event", "harvest");
+        hEvent.put("harm", "111");
+        HashMap cEvent = new HashMap();
+        int cdate = 20100813;
+        cEvent.put("event", "chemicals");
+        cEvent.put("chcd", "222");
+        HashMap mEvent = new HashMap();
+        int mdate = 20100913;
+        mEvent.put("event", "mulch");
+        mEvent.put("mltp", "333");
+
+        for (int i = 0; i < expDur; i++) {
+            expected.add(new ArrayList());
+            expected.get(i).add(createEvent2(pEvent, pdate, i));
+            expected.get(i).get(expected.get(i).size() - 1).put("edate", edate + 10000 * i + "");
+            expected.get(i).add(createEvent2(iEvent, idate, i));
+            expected.get(i).add(createEvent2(iaEvent, iadate, i));
+            expected.get(i).add(createEvent2(feEvent, fedate, i));
+            expected.get(i).add(createEvent2(tEvent, tdate, i));
+            expected.get(i).add(createEvent2(omEvent, omdate, i));
+            expected.get(i).add(createEvent2(hEvent, hdate, i));
+            expected.get(i).add(createEvent2(cEvent, cdate, i));
+            expected.get(i).add(createEvent2(mEvent, mdate, i));
+        }
+
+        HashMap<String, Object> data = new HashMap();
+        AcePathfinderUtil.insertValue(data, "pdate", "19820203");
+        MapUtil.getBucket(data, "management").getDataList().get(0).put("edate", "19820204");
+        AcePathfinderUtil.insertValue(data, "crid", "MAZ");
+        AcePathfinderUtil.insertValue(data, "idate", "19820213");
+        AcePathfinderUtil.insertValue(data, "irop", "ir001");
+//        AcePathfinderUtil.insertValue(data, "iadate", "19820313");
+        AcePathfinderUtil.insertValue(data, "irmdp", "1234");
+        MapUtil.getBucket(data, "management").getDataList().get(2).put("date", "19820313");
+        AcePathfinderUtil.insertValue(data, "fedate", "19820413");
+        AcePathfinderUtil.insertValue(data, "fecd", "123");
+        AcePathfinderUtil.insertValue(data, "tdate", "19820513");
+        AcePathfinderUtil.insertValue(data, "tiimp", "123456");
+        AcePathfinderUtil.insertValue(data, "omdat", "19820613");
+        AcePathfinderUtil.insertValue(data, "omcd", "12345");
+        AcePathfinderUtil.insertValue(data, "hadat", "19820713");
+        AcePathfinderUtil.insertValue(data, "harm", "111");
+        AcePathfinderUtil.insertValue(data, "cdate", "19820813");
+        AcePathfinderUtil.insertValue(data, "chcd", "222");
+        AcePathfinderUtil.insertValue(data, "mladat", "19820913");
+        AcePathfinderUtil.insertValue(data, "mltp", "333");
+        data.put("exp_dur", expDur + "");
+        data.put("sc_year", sc_year + "");
+
+//        HashMap dummyEvent = new HashMap();
+//        dummyEvent.put("date", "abc");
+//        MapUtil.getBucket(data, "management").getDataList().add(dummyEvent);
+
+        log.info("Inputs: {}", data);
+        ArrayList<ArrayList<HashMap<String, String>>> results = ExperimentHelper.getAutoEvent(data);
+        log.info("Results: {}", results);
+
+        assertEquals("getAutoEvent: unexpected result", expected, results);
+
     }
 
     @Test
@@ -665,7 +765,7 @@ public class ExperimentHelperTest {
         ArrayList<ArrayList<HashMap<String, String>>> results = ExperimentHelper.getAutoEventDate(data);
         log.info("Results: {}", results);
 
-        assertEquals("getAutoPlantingDate: unexpected result", expected, results);
+        assertEquals("getAutoEventDate: unexpected result", expected, results);
 
     }
 
@@ -756,7 +856,7 @@ public class ExperimentHelperTest {
         ArrayList<ArrayList<HashMap<String, String>>> results = ExperimentHelper.getAutoEventDate(data, pdates);
         log.info("Results: {}", results);
 
-        assertEquals("getAutoPlantingDate: unexpected result", expected, results);
+        assertEquals("getAutoEventDate: unexpected result", expected, results);
 
     }
 
@@ -767,9 +867,23 @@ public class ExperimentHelperTest {
         return event;
     }
 
+    private HashMap createEvent2(HashMap template, int date, int yearIndex) {
+        HashMap event = new HashMap();
+        event.putAll(template);
+        int leapYear = date/10000%4 + date/10000;
+        int leapDate = leapYear * 10000 + 229;
+        int furDate = date + yearIndex * 10000;
+        int diff = yearIndex/4 + 1;
+        if (furDate < leapDate) {
+            diff--;
+        }
+        event.put("date", Functions.dateOffset(furDate + "", (0 - diff) + ""));
+        return event;
+    }
+
     @Test
     public void testGetPaddyIrrigation() throws IOException, Exception {
-        log.debug("==testGetPaddyIrrigation() Test Start ==");
+        log.debug("== testGetPaddyIrrigation() Test Start ==");
         String num = "3";
         String percRate = "2";
         String dept = "150";
@@ -807,9 +921,96 @@ public class ExperimentHelperTest {
         HashMap<String, Object> data = new HashMap<String, Object>();
         AcePathfinderUtil.insertValue(data, "pdate", "19990415");
         ArrayList<HashMap<String, String>> actArr = ExperimentHelper.getPaddyIrrigation(data, num, percRate, dept, offsets, maxVals, minVals);
-        
+
         assertEquals("getPaddyIrrigation: unexpected output", expArr, actArr);
-        log.info("getFertDistribution Output: {}", actArr.toString());
-        log.debug("==testGetPaddyIrrigation() Test End ==");
+        log.info("getPaddyIrrigation Output: {}", actArr.toString());
+        log.debug("== testGetPaddyIrrigation() Test End ==");
+    }
+
+    @Test
+    public void testCreateEvent() throws IOException, Exception {
+        log.debug("== testCreateEvent() Test Start ==");
+        String type = "IRRIGATION";
+        String dap = "15";
+        String pdate = "19820315";
+        HashMap<String, String> info = new HashMap();
+        info.put("irop", "IR010");
+        info.put("irval", "150");
+        // planting data is 19990415
+        HashMap expected = new HashMap();
+        expected.put("date", "19820330");
+        expected.put("event", "irrigation");
+        expected.putAll(info);
+
+        HashMap<String, Object> data = new HashMap<String, Object>();
+        AcePathfinderUtil.insertValue(data, "pdate", pdate);
+        HashMap<String, String> actual = ExperimentHelper.createEvent(data, type, dap, info, true);
+
+        assertEquals("createEvent: unexpected output", expected, actual);
+        log.info("createEvent Output: {}", actual.toString());
+        log.debug("== testCreateEvent() Test End ==");
+    }
+
+    @Test
+    public void testCreateEvent_invalidType() throws IOException, Exception {
+        log.debug("== testCreateEvent_invalidType() Test Start ==");
+        String type = "IRRIGATIONs";
+        String dap = "15";
+        String pdate = "19820315";
+        HashMap<String, String> info = new HashMap();
+        info.put("irop", "IR010");
+        info.put("irval", "150");
+        // planting data is 19990415
+        HashMap expected = new HashMap();
+
+        HashMap<String, Object> data = new HashMap<String, Object>();
+        AcePathfinderUtil.insertValue(data, "pdate", pdate);
+        HashMap<String, String> actual = ExperimentHelper.createEvent(data, type, dap, info, true);
+
+        assertEquals("createEvent: unexpected output", expected, actual);
+        log.info("createEvent Output: {}", actual.toString());
+        log.debug("== testCreateEvent_invalidType() Test End ==");
+    }
+
+    @Test
+    public void testCreateEvent_InvalidDap() throws IOException, Exception {
+        log.debug("== testCreateEvent_InvalidDap() Test Start ==");
+        String type = "IRRIGATION";
+        String dap = "a";
+        String pdate = "19820315";
+        HashMap<String, String> info = new HashMap();
+        info.put("irop", "IR010");
+        info.put("irval", "150");
+        // planting data is 19990415
+        HashMap expected = new HashMap();
+
+        HashMap<String, Object> data = new HashMap<String, Object>();
+        AcePathfinderUtil.insertValue(data, "pdate", pdate);
+        HashMap<String, String> actual = ExperimentHelper.createEvent(data, type, dap, info, true);
+
+        assertEquals("createEvent: unexpected output", expected, actual);
+        log.info("createEvent Output: {}", actual.toString());
+        log.debug("== testCreateEvent_InvalidDap() Test End ==");
+    }
+
+    @Test
+    public void testCreateEvent_invalidPdate() throws IOException, Exception {
+        log.debug("== testCreateEvent_invalidPdate() Test Start ==");
+        String type = "Irrigation";
+        String dap = "15";
+        String pdate = "";
+        HashMap<String, String> info = new HashMap();
+        info.put("irop", "IR010");
+        info.put("irval", "150");
+        // planting data is 19990415
+        HashMap expected = new HashMap();
+
+        HashMap<String, Object> data = new HashMap<String, Object>();
+        AcePathfinderUtil.insertValue(data, "pdate", pdate);
+        HashMap<String, String> actual = ExperimentHelper.createEvent(data, type, dap, info, true);
+
+        assertEquals("createEvent: unexpected output", expected, actual);
+        log.info("createEvent Output: {}", actual.toString());
+        log.debug("== testCreateEvent_invalidPdate() Test End ==");
     }
 }
