@@ -8,6 +8,7 @@ import java.util.Map;
 import org.agmip.ace.AcePathfinder;
 import org.agmip.ace.util.AcePathfinderUtil;
 import org.agmip.common.Event;
+import org.agmip.common.Functions;
 import static org.agmip.common.Functions.*;
 import org.agmip.common.Functions.CompareMode;
 import static org.agmip.functions.SoilHelper.*;
@@ -251,7 +252,9 @@ public class ExperimentHelper {
 
             if (accRainAmt < accRainAmtTotal) {
                 String lastDay;
-                if (windows[i].end >= dailyData.size()) {
+                if (startYear > 0) {
+                    lastDay = (startYear + i) + lDate;
+                } else if (windows[i].end >= dailyData.size()) {
                     lastDay = getValueOr(dailyData.get(dailyData.size() - 1), "w_date", "");
                 } else {
                     lastDay = getValueOr(dailyData.get(windows[i].end), "w_date", "");
