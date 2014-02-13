@@ -164,4 +164,67 @@ public class SoilHelper {
             return new BucketEntry(data).getDataList();
         }
     }
+
+    /**
+     * Splitting the original soil layers into homogeneous layers with soil
+     * thicknesses which do not exceed limits of drainage models. The parameters
+     * for new layer will depend on the original layers.
+     *
+     * @param data The experiment data holder
+     * @return The soil layer data array with new added layers
+     */
+    public static ArrayList<HashMap<String, String>> splittingSoillayer(HashMap data) {
+        ArrayList<HashMap<String, String>> ret = new ArrayList();
+        ArrayList<HashMap<String, String>> soilLayers = getSoilLayer(data);
+        String lastDepth;
+        String curDepth;
+        String thickness;
+        HashMap<String, String> layer;
+
+        if (soilLayers.size() < 2) {
+            return ret;
+        } else {
+            lastDepth = MapUtil.getValueOr(soilLayers.get(0), "sllb", "");
+            ret.add(soilLayers.get(0));
+        }
+
+        for (int i = 1; i < soilLayers.size(); i++, lastDepth = curDepth) {
+            layer = soilLayers.get(i);
+            curDepth = MapUtil.getValueOr(layer, "sllb", "");
+            thickness = substract(curDepth, lastDepth);
+            String pt;
+            if (compare(curDepth, "15", CompareMode.NOTGREATER)) {
+                pt = "10";
+            } else if (compare(curDepth, "60", CompareMode.NOTGREATER)) {
+                pt = "15";
+            } else if (compare(curDepth, "200", CompareMode.NOTGREATER)) {
+                pt = "30";
+            } else {
+                pt = "60";
+            }
+            ret.addAll(createNewLayers(layer, pt, thickness, lastDepth));
+            ret.add(layer);
+        }
+        return ret;
+    }
+
+    private static ArrayList<HashMap<String, String>> createNewLayers(HashMap layer, String pt, String thickness, String lastDepth) {
+        ArrayList<HashMap<String, String>> ret = new ArrayList();
+        if (compare(thickness, pt, CompareMode.NOTGREATER)) {
+            return ret;
+        }
+        int newLayerNum = numericStringToBigInteger(divide(thickness, pt, 0)).intValue();
+        if (compare(thickness, multiply(pt, newLayerNum + ""), CompareMode.GREATER)) {
+            newLayerNum++;
+        }
+        String increase = divide(thickness, newLayerNum + "", 0);
+        for (int i = 0; i < newLayerNum - 1; i++) {
+            lastDepth = sum(lastDepth, increase);
+            HashMap newLayer = new HashMap();
+            newLayer.putAll(layer);
+            newLayer.put("sllb", lastDepth);
+            ret.add(newLayer);
+        }
+        return ret;
+    }
 }
