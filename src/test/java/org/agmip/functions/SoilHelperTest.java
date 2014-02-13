@@ -7,6 +7,7 @@ import java.util.HashMap;
 import static org.agmip.util.MapUtil.*;
 import static org.junit.Assert.*;
 import org.agmip.ace.util.AcePathfinderUtil;
+import org.agmip.util.MapUtil;
 import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -112,6 +113,56 @@ public class SoilHelperTest {
             }
         }
         assertEquals("getRootDistribution: icno3 ", expIcnTot.length, acctual.size());
+        
+        log.info("getRootDistribution() output: {}", result.toString());
+    }
+
+    @Test
+    public void testSplittingSoillayer() throws IOException, Exception {
+
+        HashMap<String, Object> data = new HashMap<String, Object>();
+        AcePathfinderUtil.insertValue(data, "sllb", "10");
+        AcePathfinderUtil.insertValue(data, "slbdm", "1.15");
+        AcePathfinderUtil.insertValue(data, "sllb", "40");
+        AcePathfinderUtil.insertValue(data, "slbdm", "1.16");
+        AcePathfinderUtil.insertValue(data, "sllb", "80");
+        AcePathfinderUtil.insertValue(data, "slbdm", "1.21");
+        AcePathfinderUtil.insertValue(data, "sllb", "110");
+        AcePathfinderUtil.insertValue(data, "slbdm", "1.23");
+        AcePathfinderUtil.insertValue(data, "sllb", "180");
+        AcePathfinderUtil.insertValue(data, "slbdm", "1.31");
+        AcePathfinderUtil.insertValue(data, "sllb", "250");
+        AcePathfinderUtil.insertValue(data, "slbdm", "1.31");
+        
+        HashMap<String, Object> expectedData = new HashMap<String, Object>();
+        AcePathfinderUtil.insertValue(expectedData, "sllb", "10");
+        AcePathfinderUtil.insertValue(expectedData, "slbdm", "1.15");
+        AcePathfinderUtil.insertValue(expectedData, "sllb", "25");
+        AcePathfinderUtil.insertValue(expectedData, "slbdm", "1.16");
+        AcePathfinderUtil.insertValue(expectedData, "sllb", "40");
+        AcePathfinderUtil.insertValue(expectedData, "slbdm", "1.16");
+        AcePathfinderUtil.insertValue(expectedData, "sllb", "60");
+        AcePathfinderUtil.insertValue(expectedData, "slbdm", "1.21");
+        AcePathfinderUtil.insertValue(expectedData, "sllb", "80");
+        AcePathfinderUtil.insertValue(expectedData, "slbdm", "1.21");
+        AcePathfinderUtil.insertValue(expectedData, "sllb", "110");
+        AcePathfinderUtil.insertValue(expectedData, "slbdm", "1.23");
+        AcePathfinderUtil.insertValue(expectedData, "sllb", "133");
+        AcePathfinderUtil.insertValue(expectedData, "slbdm", "1.31");
+        AcePathfinderUtil.insertValue(expectedData, "sllb", "156");
+        AcePathfinderUtil.insertValue(expectedData, "slbdm", "1.31");
+        AcePathfinderUtil.insertValue(expectedData, "sllb", "180");
+        AcePathfinderUtil.insertValue(expectedData, "slbdm", "1.31");
+        AcePathfinderUtil.insertValue(expectedData, "sllb", "215");
+        AcePathfinderUtil.insertValue(expectedData, "slbdm", "1.31");
+        AcePathfinderUtil.insertValue(expectedData, "sllb", "250");
+        AcePathfinderUtil.insertValue(expectedData, "slbdm", "1.31");
+        ArrayList<HashMap<String, String>> expectedLayers = MapUtil.getBucket(expectedData, "soil").getDataList();
+
+        ArrayList<HashMap<String, String>> result = SoilHelper.splittingSoillayer(data);
+        
+//        assertEquals("getRootDistribution: layer size is incorrect ", expectedLayers.size(), result.size());
+        assertEquals("getRootDistribution: layer data is incorrect ", expectedLayers, result);
         
         log.info("getRootDistribution() output: {}", result.toString());
     }
