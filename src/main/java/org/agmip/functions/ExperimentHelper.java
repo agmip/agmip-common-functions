@@ -1333,7 +1333,10 @@ public class ExperimentHelper {
                 LOG.warn("Invalid TMAX/TMIN detected on {}", date);
                 continue;
             }
-            calGdd = sum(calGdd, substract(tavg, baseTemp));
+            String gdd = substract(tavg, baseTemp);
+            if (gdd != null && compare(gdd, "0", CompareMode.GREATER)) {
+                calGdd = sum(calGdd, gdd);
+            }
             if (compare(calGdd, gddArr[j], CompareMode.NOTLESS)) {
                 LOG.debug(date + " TAVG: {}\t IcrGDD: {}\t GDD: " + calGdd + "\t Target :" + gddArr[j] + " [Picked up]", tavg, substract(tavg, baseTemp));
                 HashMap irrEvt = new HashMap();
