@@ -310,7 +310,7 @@ public class ExperimentHelper {
         if (eDateCal.after(lDateCal)) {
             lDateCal.set(Calendar.YEAR, lDateCal.get(Calendar.YEAR) + 1);
         }
-        duration = (int) ((lDateCal.getTimeInMillis() - eDateCal.getTimeInMillis()) / 86400000);
+        duration = (int) Math.round((lDateCal.getTimeInMillis() - eDateCal.getTimeInMillis()) / 86400000.0);
 
         // Check Number of days of accumulation
         try {
@@ -1261,5 +1261,100 @@ public class ExperimentHelper {
         }
         newEvent.putAll(info);
         return newEvent;
+    }
+    
+    public static ArrayList<HashMap<String, String>> getAutoIrrigationEvent(HashMap data, String irrNum, String baseTemp, String[] gddArr, String[] irvalArr) {
+        ArrayList<HashMap<String, String>> irrEvts = new ArrayList();
+        ArrayList<HashMap<String, String>> dailyArr = WeatherHelper.getDailyData(data);
+        if (dailyArr.isEmpty()) {
+            LOG.error("The weather data for {} is missing", getValueOr(data, "exname", "unknown experiment"));
+            return irrEvts;
+        }
+        
+        int iIrrNum;
+        try {
+            iIrrNum = numericStringToBigInteger(irrNum).intValue();
+        } catch (Exception e) {
+            LOG.error("The number for irrigation event is invalid");
+            return irrEvts;
+        }
+        if (gddArr.length != iIrrNum || irvalArr.length != iIrrNum) {
+            LOG.error("There is not enough pairs of GDD and irrigation amount for {} irrigation", iIrrNum);
+            return irrEvts;
+        }
+        for (String gdd : gddArr) {
+            if (gdd == null || gdd.equals("") || !gdd.matches("-?\\d+(.\\d*)?")) {
+                LOG.error("Invalid input GDD value {} has been deceted", gdd);
+                return irrEvts;
+            }
+        }
+        for (String irval : irvalArr) {
+            if (irval == null || irval.equals("") || !irval.matches("-?\\d+(.\\d*)?")) {
+                LOG.error("Invalid input irrigation amount value {} has been deceted", irval);
+                return irrEvts;
+            }
+        }
+        
+        Event event = new Event(getBucket(data, "management").getDataList(), "planting");
+        String pdate = getValueOr(event.getCurrentEvent(), "date", "");
+        if (pdate.equals("")) {
+            LOG.error("Planting event is not valid in the data set for calculating irrigation date");
+            return irrEvts;
+        }
+        
+        long pdateMis = convertFromAgmipDateString(pdate).getTime();
+        int  startIdx = (int) Math.round((pdateMis - convertFromAgmipDateString(getValueOr(dailyArr.get(0), "w_date", "")).getTime()) / 86400000.0);
+        if (startIdx >= dailyArr.size() || !pdate.equals(getValueOr(dailyArr.get(startIdx), "w_date", ""))) {
+            if (pdateMis > convertFromAgmipDateString(getValueOr(dailyArr.get(dailyArr.size() - 1), "w_date", "")).getTime()) {
+                LOG.error("Not enough weather daily data for calculating irrigation date based plnating date of {}", pdate);
+                return irrEvts;
+            } else {
+                boolean isExist = false;
+                for (int i = 0; i < dailyArr.size(); i++) {
+                    if (pdate.equals(getValueOr(dailyArr.get(i), "pdate", ""))) {
+                        startIdx = i;
+                        isExist = true;
+                        break;
+                    }
+                }
+                if (!isExist) {
+                    LOG.error("Could not find planting date ({}) in the weather daily date", pdate);
+                    return irrEvts;
+                }
+            }
+        }
+        
+        String calGdd = "0";
+        for (int i = startIdx, j = 0; i < dailyArr.size(); i++) {
+            HashMap<String, String> daily = dailyArr.get(i);
+            String date = getValueOr(daily, "w_date", "");
+            String tavg = average(getValueOr(daily, "tmax", ""), getValueOr(daily, "tmin", ""));
+            if (tavg == null) {
+                LOG.warn("Invalid TMAX/TMIN detected on {}", date);
+                continue;
+            }
+            String gdd = substract(tavg, baseTemp);
+            if (gdd != null && compare(gdd, "0", CompareMode.GREATER)) {
+                calGdd = sum(calGdd, gdd);
+            }
+            if (compare(calGdd, gddArr[j], CompareMode.NOTLESS)) {
+                LOG.debug(date + " TAVG: {}\t IcrGDD: {}\t GDD: " + calGdd + "\t Target :" + gddArr[j] + " [Picked up]", tavg, substract(tavg, baseTemp));
+                HashMap irrEvt = new HashMap();
+                irrEvt.put("event", "irrigation");
+                irrEvt.put("date", date);
+                irrEvt.put("irval", irvalArr[j]);
+                irrEvt.put("irop", "IR001");
+                irrEvts.add(irrEvt);
+                calGdd = "0";
+                j++;
+                if (j >= gddArr.length) {
+                    break;
+                }
+            } else {
+                LOG.debug(date + " TAVG: {}\t IcrGDD: {}\t GDD: " + calGdd + "\t Target :" + gddArr[j], tavg, substract(tavg, baseTemp));
+            }
+        }
+        
+        return irrEvts;
     }
 }
