@@ -1013,4 +1013,32 @@ public class ExperimentHelperTest {
         log.info("createEvent Output: {}", actual.toString());
         log.debug("== testCreateEvent_invalidPdate() Test End ==");
     }
+
+    @Test
+    public void testGetAutoIrrigationDate_machakos() throws IOException, Exception {
+        log.debug("== testGetAutoIrrigationDate_machakos() Test Start ==");
+        URL test_resource = this.getClass().getResource("/machakos.json");
+        String line;
+        String[] expected = {"19990510", "19990521", "19990607", "19990619"};
+        
+        // PDATE = 19990415
+        String baseTemp = "5";
+        String irrNum = "4";
+        String[] gddArr = {"400", "160", "240", "180"};
+        String[] irvalArr = {"30", "50", "40", "20"};
+        
+        BufferedReader br = new BufferedReader(
+                new InputStreamReader(
+                new FileInputStream(test_resource.getPath())));
+
+        if ((line = br.readLine()) != null) {
+            HashMap<String, Object> data = JSONAdapter.fromJSON(line);
+            ArrayList<HashMap<String, String>> results = ExperimentHelper.getAutoIrrigationEvent(data, irrNum, baseTemp, gddArr, irvalArr);
+            log.info("Results: {}", results);
+            assertEquals("The generated irrigation events is not enough", expected.length, results.size());
+            for (int i = 0; i < expected.length; i++) {
+                assertEquals("The calculated irrigation date is not match with expected date for " + i, expected[i], getValueOr(results.get(i), "date", ""));                
+            }
+        }
+    }
 }
