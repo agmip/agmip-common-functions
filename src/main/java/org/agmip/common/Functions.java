@@ -84,7 +84,7 @@ public class Functions {
      *
      * @return {@code Date} represented by the AgMIP date string or {@code null}
      */
-    public static Date convertFromAgmipDateString(String agmipDate) {
+    public synchronized static Date convertFromAgmipDateString(String agmipDate) {
         try {
             return dateFormatter.parse(agmipDate);
         } catch (Exception ex) {
@@ -99,7 +99,7 @@ public class Functions {
      *
      * @return an AgMIP standard date string representation of {@code date}.
      */
-    public static String convertToAgmipDateString(Date date) {
+    public synchronized static String convertToAgmipDateString(Date date) {
         if (date != null) {
             return dateFormatter.format(date);
         } else {
@@ -115,7 +115,7 @@ public class Functions {
      *
      * @return a formatted date string or {@code null}
      */
-    public static String formatAgmipDateString(String agmipDate, String format) {
+    public synchronized static String formatAgmipDateString(String agmipDate, String format) {
         try {
             SimpleDateFormat fmt = new SimpleDateFormat(format);
             Date d = dateFormatter.parse(agmipDate);
