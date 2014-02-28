@@ -1303,7 +1303,9 @@ public class ExperimentHelper {
         }
         
         long pdateMis = convertFromAgmipDateString(pdate).getTime();
-        int  startIdx = (int) Math.round((pdateMis - convertFromAgmipDateString(getValueOr(dailyArr.get(0), "w_date", "")).getTime()) / 86400000.0);
+        String fstDay = getValueOr(dailyArr.get(0), "w_date", "");
+        long fstDayMis = convertFromAgmipDateString(fstDay).getTime();
+        int  startIdx = (int) Math.round((pdateMis - fstDayMis) / 86400000.0);
         if (startIdx >= dailyArr.size() || !pdate.equals(getValueOr(dailyArr.get(startIdx), "w_date", ""))) {
             if (pdateMis > convertFromAgmipDateString(getValueOr(dailyArr.get(dailyArr.size() - 1), "w_date", "")).getTime()) {
                 LOG.error("Not enough weather daily data for calculating irrigation date based plnating date of {}", pdate);
