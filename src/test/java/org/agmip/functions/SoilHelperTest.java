@@ -350,4 +350,34 @@ public class SoilHelperTest {
         
         log.info("getRootDistribution() output: {}", result.toString());
     }
+
+    @Test
+    public void testSplittingSoillayer7() throws IOException, Exception {
+
+        // Test for fixed top layers with the case that both are non-mixed layer and 5/15 depth not exists
+        HashMap<String, Object> data = new HashMap<String, Object>();
+        AcePathfinderUtil.insertValue(data, "sllb", "30");
+        AcePathfinderUtil.insertValue(data, "slbdm", "1.16");
+        AcePathfinderUtil.insertValue(data, "sllb", "50");
+        AcePathfinderUtil.insertValue(data, "slbdm", "1.3");
+        
+        HashMap<String, Object> expectedData = new HashMap<String, Object>();
+        AcePathfinderUtil.insertValue(expectedData, "sllb", "5");
+        AcePathfinderUtil.insertValue(expectedData, "slbdm", "1.16");
+        AcePathfinderUtil.insertValue(expectedData, "sllb", "15");
+        AcePathfinderUtil.insertValue(expectedData, "slbdm", "1.16");
+        AcePathfinderUtil.insertValue(expectedData, "sllb", "30");
+        AcePathfinderUtil.insertValue(expectedData, "slbdm", "1.16");
+        AcePathfinderUtil.insertValue(expectedData, "sllb", "40");
+        AcePathfinderUtil.insertValue(expectedData, "slbdm", "1.3");
+        AcePathfinderUtil.insertValue(expectedData, "sllb", "50");
+        AcePathfinderUtil.insertValue(expectedData, "slbdm", "1.3");
+        ArrayList<HashMap<String, String>> expectedLayers = MapUtil.getBucket(expectedData, "soil").getDataList();
+
+        ArrayList<HashMap<String, String>> result = SoilHelper.splittingSoillayer(data, false);
+        
+        assertEquals("getRootDistribution: soil top layer case 4 is incorrect ", expectedLayers, result);
+        
+        log.info("getRootDistribution() output: {}", result.toString());
+    }
 }
