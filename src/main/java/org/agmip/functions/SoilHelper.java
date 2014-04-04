@@ -223,7 +223,7 @@ public class SoilHelper {
             }
             
             HashMap newLayer = new HashMap();
-            if (weights.size() == 1 && weights.get(0).equals("1.00")) {
+            if (weights.size() == 1 && weights.get(0).equals("1")) {
                 newLayer.putAll(layer);
             } else {
                 HashSet<String> vars = new HashSet();
