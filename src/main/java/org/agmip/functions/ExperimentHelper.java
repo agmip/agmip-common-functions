@@ -1359,4 +1359,18 @@ public class ExperimentHelper {
         
         return irrEvts;
     }
+    
+    /**
+     * Get initial condition soil layer data array from data holder.
+     *
+     * @param data The experiment data holder
+     * @return The soil layer data array
+     */
+    protected static ArrayList getICLayer(HashMap data) {
+        if (data.containsKey("initial_conditions") || !data.containsKey("soilLayer")) {
+            return MapUtil.getBucket(data, "initial_conditions").getDataList();
+        } else {
+            return new BucketEntry(data).getDataList();
+        }
+    }
 }

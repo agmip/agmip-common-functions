@@ -2,11 +2,13 @@ package org.agmip.functions;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Map;
+import java.util.HashSet;
+import java.util.Set;
 import static org.agmip.common.Functions.*;
 import org.agmip.common.Functions.CompareMode;
 import org.agmip.util.MapUtil;
 import static org.agmip.util.MapUtil.*;
+import org.agmip.util.MapUtil.BucketEntry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -173,42 +175,101 @@ public class SoilHelper {
      * @param data The experiment data holder
      * @return The soil layer data array with new added layers
      */
-    public static ArrayList<HashMap<String, String>> splittingSoillayer(HashMap data) {
+    public static ArrayList<HashMap<String, String>> splittingSoillayer(HashMap data, boolean isICLayer) {
+        if (isICLayer) {
+            return splittingLayers(ExperimentHelper.getICLayer(data), "icbl");
+        } else {
+            return splittingLayers(getSoilLayer(data), "sllb");
+        }
+    }
+
+    private static ArrayList<HashMap<String, String>> splittingLayers(ArrayList<HashMap<String, String>> soilLayers, String depthVal) {
         ArrayList<HashMap<String, String>> ret = new ArrayList();
-        ArrayList<HashMap<String, String>> soilLayers = getSoilLayer(data);
-        String lastDepth;
+        String lastDepth = "0";
         String curDepth;
         String thickness;
-        HashMap<String, String> layer;
+        HashMap<String, String> layer = new HashMap();
 
-        if (soilLayers.size() < 2) {
-            return ret;
-        } else {
-            lastDepth = MapUtil.getValueOr(soilLayers.get(0), "sllb", "");
-            ret.add(soilLayers.get(0));
+        int idx = 0;
+        String[] fixedTopLayerDeps = {"5", "15"};
+        String[] fixedTopLayerThks = {"5.00", "10.00"};
+        for (int i = 0; i < fixedTopLayerDeps.length; i++) {
+            if (idx >= soilLayers.size()) {
+                break;
+            }
+            int start = idx;
+            ArrayList<String> weights = new ArrayList();
+            for (; idx < soilLayers.size(); idx++) {
+                layer = soilLayers.get(idx);
+                curDepth = MapUtil.getValueOr(layer, depthVal, "");
+                if (compare(curDepth, fixedTopLayerDeps[i], CompareMode.NOTLESS)) {
+                    thickness = substract(fixedTopLayerDeps[i], lastDepth);
+                    weights.add(divide(thickness, fixedTopLayerThks[i]));
+                    lastDepth = fixedTopLayerDeps[i];
+                    if (compare(curDepth, fixedTopLayerDeps[i], CompareMode.EQUAL)) {
+                        idx++;
+                    }
+                    break;
+                } else {
+                    thickness = substract(curDepth, lastDepth);
+                    weights.add(divide(thickness, fixedTopLayerThks[i]));
+                    lastDepth = curDepth;
+                }
+            }
+            
+            if (compare(lastDepth, fixedTopLayerDeps[i], CompareMode.LESS)) {
+                LOG.warn("The soil layer is deep enough for LYRSET() function!");
+                continue;
+            }
+            
+            HashMap newLayer = new HashMap();
+            if (weights.size() == 1 && weights.get(0).equals("1")) {
+                newLayer.putAll(layer);
+            } else {
+                HashSet<String> vars = new HashSet();
+                vars.addAll(layer.keySet());
+                vars.remove(depthVal);
+                String val;
+                for (String var : vars) {
+                    val = "0";
+                    for (int j = 0; j < weights.size(); j++, start++) {
+                        layer = soilLayers.get(start);
+                        val = sum(val, product(layer.get(var), weights.get(j)));
+                        if (val == null) {
+                            break;
+                        }
+                    }
+                    if (val != null && !val.equals("")) {
+                        newLayer.put(var, val);
+                    }
+                }
+            }
+            newLayer.put(depthVal, fixedTopLayerDeps[i]);
+            ret.add(newLayer);
         }
 
-        for (int i = 1; i < soilLayers.size(); i++, lastDepth = curDepth) {
+        for (int i = idx; i < soilLayers.size(); i++, lastDepth = curDepth) {
             layer = soilLayers.get(i);
-            curDepth = MapUtil.getValueOr(layer, "sllb", "");
+            curDepth = MapUtil.getValueOr(layer, depthVal, "");
             thickness = substract(curDepth, lastDepth);
             String pt;
-            if (compare(curDepth, "15", CompareMode.NOTGREATER)) {
-                pt = "10";
-            } else if (compare(curDepth, "60", CompareMode.NOTGREATER)) {
+//            if (compare(curDepth, "15", CompareMode.NOTGREATER)) {
+//                pt = "10";
+//            } else
+            if (compare(curDepth, "60", CompareMode.NOTGREATER)) { // TODO might change to 90 to match with current DSSAT handling
                 pt = "15";
             } else if (compare(curDepth, "200", CompareMode.NOTGREATER)) {
                 pt = "30";
             } else {
                 pt = "60";
             }
-            ret.addAll(createNewLayers(layer, pt, thickness, lastDepth));
+            ret.addAll(createNewLayers(layer, pt, thickness, lastDepth, depthVal));
             ret.add(layer);
         }
         return ret;
     }
 
-    private static ArrayList<HashMap<String, String>> createNewLayers(HashMap layer, String pt, String thickness, String lastDepth) {
+    private static ArrayList<HashMap<String, String>> createNewLayers(HashMap layer, String pt, String thickness, String lastDepth, String depthVal) {
         ArrayList<HashMap<String, String>> ret = new ArrayList();
         if (compare(thickness, pt, CompareMode.NOTGREATER)) {
             return ret;
@@ -222,7 +283,7 @@ public class SoilHelper {
             lastDepth = sum(lastDepth, increase);
             HashMap newLayer = new HashMap();
             newLayer.putAll(layer);
-            newLayer.put("sllb", lastDepth);
+            newLayer.put(depthVal, lastDepth);
             ret.add(newLayer);
         }
         return ret;
