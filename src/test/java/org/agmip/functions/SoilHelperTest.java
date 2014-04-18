@@ -453,19 +453,6 @@ public class SoilHelperTest {
         expectedData.put("slsat", Arrays.asList(new String[] {"0.514", "0.471"}));
         expectedData.put("sksat", Arrays.asList(new String[] {"0.205", "0.216"}));
         expectedData.put("slbdm", Arrays.asList(new String[] {"1.29", "1.40"}));
-//        AcePathfinderUtil.insertValue(expectedData, "sllb", "30");
-//        AcePathfinderUtil.insertValue(expectedData, "slll", "0.297");
-//        AcePathfinderUtil.insertValue(expectedData, "sldul", "0.419");
-//        AcePathfinderUtil.insertValue(expectedData, "slsat", "0.514");
-//        AcePathfinderUtil.insertValue(expectedData, "sksat", "2.05");
-//        AcePathfinderUtil.insertValue(expectedData, "slbdm", "1.29");
-//        AcePathfinderUtil.insertValue(expectedData, "sllb", "50");
-//        AcePathfinderUtil.insertValue(expectedData, "slll", "0.243");
-//        AcePathfinderUtil.insertValue(expectedData, "sldul", "0.376");
-//        AcePathfinderUtil.insertValue(expectedData, "slsat", "0.471");
-//        AcePathfinderUtil.insertValue(expectedData, "sksat", "2.16");
-//        AcePathfinderUtil.insertValue(expectedData, "slbdm", "1.40");
-//        ArrayList<HashMap<String, String>> expectedLayers = MapUtil.getBucket(expectedData, "soil").getDataList();
 
         HashMap<String, ArrayList<String>> result = SoilHelper.getSoilValsFromOthPara(data, "PTSAXTON2006", vars);
         
@@ -498,23 +485,42 @@ public class SoilHelperTest {
         expectedData.put("slsat", Arrays.asList(new String[] {"0.514", "0.471"}));
         expectedData.put("sksat", Arrays.asList(new String[] {"0.118", "0.120"}));
         expectedData.put("slbdm", Arrays.asList(new String[] {"1.73", "1.83"}));
-//        AcePathfinderUtil.insertValue(expectedData, "sllb", "30");
-//        AcePathfinderUtil.insertValue(expectedData, "slll", "0.297");
-//        AcePathfinderUtil.insertValue(expectedData, "sldul", "0.419");
-//        AcePathfinderUtil.insertValue(expectedData, "slsat", "0.514");
-//        AcePathfinderUtil.insertValue(expectedData, "sksat", "2.05");
-//        AcePathfinderUtil.insertValue(expectedData, "slbdm", "1.29");
-//        AcePathfinderUtil.insertValue(expectedData, "sllb", "50");
-//        AcePathfinderUtil.insertValue(expectedData, "slll", "0.243");
-//        AcePathfinderUtil.insertValue(expectedData, "sldul", "0.376");
-//        AcePathfinderUtil.insertValue(expectedData, "slsat", "0.471");
-//        AcePathfinderUtil.insertValue(expectedData, "sksat", "2.16");
-//        AcePathfinderUtil.insertValue(expectedData, "slbdm", "1.40");
-//        ArrayList<HashMap<String, String>> expectedLayers = MapUtil.getBucket(expectedData, "soil").getDataList();
 
         HashMap<String, ArrayList<String>> result = SoilHelper.getSoilValsFromOthPara(data, "PTSAXTON2006", vars);
         
-        assertEquals("getSoilValsFromOthPara: All case is incorrect ", expectedData, result);
+        assertEquals("getSoilValsFromOthPara: gravel case is incorrect ", expectedData, result);
+        
+        log.info("getSoilValsFromOthPara() output: {}", result.toString());
+    }
+    
+    @Test
+    public void testGetSoilValsFromOthPara4() throws IOException, Exception {
+
+        // Test for fixed top layers with the case that both are non-mixed layer and 5/15 depth not exists
+        HashMap<String, Object> data = new HashMap<String, Object>();
+        AcePathfinderUtil.insertValue(data, "sllb", "30");
+        AcePathfinderUtil.insertValue(data, "slsil", "20");
+        AcePathfinderUtil.insertValue(data, "slcly", "50");
+        AcePathfinderUtil.insertValue(data, "sloc", "2");
+        AcePathfinderUtil.insertValue(data, "slcf", "50");
+        AcePathfinderUtil.insertValue(data, "sllb", "50");
+        AcePathfinderUtil.insertValue(data, "slsil", "40");
+        AcePathfinderUtil.insertValue(data, "slcly", "40");
+        AcePathfinderUtil.insertValue(data, "sloc", "1");
+        AcePathfinderUtil.insertValue(data, "slcf", "50");
+        ArrayList vars = new ArrayList();
+        vars.add("all");
+        
+        HashMap<String, Object> expectedData = new HashMap<String, Object>();
+        expectedData.put("slll", Arrays.asList(new String[] {"0.300", "0.242"}));
+        expectedData.put("sldul", Arrays.asList(new String[] {"0.419", "0.385"}));
+        expectedData.put("slsat", Arrays.asList(new String[] {"0.492", "0.487"}));
+        expectedData.put("sksat", Arrays.asList(new String[] {"0.053", "0.155"}));
+        expectedData.put("slbdm", Arrays.asList(new String[] {"1.79", "1.80"}));
+
+        HashMap<String, ArrayList<String>> result = SoilHelper.getSoilValsFromOthPara(data, "PTSAXTON2006", vars);
+        
+        assertEquals("getSoilValsFromOthPara: slit case is incorrect ", expectedData, result);
         
         log.info("getSoilValsFromOthPara() output: {}", result.toString());
     }
