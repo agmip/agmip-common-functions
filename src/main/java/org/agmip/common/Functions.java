@@ -813,4 +813,23 @@ public class Functions {
             return true;
         }
     }
+    
+    public static String checkPctVal(String pctVal) {
+        if (pctVal == null) {
+            return null;
+        } else if (pctVal.contains("%")) {
+            if (!pctVal.equals("%") && !pctVal.equals(".%") && pctVal.matches("\\d*\\.?\\d*%")) {
+                pctVal = pctVal.substring(0, pctVal.length() - 1);
+            } else {
+                log.error("Invalid format for a percent value, [{}]", pctVal);
+                return null;
+            }
+        }
+        if (compare(pctVal, "100", Functions.CompareMode.GREATER) || compare(pctVal, "-100", Functions.CompareMode.LESS)) {
+            log.error("Out of range for a percent value, [{}]", pctVal);
+            return null;
+        } else {
+            return pctVal;
+        }
+    }
 }

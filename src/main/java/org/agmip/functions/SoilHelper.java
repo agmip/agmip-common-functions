@@ -1,9 +1,11 @@
 package org.agmip.functions;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Set;
+import org.agmip.common.Functions;
 import static org.agmip.common.Functions.*;
 import org.agmip.common.Functions.CompareMode;
 import org.agmip.util.MapUtil;
@@ -216,12 +218,12 @@ public class SoilHelper {
                     lastDepth = curDepth;
                 }
             }
-            
+
             if (compare(lastDepth, fixedTopLayerDeps[i], CompareMode.LESS)) {
                 LOG.warn("The soil layer is deep enough for LYRSET() function!");
                 continue;
             }
-            
+
             HashMap newLayer = new HashMap();
             if (weights.size() == 1 && weights.get(0).equals("1")) {
                 newLayer.putAll(layer);
@@ -287,5 +289,97 @@ public class SoilHelper {
             ret.add(newLayer);
         }
         return ret;
+    }
+
+    /**
+     * Calculate the soil layer variables based on other soil parameters.
+     * Currently following method is available for calculation:
+     * PTSaxton2006 - based on the soil texture and organic matter.
+     * More potential ways would be available in the future.
+     *
+     * @param data The data set
+     * @param calcMethod The name of calculation method
+     * @param calcVars The list of variables which will be applied with calculation
+     * @return The list for calculation results for each variable
+     */
+    public static HashMap<String, ArrayList<String>> getSoilValsFromOthPara(HashMap data, String calcMethod, ArrayList<String> calcVars) {
+        HashMap<String, ArrayList<String>> rets = new HashMap();
+        ArrayList<Method> calcMtds;
+        ArrayList<String> calcVarsFinal;
+        
+        if (calcMethod.equalsIgnoreCase("PTSaxton2006")) {
+            calcMethod = "PTSaxton2006";
+        }
+        
+        try {
+            // Load calculation class
+            String packageName = SoilHelper.class.getPackage().getName();
+            Class calClass = Class.forName(packageName + "." + calcMethod);
+            
+            // Load method for each target variable
+            calcMtds = new ArrayList();
+            calcVarsFinal = new ArrayList();
+            if (calcVars.contains("all")) {
+                for (Method mtd : calClass.getDeclaredMethods()) {
+                    String mtdName = mtd.getName();
+                    if (mtdName.startsWith("get")) {
+                        calcMtds.add(mtd);
+                        String var = mtdName.substring(3).toLowerCase();
+                        calcVarsFinal.add(var);
+                        rets.put(var, new ArrayList());
+                    }
+                }
+            } else {
+                for (String var : calcVars) {
+                    try {
+                        if (!rets.containsKey(var)) {
+                            calcMtds.add(calClass.getDeclaredMethod("get" + var.toUpperCase(), String[].class));
+                            calcVarsFinal.add(var.toLowerCase());
+                            rets.put(var, new ArrayList());
+                        } else {
+                            LOG.warn("Variable {} is repeated in the target variable list.", var);
+                        }
+                    } catch (NoSuchMethodException e) {
+                        LOG.error("PT Calculation for {} is not valiable in {} method", var, calcMethod);
+                    }
+                }
+            }
+            
+            // Invoke the calculation for each soil layer
+            ArrayList<HashMap<String, String>> layers = getSoilLayer(data);
+            for (HashMap<String, String> layer : layers) {
+                String[] vals = new String[0];
+                if (calcMethod.equals("PTSaxton2006")) {
+                    String sand = getValueOr(layer, "slsnd", "");
+                    String clay = getValueOr(layer, "slcly", "");
+                    String om = product(getValueOr(layer, "sloc", ""), "1.72");
+                    String grave = getValueOr(layer, "slcf", "0");
+                    if ("".equals(sand)) {
+                        sand = substract("100", clay, getValueOr(layer, "slsil", ""));
+                    }
+                    if (om == null || sand == null || clay.equals("")) {
+                        LOG.warn("Invilid soil texture and organic matter data, PT calculation will skip this soil layer");
+                        continue;
+                    }
+                    vals = new String[]{sand, clay, om, grave};
+                }
+                for (int i = 0; i < calcVarsFinal.size(); i++) {
+                    String var = calcVarsFinal.get(i);
+                    try {
+                        String val;
+                        val = (String) calcMtds.get(i).invoke(calClass, new Object[]{vals});
+                        rets.get(var).add(val);
+                    } catch (Exception e) {
+                        LOG.error(Functions.getStackTrace(e));
+                    }
+                }
+            }
+            
+        } catch (ClassNotFoundException e) {
+            LOG.error("{} is not a valid name for PT calculation method", calcMethod);
+            return rets;
+        }
+
+        return rets;
     }
 }
