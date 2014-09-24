@@ -832,4 +832,28 @@ public class Functions {
             return pctVal;
         }
     }
+
+    /**
+     * Revise output path
+     *
+     * @param path the output path
+     * @return revised path
+     */
+    public static String revisePath(String path) {
+        if (!path.trim().equals("")) {
+//            path = path.replaceAll("/", File.separator);
+            if (!path.endsWith(File.separator)) {
+                path += File.separator;
+            }
+            File f = new File(path);
+            if (f != null && !f.exists()) {
+                f.mkdirs();
+            }
+            if (!f.isDirectory()) {
+                f = f.getParentFile();
+                path = f.getPath();
+            }
+        }
+        return path;
+    }
 }
