@@ -842,9 +842,6 @@ public class Functions {
     public static String revisePath(String path) {
         if (!path.trim().equals("")) {
 //            path = path.replaceAll("/", File.separator);
-            if (!path.endsWith(File.separator)) {
-                path += File.separator;
-            }
             File f = new File(path);
             if (f != null && !f.exists()) {
                 f.mkdirs();
@@ -852,6 +849,9 @@ public class Functions {
             if (!f.isDirectory()) {
                 f = f.getParentFile();
                 path = f.getPath();
+            }
+            if (!path.endsWith(File.separator)) {
+                path += File.separator;
             }
         }
         return path;

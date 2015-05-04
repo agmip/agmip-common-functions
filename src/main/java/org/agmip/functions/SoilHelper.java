@@ -175,6 +175,7 @@ public class SoilHelper {
      * for new layer will depend on the original layers.
      *
      * @param data The experiment data holder
+     * @param isICLayer True for handling initial condition soil layers
      * @return The soil layer data array with new added layers
      */
     public static ArrayList<HashMap<String, String>> splittingSoillayer(HashMap data, boolean isICLayer) {
@@ -234,8 +235,8 @@ public class SoilHelper {
                 String val;
                 for (String var : vars) {
                     val = "0";
-                    for (int j = 0; j < weights.size(); j++, start++) {
-                        layer = soilLayers.get(start);
+                    for (int j = 0; j < weights.size(); j++) {
+                        layer = soilLayers.get(j + start);
                         val = sum(val, product(layer.get(var), weights.get(j)));
                         if (val == null) {
                             break;
