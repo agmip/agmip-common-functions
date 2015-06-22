@@ -386,13 +386,11 @@ public class ExperimentHelper {
         }
 
         // Loop each window to try to find appropriate planting date
-        for (int i = 0; i < windows.size(); i++) {
-
+        for (Window window : windows) {
             // Check first n days
-            int last = Math.min(windows.get(i).start + intDays, windows.get(i).end);
+            int last = Math.min(window.start + intDays, window.end);
             accRainAmt = 0;
-            for (int j = windows.get(i).start; j < last; j++) {
-
+            for (int j = window.start; j < last; j++) {
                 try {
                     accRainAmt += Double.parseDouble(getValueOr(dailyData.get(j), "rain", "0"));
                 } catch (Exception e) {
@@ -406,15 +404,11 @@ public class ExperimentHelper {
                     break;
                 }
             }
-
             if (accRainAmt >= accRainAmtTotal) {
                 continue;
             }
-
             // Check following days
-            int outIndex = last;
-            for (int j = last; j <= windows.get(i).end; j++) {
-
+            for (int j = last; j <= window.end; j++) {
                 try {
                     accRainAmt -= Double.parseDouble(getValueOr(dailyData.get(j - intDays), "rain", "0"));
                     accRainAmt += Double.parseDouble(getValueOr(dailyData.get(j), "rain", "0"));
@@ -428,15 +422,13 @@ public class ExperimentHelper {
                     pdates.add(getValueOr(dailyData.get(j), "w_date", ""));
                     break;
                 }
-                outIndex++;
             }
-
             if (accRainAmt < accRainAmtTotal) {
                 String lastDay;
-                if (windows.get(i).end >= dailyData.size()) {
+                if (window.end >= dailyData.size()) {
                     lastDay = getValueOr(dailyData.get(dailyData.size() - 1), "w_date", "");
                 } else {
-                    lastDay = getValueOr(dailyData.get(windows.get(i).end), "w_date", "");
+                    lastDay = getValueOr(dailyData.get(window.end), "w_date", "");
                 }
                 LOG.error("Could not find an appropriate day to plant, using {}", lastDay);
                 pdates.add(lastDay);
@@ -948,9 +940,7 @@ public class ExperimentHelper {
             results.add(new ArrayList());
         }
 
-        Calendar cal = Calendar.getInstance();
-        for (int i = 0; i < events.size(); i++) {
-            HashMap<String, String> event = events.get(i);
+        for (HashMap<String, String> event : events) {
             String date = getValueOr(event, "date", "");
             if (date.equals("")) {
                 String eventType = getValueOr(event, "event", "unknown");
@@ -1053,8 +1043,7 @@ public class ExperimentHelper {
         } else {
             LOG.debug("Find original PDATE {}", orgPdate);
         }
-        for (int i = 0; i < events.size(); i++) {
-            HashMap<String, String> event = events.get(i);
+        for (HashMap<String, String> event : events) {
             // Get days after planting for current event date
             String date = getValueOr(event, "date", "");
             String orgDap = "";
@@ -1358,6 +1347,54 @@ public class ExperimentHelper {
         }
         
         return irrEvts;
+    }
+    
+    public static void setCTWNAdjustments(HashMap data, String co2, String tmax, String tmin, String rain, String fenTot, String climId) {
+        
+        ArrayList<HashMap<String, String>> adjArr = new ArrayList();
+        HashMap adjData;
+        if (co2 != null && !co2.trim().equals("")) {
+            adjData = new HashMap();
+            adjData.put("variable", "co2y");
+            adjData.put("value", co2);
+            adjData.put("method", "substitute");
+            adjArr.add(adjData);
+        }
+        if (tmax != null && !tmax.trim().equals("")) {
+            adjData = new HashMap();
+            adjData.put("variable", "tmax");
+            adjData.put("value", tmax);
+            adjData.put("method", "delta");
+            adjArr.add(adjData);
+        }
+        if (tmin != null && !tmin.trim().equals("")) {
+            adjData = new HashMap();
+            adjData.put("variable", "tmin");
+            adjData.put("value", tmin);
+            adjData.put("method", "delta");
+            adjArr.add(adjData);
+        }
+        if (rain != null && !rain.trim().equals("")) {
+            adjData = new HashMap();
+            adjData.put("variable", "rain");
+            adjData.put("value", rain);
+            adjData.put("method", "multiply");
+            adjArr.add(adjData);
+        }
+        if (fenTot != null && !fenTot.trim().equals("")) {
+            data.put("fen_tot", fenTot);
+        }
+        if (climId != null && !climId.trim().equals("")) {
+            data.put("clim_id", climId.toUpperCase());
+        }
+        
+        if (!adjArr.isEmpty()) {
+            ArrayList adjArr2 = MapUtil.getObjectOr(data, "adjustments", new ArrayList());
+            if (adjArr2.isEmpty()) {
+                data.put("adjustments", adjArr2);
+            }
+            adjArr2.addAll(adjArr);
+        }
     }
     
     /**
