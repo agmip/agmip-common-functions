@@ -1161,6 +1161,18 @@ public class ExperimentHelper {
         AcePathfinderUtil.insertValue(result, "idate", idates[0]);
         AcePathfinderUtil.insertValue(result, "irop", "IR008");
         AcePathfinderUtil.insertValue(result, "irval", percRate);
+        // Modify soil parameters
+        String plowpanDeptCm = Functions.divide(plowpanDept, "10");
+        HashMap soil = MapUtil.getObjectOr(data, "soil", new HashMap());
+        for (Object o : MapUtil.getObjectOr(soil, "soilLayer", new ArrayList())) {
+            HashMap<String, String> layer = (HashMap) o;
+            if (Functions.compare(layer.get("sllb"), plowpanDeptCm, CompareMode.NOTGREATER)) {
+                String ks = Functions.divide(percRate, "240", 5);
+                layer.put("sksat", ks);
+            } else {
+                break;
+            }
+        }
         // For each irrigation date
         for (int i = 0; i < idates.length; i++) {
             // bund height
