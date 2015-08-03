@@ -1395,9 +1395,27 @@ public class ExperimentHelper {
         }
         if (fenTot != null && !fenTot.trim().equals("")) {
             data.put("fen_tot", fenTot);
+            Event event = new Event(getBucket(data, "management").getDataList(), "fertilizer");
+            ArrayList<HashMap> fertEvents = new ArrayList();
+            String totAmtN = "0";
+            {
+                HashMap fertEvent;
+                while ((fertEvent = event.getNextEvent()) != null) {
+                    fertEvents.add(fertEvent);
+                    totAmtN = Functions.sum(totAmtN, MapUtil.getValueOr(fertEvent, "feamn", "0"));
+                }
+            }
+            if (!Functions.compare(totAmtN, "0", CompareMode.EQUAL)) {
+                for (HashMap fertEvent : fertEvents) {
+                    String feamn = MapUtil.getValueOr(fertEvent, "feamn", "0");
+                    String rate = Functions.divide(feamn, totAmtN, 3);
+                    feamn = Functions.round(Functions.multiply(fenTot, rate), 1);
+                    fertEvent.put("feamn", feamn);
+                }
+            }
         }
         if (climId != null && !climId.trim().equals("")) {
-            data.put("clim_id", climId.toUpperCase());
+            data.put("ctwn_clim_id", climId.toUpperCase());
         }
         
         if (!adjArr.isEmpty()) {

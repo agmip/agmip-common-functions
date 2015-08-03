@@ -168,6 +168,16 @@ public class Event {
             return new HashMap();
         }
     }
+    
+    public HashMap getNextEvent() {
+        HashMap ret = getCurrentEvent();
+        if (!ret.isEmpty()) {
+            next++;
+        } else {
+            ret = null;
+        }
+        return ret;
+    }
 
     /**
      * Find out the insert position for the new event. If date is not available
