@@ -180,13 +180,31 @@ public class SoilHelper {
      */
     public static ArrayList<HashMap<String, String>> splittingSoillayer(HashMap data, boolean isICLayer) {
         if (isICLayer) {
-            return splittingLayers(ExperimentHelper.getICLayer(data), "icbl");
+            return splittingLayers(ExperimentHelper.getICLayer(data), "icbl", "5", "10");
         } else {
-            return splittingLayers(getSoilLayer(data), "sllb");
+            return splittingLayers(getSoilLayer(data), "sllb", "5", "10");
         }
     }
 
-    private static ArrayList<HashMap<String, String>> splittingLayers(ArrayList<HashMap<String, String>> soilLayers, String depthVal) {
+    /**
+     * Splitting the original soil layers into homogeneous layers with soil
+     * thicknesses which do not exceed limits of drainage models.The parameters
+     * for new layer will depend on the original layers.
+     * @param data The experiment data holder
+     * @param isICLayer True for handling initial condition soil layers
+     * @param fstLyrThk
+     * @param sndLyrThk
+     * @return The soil layer data array with new added layers
+     */
+    public static ArrayList<HashMap<String, String>> splittingSoillayer(HashMap data, boolean isICLayer, String fstLyrThk, String sndLyrThk) {
+        if (isICLayer) {
+            return splittingLayers(ExperimentHelper.getICLayer(data), "icbl", fstLyrThk, sndLyrThk);
+        } else {
+            return splittingLayers(getSoilLayer(data), "sllb", fstLyrThk, sndLyrThk);
+        }
+    }
+
+    private static ArrayList<HashMap<String, String>> splittingLayers(ArrayList<HashMap<String, String>> soilLayers, String depthVal, String fstLyrThk, String sndLyrThk) {
         ArrayList<HashMap<String, String>> ret = new ArrayList();
         String lastDepth = "0";
         String curDepth;
@@ -194,8 +212,8 @@ public class SoilHelper {
         HashMap<String, String> layer = new HashMap();
 
         int idx = 0;
-        String[] fixedTopLayerDeps = {"5", "15"};
-        String[] fixedTopLayerThks = {"5.00", "10.00"};
+        String[] fixedTopLayerDeps = {fstLyrThk, Functions.sum(fstLyrThk, sndLyrThk)};
+        String[] fixedTopLayerThks = {Functions.round(fstLyrThk, 2), Functions.round(sndLyrThk, 2)};
         for (int i = 0; i < fixedTopLayerDeps.length; i++) {
             if (idx >= soilLayers.size()) {
                 break;
