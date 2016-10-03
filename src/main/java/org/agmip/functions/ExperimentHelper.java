@@ -29,7 +29,7 @@ public class ExperimentHelper {
 
     /**
      * This function will calculate the planting date which is the first date
-     * within the planting window<br/> that has an accumulated rainfall amount
+     * within the planting window that has an accumulated rainfall amount
      * (P) in the previous n days.
      *
      * @param data The HashMap of experiment (including weather data)
@@ -269,7 +269,7 @@ public class ExperimentHelper {
 
     /**
      * This function will calculate the planting date which is the first date
-     * within the planting window<br/> that has an accumulated rainfall amount
+     * within the planting window that has an accumulated rainfall amount
      * (P) in the previous n days. The calculation will be done then planting
      * date is missing in the valid planting event.
      *
@@ -915,7 +915,7 @@ public class ExperimentHelper {
      *
      * @return Several groups of {@code ArrayList} of {@code Event} for each
      * year in the experiment duration. The original group of {@code Event} will
-     * only be included when {@code duration} > 1.
+     * only be included when {@code duration} greater than 1.
      */
     public static ArrayList<ArrayList<HashMap<String, String>>> getAutoEventDate(Map data) {
 
@@ -1161,18 +1161,18 @@ public class ExperimentHelper {
         AcePathfinderUtil.insertValue(result, "idate", idates[0]);
         AcePathfinderUtil.insertValue(result, "irop", "IR008");
         AcePathfinderUtil.insertValue(result, "irval", percRate);
-        // Modify soil parameters
-        String plowpanDeptCm = Functions.divide(plowpanDept, "10");
-        HashMap soil = MapUtil.getObjectOr(data, "soil", new HashMap());
-        for (Object o : MapUtil.getObjectOr(soil, "soilLayer", new ArrayList())) {
-            HashMap<String, String> layer = (HashMap) o;
-            if (Functions.compare(layer.get("sllb"), plowpanDeptCm, CompareMode.NOTGREATER)) {
-                String ks = Functions.divide(percRate, "240", 5);
-                layer.put("sksat", ks);
-            } else {
-                break;
-            }
-        }
+//        // Modify soil parameters
+//        String plowpanDeptCm = Functions.divide(plowpanDept, "10");
+//        HashMap soil = MapUtil.getObjectOr(data, "soil", new HashMap());
+//        for (Object o : MapUtil.getObjectOr(soil, "soilLayer", new ArrayList())) {
+//            HashMap<String, String> layer = (HashMap) o;
+//            if (Functions.compare(layer.get("sllb"), plowpanDeptCm, CompareMode.NOTGREATER)) {
+//                String ks = Functions.divide(percRate, "240", 5);
+//                layer.put("sksat", ks);
+//            } else {
+//                break;
+//            }
+//        }
         // For each irrigation date
         for (int i = 0; i < idates.length; i++) {
             // bund height
@@ -1438,6 +1438,14 @@ public class ExperimentHelper {
             return MapUtil.getBucket(data, "initial_conditions").getDataList();
         } else {
             return new BucketEntry(data).getDataList();
+        }
+    }
+    
+    public static void shiftEvents(HashMap data, String days) {
+        ArrayList<HashMap<String, String>> events = MapUtil.getBucket(data, "management").getDataList();
+        for (HashMap<String, String> event : events) {
+            String date = MapUtil.getValueOr(event, "date", "");
+            event.put("date", Functions.dateOffset(date, days));
         }
     }
 }
