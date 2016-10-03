@@ -23,9 +23,9 @@ public class WeatherAdjustAdaptor {
     
     private static final Logger LOG = LoggerFactory.getLogger(WeatherAdjustAdaptor.class);
 
-    private final HashMap<String, HashMap> wthMap = new HashMap();
-    private final HashMap<String, String> expWthMap = new HashMap();
-    private final HashMap<String, ArrayList<HashMap>> wthAdjMap = new HashMap();
+    private final static HashMap<String, HashMap> wthMap = new HashMap();
+    private final static HashMap<String, String> expWthMap = new HashMap();
+    private final static HashMap<String, ArrayList<HashMap>> wthAdjMap = new HashMap();
     
     public WeatherAdjustAdaptor(Map data) {
         
@@ -65,16 +65,15 @@ public class WeatherAdjustAdaptor {
                 }
                 expWthMap.put(exname, newWstId);
                 
-                
-                
-                
-                
-                
-                
-                
             }
         }
         
+    }
+    
+    public static void init() {
+        wthMap.clear();
+        expWthMap.clear();
+        wthAdjMap.clear();
     }
     
     public boolean hasAdjustments() {
