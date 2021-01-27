@@ -1255,7 +1255,7 @@ public class ExperimentHelper {
             for (String id : ids) {
                 String path = AcePathfinder.INSTANCE.getPath(id);
                 if (path == null || !path.contains(typeStr)) {
-                    LOG.warn("{} is not belong to {} event, please check if it is a typo");
+                    LOG.warn("{} is not belong to {} event, please check if it is a typo", id, typeStr);
 //                    info.remove(id);
                 }
             }
