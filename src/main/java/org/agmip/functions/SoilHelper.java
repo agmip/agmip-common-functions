@@ -1,6 +1,5 @@
 package org.agmip.functions;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -371,10 +370,13 @@ public class SoilHelper {
                 if (calcMethod.equals("PTSaxton2006")) {
                     String sand = getValueOr(layer, "slsnd", "");
                     String clay = getValueOr(layer, "slcly", "");
-                    String om = product(getValueOr(layer, "sloc", ""), "1.72");
+                    String om = getValueOr(layer, "slni", "");
                     String grave = getValueOr(layer, "slcf", "0");
                     if ("".equals(sand)) {
                         sand = substract("100", clay, getValueOr(layer, "slsil", ""));
+                    }
+                    if ("".equals(om)) {
+                        om = product(getValueOr(layer, "sloc", ""), "1.72");
                     }
                     if (om == null || sand == null || clay.equals("")) {
                         LOG.warn("Invilid soil texture and organic matter data, PT calculation will skip this soil layer");
@@ -400,5 +402,23 @@ public class SoilHelper {
         }
 
         return rets;
+    }
+    
+    public static HashMap<String, ArrayList<String>> reduceWP(HashMap data, String rate) {
+        HashMap<String, ArrayList<String>> results = new HashMap<String, ArrayList<String>>();
+        ArrayList<String> result = new ArrayList<String>();
+        ArrayList<HashMap> layers = getSoilLayer(data);
+        for (HashMap layer : layers) {
+            String slll = MapUtil.getValueOr(layer, "slll", "");
+            String sldul = MapUtil.getValueOr(layer, "sldul", "");
+            rate = Functions.divide(rate, "100");
+            slll = Functions.substract(slll, Functions.multiply(rate, Functions.substract(sldul, slll)));
+            if (slll == null || slll.equals("")) {
+                LOG.error("reduceWP function failed for soil data " + MapUtil.getValueOr(data, "soil_id", "[Unkonwn]"));
+            }
+            result.add(slll);
+        }
+        results.put("slll", result);
+        return results;
     }
 }
