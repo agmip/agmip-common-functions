@@ -370,10 +370,13 @@ public class SoilHelper {
                 if (calcMethod.equals("PTSaxton2006")) {
                     String sand = getValueOr(layer, "slsnd", "");
                     String clay = getValueOr(layer, "slcly", "");
-                    String om = product(getValueOr(layer, "sloc", ""), "1.72");
+                    String om = getValueOr(layer, "slni", "");
                     String grave = getValueOr(layer, "slcf", "0");
                     if ("".equals(sand)) {
                         sand = substract("100", clay, getValueOr(layer, "slsil", ""));
+                    }
+                    if ("".equals(om)) {
+                        om = product(getValueOr(layer, "sloc", ""), "1.72");
                     }
                     if (om == null || sand == null || clay.equals("")) {
                         LOG.warn("Invilid soil texture and organic matter data, PT calculation will skip this soil layer");
